@@ -117,19 +117,19 @@ public abstract class lr_parser {
     /** 
      * Simple constructor. 
      */
-    public lr_parser() {
+    public this() {
     }
     
     /** 
      * Constructor that sets the default scanner. [CSA/davidm] 
      */
-    public lr_parser(Scanner s) {
+    public this(Scanner s) {
         this(s,new DefaultSymbolFactory()); // TUM 20060327 old cup v10 Symbols as default
     }
     /** 
      * Constructor that sets the default scanner and a SymbolFactory
      */
-    public lr_parser(Scanner s, SymbolFactory symfac) {
+    public this(Scanner s, SymbolFactory symfac) {
         this(); // in case default constructor someday does something
         symbolFactory = symfac;
         setScanner(s);
@@ -311,7 +311,7 @@ public abstract class lr_parser {
     lr_parser parser, 
     Stack     stack, 
     int       top) 
-    throws java.lang.Exception;
+    ;
 
   /*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 
@@ -322,7 +322,7 @@ public abstract class lr_parser {
    *  overridden by the generated code using this contents of the "init with"
    *  clause as its body.
    */
-  public void user_init() throws java.lang.Exception { }
+  public void user_init() { }
 
   /*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 
@@ -330,7 +330,7 @@ public abstract class lr_parser {
    *  any parse actions. This is filled in by generated code to create
    *  an object that encapsulates all action code. 
    */ 
-  protected abstract void init_actions() throws java.lang.Exception;
+  protected abstract void init_actions();
 
   /*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 
@@ -342,7 +342,7 @@ public abstract class lr_parser {
    *  the "scan with" clause.  Do not recycle objects; every call to
    *  scan() should return a fresh object.
    */
-  public Symbol scan() throws java.lang.Exception {
+  public Symbol scan() {
     Symbol sym = getScanner().next_token();
     return (sym!=null) ? sym : getSymbolFactory().newSymbol("END_OF_FILE",EOF_sym());
   }

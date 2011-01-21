@@ -3,6 +3,8 @@ module cup.compleysymbolfactory;
 import cup.symbol;
 import cup.symbolfactory;
 
+import hurt.conv.conv;
+
 /** Default Implementation for SymbolFactory, creates
  * plain old Symbols
  *
@@ -22,7 +24,8 @@ public class Location {
 		this.column = column;
 	}
 	public string tostring() {
-		return this.unit ~ ":" ~ this.line ~ "/" ~ this.column;
+		return this.unit ~ ":" ~ conv!(int, string)(this.line) ~ "/" 
+			~ conv!(int, string)(this.column);
 	}
 	public int getColumn() {
 		return this.column;

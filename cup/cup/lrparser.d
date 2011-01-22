@@ -4,6 +4,7 @@ import cup.scanner;
 import cup.symbolfactory;
 import cup.defaultsymbolfactory;
 import cup.symbol;
+import cup.virtualparsestack;
 
 import hurt.container.stack;
 import hurt.conv.conv;
@@ -123,7 +124,9 @@ import std.stdio;
 public abstract class lr_parser {
 	/** Simple constructor. 
 	 */
-	public this() { }
+	public this() { 
+ 		this.stack = new Stack!(Symbol)(64);
+	}
 	
 	/** Constructor that sets the default scanner. [CSA/davidm] 
 	 */
@@ -233,7 +236,7 @@ public abstract class lr_parser {
 	protected Symbol cur_token;
 
 	/** The parse stack itself. */
-	protected Stack!(Symbol) stack = new Stack!(Symbol)();
+	protected Stack!(Symbol) stack;
 
 	/** Direct reference to the production table. */ 
 	protected short[][] production_tab;
@@ -577,7 +580,7 @@ public abstract class lr_parser {
 	 * @param rhs_size	the size of the RHS.
 	 */
 	public void debug_reduce(int prod_num, int nt_num, int rhs_size) {
-		debug_message("# Reduce with prod #" ~ conv!(int,string)(prod_num) ~ " [NT=" + conv!(int,string)(nt_num) ~ 
+		debug_message("# Reduce with prod #" ~ conv!(int,string)(prod_num) ~ " [NT=" ~ conv!(int,string)(nt_num) ~ 
 			", " ~ "SZ=" ~ conv!(int,string)(rhs_size) ~ "]");
 	}
 
@@ -636,7 +639,7 @@ public abstract class lr_parser {
 		/* the current Symbol */
 		cur_token = scan(); 
 
-		debug_message("# Current Symbol is #" + conv!(int,string)(cur_token.sym) );
+		debug_message("# Current Symbol is #" ~ conv!(int,string)(cur_token.sym) );
 
 		/* push dummy Symbol with start state to get us underway */
 		stack.clear();
@@ -695,7 +698,7 @@ public abstract class lr_parser {
 				stack.push(lhs_sym);
 				tos++;
 
-				debug_message("# Goto state #" + act);
+				debug_message("# Goto state #" ~ conv!(int,string)(act) );
 			} else if(act == 0) { /* finally if the entry is zero, we have an error */
 				/* call user syntax error reporting routine */
 				syntax_error(cur_token);
@@ -714,10 +717,6 @@ public abstract class lr_parser {
 		}
 		return lhs_sym;
 	}
-
-	/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
-	/* Error recovery code */
-	/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 
 	/** Attempt to recover from a syntax error.	This returns false if recovery 
 	 *	fails, true if it succeeds.	Recovery happens in 4 steps.	First we
@@ -741,51 +740,50 @@ public abstract class lr_parser {
 	 *
 	 * @param debug should we produce debugging messages as we parse.
 	 */
-	protected bool error_recovery(bool debugflag)
-	{
+	protected bool error_recovery(bool debugflag) {
 		if(debugflag) debug_message("# Attempting error recovery");
 
 		/* first pop the stack back into a state that can shift on error and 
 	 do that shift (if that fails, we fail) */
-		if(!find_recovery_config(debugflag))
-	{
-		if(debugflag) debug_message("# Error recovery fails");
-		return false;
-	}
+		if(!find_recovery_config(debugflag)) {
+			if(debugflag) debug_message("# Error recovery fails");
+			return false;
+		}
 
 		/* read ahead to create lookahead we can parse multiple times */
 		read_lookahead();
 
 		/* repeatedly try to parse forward until we make it the required dist */
-		for(;;)
-	{
-		/* try to parse forward, if it makes it, bail out of loop */
-		if(debugflag) debug_message("# Trying to parse ahead");
-		if(try_parse_ahead(debugflag))
-		{
-			break;
-		}
+		while(true) {
+			/* try to parse forward, if it makes it, bail out of loop */
+			if(debugflag) 
+				debug_message("# Trying to parse ahead");
 
-		/* if we are now at EOF, we have failed */
-		if(lookahead[0].sym == EOF_sym()) 
-		{
-			if(debugflag) debug_message("# Error recovery fails at EOF");
-			return false;
-		}
+			if(try_parse_ahead(debugflag)) {
+				break;
+			}
 
-		/* otherwise, we consume another Symbol and try again */
-		// BUG FIX by Bruce Hutton
-		// Computer Science Department, University of Auckland,
-		// Auckland, New Zealand.
-		// It is the first token that is being consumed, not the one 
-		// we were up to parsing
-		if(debugflag) 
-			debug_message("# Consuming Symbol #" + lookahead[ 0 ].sym);
-		restart_lookahead();
-	}
+			/* if we are now at EOF, we have failed */
+			if(lookahead[0u].sym == EOF_sym()) {
+				if(debugflag)
+					debug_message("# Error recovery fails at EOF");
+				return false;
+			}
+
+			/* otherwise, we consume another Symbol and try again */
+			// BUG FIX by Bruce Hutton
+			// Computer Science Department, University of Auckland,
+			// Auckland, New Zealand.
+			// It is the first token that is being consumed, not the one 
+			// we were up to parsing
+			if(debugflag) 
+				debug_message("# Consuming Symbol #" ~ conv!(int,string)(lookahead[0u].sym) );
+			restart_lookahead();
+		}
 
 		/* we have consumed to a point where we can parse forward */
-		if(debugflag) debug_message("# Parse-ahead ok, going back to normal parse");
+		if(debugflag) 
+			debug_message("# Parse-ahead ok, going back to normal parse");
 
 		/* do the real parse (including actions) across the lookahead */
 		parse_lookahead(debugflag);
@@ -794,18 +792,13 @@ public abstract class lr_parser {
 		return true;
 	}
 
-	/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
-
 	/** Determine if we can shift under the special error Symbol out of the 
 	 *	state currently on the top of the (real) parse stack. 
 	 */
-	protected bool shift_under_error()
-	{
+	protected bool shift_under_error() {
 		/* is there a shift under error Symbol */
 		return get_action(stack.top().parse_state, error_sym()) > 0;
 	}
-
-	/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 
 	/** Put the (real) parse stack into error recovery configuration by 
 	 *	popping the stack down to a state that can shift on the special 
@@ -814,43 +807,41 @@ public abstract class lr_parser {
 	 *
 	 * @param debug should we produce debugging messages as we parse.
 	 */
-	protected bool find_recovery_config(bool debugflag)
-	{
+	protected bool find_recovery_config(bool debugflag) {
 		Symbol error_token;
 		int act;
 
-		if(debugflag) debug_message("# Finding recovery state on stack");
+		if(debugflag) 
+			debug_message("# Finding recovery state on stack");
 
 		/* Remember the right-position of the top symbol on the stack */
 		Symbol right = stack.top();// TUM 20060327 removed .right	
 		Symbol left	= right;// TUM 20060327 removed .left	
 
 		/* pop down until we can shift under error Symbol */
-		while(!shift_under_error())
-	{
-		/* pop the stack */
-		if(debugflag) 
-		debug_message("# Pop stack by one, state was # " +
-						stack.top().parse_state);
-			left = stack.pop(); // TUM 20060327 removed .left	
-		tos--;
+		while(!shift_under_error()) {
+			/* pop the stack */
+			if(debugflag) 
+				debug_message("# Pop stack by one, state was # " ~
+					conv!(int,string)(stack.top().parse_state) );
 
-		/* if we have hit bottom, we fail */
-		if(stack.empty()) 
-		{
-			if(debugflag) debug_message("# No recovery state found on stack");
-			return false;
+			left = stack.pop(); // TUM 20060327 removed .left	
+			tos--;
+	
+			/* if we have hit bottom, we fail */
+			if(stack.empty()) {
+				if(debugflag) debug_message("# No recovery state found on stack");
+				return false;
+			}
 		}
-	}
 
 		/* state on top of the stack can shift under error, find the shift */
 		act = get_action(stack.top().parse_state, error_sym());
-		if(debugflag) 
-	{
-		debug_message("# Recover state found (#" + 
-			stack.top().parse_state + ")");
-		debug_message("# Shifting on error to state #" + (act-1));
-	}
+		if(debugflag) {
+			debug_message("# Recover state found (#" ~ 
+			conv!(int,string)(stack.top().parse_state) ~ ")");
+			debug_message("# Shifting on error to state #" ~ conv!(int,string)(act-1) );
+		}
 
 		/* build and shift a special error Symbol */
 		error_token = getSymbolFactory().newSymbol("ERROR",error_sym(), left, right);
@@ -862,15 +853,11 @@ public abstract class lr_parser {
 		return true;
 	}
 
-	/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
-
 	/** Lookahead Symbols used for attempting error recovery "parse aheads". */
 	protected Symbol lookahead[];
 
 	/** Position in lookahead input buffer used for "parse ahead". */
 	protected int lookahead_pos;
-
-	/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 
 	/** Read from input to establish our buffer of "parse ahead" lookahead 
 	 *	Symbols. 
@@ -880,28 +867,22 @@ public abstract class lr_parser {
 		lookahead = new Symbol[error_sync_size()];
 
 		/* fill in the array */
-		for(int i = 0; i < error_sync_size(); i++)
-	{
-		lookahead[i] = cur_token;
-		cur_token = scan();
-	}
+		for(int i = 0; i < error_sync_size(); i++) {
+			lookahead[i] = cur_token;
+			cur_token = scan();
+		}
 
 		/* start at the beginning */
 		lookahead_pos = 0;
 	}
 
-	/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
-
 	/** Return the current lookahead in our error "parse ahead" buffer. */
 	protected Symbol cur_err_token() { return lookahead[lookahead_pos]; }
-
-	/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 
 	/** Advance to next "parse ahead" input Symbol. Return true if we have 
 	 *	input to advance to, false otherwise. 
 	 */
-	protected bool advance_lookahead()
-	{
+	protected bool advance_lookahead() {
 		/* advance the input location */
 		lookahead_pos++;
 
@@ -909,15 +890,13 @@ public abstract class lr_parser {
 		return lookahead_pos < error_sync_size();
 	}
 
-	/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
-
 	/** Reset the parse ahead input to one Symbol past where we started error 
 	 *	recovery (this consumes one new Symbol from the real input). 
 	 */
 	protected void restart_lookahead() {
 		/* move all the existing input over */
 		for(int i = 1; i < error_sync_size(); i++)
-	lookahead[i-1] = lookahead[i];
+			lookahead[i-1] = lookahead[i];
 
 		/* read a new Symbol into the last spot */
 		// BUG Fix by Bruce Hutton
@@ -930,8 +909,6 @@ public abstract class lr_parser {
 		/* reset our internal position marker */
 		lookahead_pos = 0;
 	}
-
-	/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 
 	/** Do a simulated parse forward (a "parse ahead") from the current 
 	 *	stack configuration using stored lookahead input and a virtual parse
@@ -947,60 +924,58 @@ public abstract class lr_parser {
 		short lhs, rhs_size;
 
 		/* create a virtual stack from the real parse stack */
-		virtual_parse_stack vstack = new virtual_parse_stack(stack);
+		VirtualParseStack vstack = new VirtualParseStack(stack);
 
 		/* parse until we fail or get past the lookahead input */
-		for(;;)
-	{
-		/* look up the action from the current state (on top of stack) */
-		act = get_action(vstack.top(), cur_err_token().sym);
+		while(true) {
+			/* look up the action from the current state (on top of stack) */
+			act = get_action(vstack.top(), cur_err_token().sym);
 
-		/* if its an error, we fail */
-		if(act == 0) return false;
+			/* if its an error, we fail */
+			if(act == 0) 
+				return false;
 
-		/* > 0 encodes a shift */
-		if(act > 0)
-		{
-			/* push the new state on the stack */
-			vstack.push(act-1);
+			/* > 0 encodes a shift */
+			if(act > 0) {
+				/* push the new state on the stack */
+				vstack.push(act-1);
 
-			if(debugflag) debug_message("# Parse-ahead shifts Symbol #" + 
-				 cur_err_token().sym + " into state #" + (act-1));
+				if(debugflag) 
+					debug_message("# Parse-ahead shifts Symbol #" ~ 
+					conv!(int,string)(cur_err_token().sym) ~ " into state #" ~ conv!(int,string)(act-1) );
 
-			/* advance simulated input, if we run off the end, we are done */
-			if(!advance_lookahead()) return true;
-		}
-		/* < 0 encodes a reduce */
-		else
-		{
-			/* if this is a reduce with the start production we are done */
-			if((-act)-1 == start_production()) 
-		{
-			if(debugflag) debug_message("# Parse-ahead accepts");
-			return true;
-		}
+				/* advance simulated input, if we run off the end, we are done */
+				if(!advance_lookahead()) 
+					return true;
+			/* < 0 encodes a reduce */
+			} else {
+				/* if this is a reduce with the start production we are done */
+				if((-act)-1 == start_production()) {
+					if(debugflag) 
+						debug_message("# Parse-ahead accepts");
+					return true;
+				}
 
-			/* get the lhs Symbol and the rhs size */
-			lhs = production_tab[(-act)-1][0];
-			rhs_size = production_tab[(-act)-1][1];
+				/* get the lhs Symbol and the rhs size */
+				lhs = production_tab[(-act)-1][0];
+				rhs_size = production_tab[(-act)-1][1];
 
-			/* pop handle off the stack */
-			for(int i = 0; i < rhs_size; i++)
-		vstack.pop();
+				/* pop handle off the stack */
+				for(int i = 0; i < rhs_size; i++)
+					vstack.pop();
 
-			if(debugflag) 
-		debug_message("# Parse-ahead reduces: handle size = " + 
-				rhs_size + " lhs = #" + lhs + " from state #" + vstack.top());
+				if(debugflag) 
+					debug_message("# Parse-ahead reduces: handle size = " ~ 
+						conv!(int,string)(rhs_size) ~ " lhs = #" ~ conv!(int,string)(lhs) 
+						~ " from state #" ~ conv!(int,string)(vstack.top()));
 
-			/* look up goto and push it onto the stack */
-			vstack.push(get_reduce(vstack.top(), lhs));
-			if(debugflag) 
-		debug_message("# Goto state #" + vstack.top());
+				/* look up goto and push it onto the stack */
+				vstack.push(get_reduce(vstack.top(), lhs));
+				if(debugflag) 
+					debug_message("# Goto state #" ~ conv!(int,string)(vstack.top()) );
+			}
 		}
 	}
-	}
-
-	/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 
 	/** Parse forward using stored lookahead Symbols.	In this case we have
 	 *	already verified that parsing will make it through the stored lookahead
@@ -1024,111 +999,105 @@ public abstract class lr_parser {
 		/* restart the saved input at the beginning */
 		lookahead_pos = 0;
 
-		if(debugflag) 
-	{
-		debug_message("# Reparsing saved input with actions");
-		debug_message("# Current Symbol is #" + cur_err_token().sym);
-		debug_message("# Current state is #" + 
-			stack.top().parse_state);
-	}
+		if(debugflag) {
+			debug_message("# Reparsing saved input with actions");
+			debug_message("# Current Symbol is #" ~ conv!(int,string)(cur_err_token().sym) );
+			debug_message("# Current state is #" ~ 
+				conv!(int,string)(stack.top().parse_state) );
+		}
 
 		/* continue until we accept or have read all lookahead input */
-		while(!_done_parsing)
-	{
-		/* current state is always on the top of the stack */
+		while(!_done_parsing) {
+			/* current state is always on the top of the stack */
 
-		/* look up action out of the current state with the current input */
-		act = 
-		get_action(stack.top().parse_state, cur_err_token().sym);
+			/* look up action out of the current state with the current input */
+			act = get_action(stack.top().parse_state, cur_err_token().sym);
 
-		/* decode the action -- > 0 encodes shift */
-		if(act > 0)
-		{
-			/* shift to the encoded state by pushing it on the stack */
-			cur_err_token().parse_state = act-1;
-			cur_err_token().used_by_parser = true;
-			if(debugflag) debug_shift(cur_err_token());
-			stack.push(cur_err_token());
-			tos++;
+			/* decode the action -- > 0 encodes shift */
+			if(act > 0) {
+				/* shift to the encoded state by pushing it on the stack */
+				cur_err_token().parse_state = act-1;
+				cur_err_token().used_by_parser = true;
+				if(debugflag) 
+					debug_shift(cur_err_token());
+				stack.push(cur_err_token());
+				tos++;
 
-			/* advance to the next Symbol, if there is none, we are done */
-			if(!advance_lookahead()) 
-		{
-			if(debugflag) debug_message("# Completed reparse");
+				/* advance to the next Symbol, if there is none, we are done */
+				if(!advance_lookahead()) {
+					if(debugflag) 
+						debug_message("# Completed reparse");
 
-			/* scan next Symbol so we can continue parse */
-			// BUGFIX by Chris Harris <ckharris@ucsd.edu>:
-			//	 correct a one-off error by commenting out
-			//	 this next line.
-			/*cur_token = scan();*/
+					/* scan next Symbol so we can continue parse */
+					// BUGFIX by Chris Harris <ckharris@ucsd.edu>:
+					//	 correct a one-off error by commenting out
+					//	 this next line.
+					/*cur_token = scan();*/
 
-			/* go back to normal parser */
-			return;
-		}
+					/* go back to normal parser */
+					return;
+				}
 			
-			if(debugflag) 
-		debug_message("# Current Symbol is #" + cur_err_token().sym);
-		}
-		/* if its less than zero, then it encodes a reduce action */
-		else if(act < 0)
-		{
-			/* perform the action for the reduce */
-			lhs_sym = do_action((-act)-1, this, stack, tos);
+				if(debugflag) 
+					debug_message("# Current Symbol is #" ~ conv!(int,string)(cur_err_token().sym) );
+				/* if its less than zero, then it encodes a reduce action */
+			} else if(act < 0) {
+				/* perform the action for the reduce */
+				lhs_sym = do_action((-act)-1, this, stack, tos);
 
-			/* look up information about the production */
-			lhs_sym_num = production_tab[(-act)-1][0];
-			handle_size = production_tab[(-act)-1][1];
+				/* look up information about the production */
+				lhs_sym_num = production_tab[(-act)-1][0];
+				handle_size = production_tab[(-act)-1][1];
 
-			if(debugflag) debug_reduce((-act)-1, lhs_sym_num, handle_size);
+				if(debugflag) 
+					debug_reduce((-act)-1, lhs_sym_num, handle_size);
 
-			/* pop the handle off the stack */
-			for(int i = 0; i < handle_size; i++)
-		{
-			stack.pop();
-			tos--;
-		}
+				/* pop the handle off the stack */
+				for(int i = 0; i < handle_size; i++) {
+					stack.pop();
+					tos--;
+				}
 			
-			/* look up the state to go to from the one popped back to */
-			act = get_reduce(stack.top().parse_state, lhs_sym_num);
+				/* look up the state to go to from the one popped back to */
+				act = get_reduce(stack.top().parse_state, lhs_sym_num);
 
-			/* shift to that state */
-			lhs_sym.parse_state = act;
-			lhs_sym.used_by_parser = true;
-			stack.push(lhs_sym);
-			tos++;
-			 
-			if(debugflag) debug_message("# Goto state #" + act);
+				/* shift to that state */
+				lhs_sym.parse_state = act;
+				lhs_sym.used_by_parser = true;
+				stack.push(lhs_sym);
+				tos++;
+				 
+				if(debugflag) 
+					debug_message("# Goto state #" ~ conv!(int,string)(act) );
 
-		}
-		/* finally if the entry is zero, we have an error 
-		 (shouldn't happen here, but...)*/
-		else if(act == 0)
-		{
-			report_fatal_error("Syntax error", lhs_sym);
-			return;
+			/* finally if the entry is zero, we have an error 
+			 (shouldn't happen here, but...)*/
+			} else if(act == 0) {
+					report_fatal_error("Syntax error", lhs_sym);
+					return;
+			}
 		}
 	}
-
-	
-	}
-
-	/*-----------------------------------------------------------*/
 
 	/** Utility function: unpacks parse tables from strings */
-	protected static short[][] unpackFromStrings(string[] sa)
-	{
+	protected static short[][] unpackFromStrings(string[] sa) {
 		// Concatanate initialization strings.
-		StringBuffer sb = new StringBuffer(sa[0]);
-		for(int i=1; i<sa.length; i++)
-	sb.append(sa[i]);
-		int n=0; // location in initialization string
-		int size1 = ((cast(int)sb.charAt(n))<<16) | (cast(int)sb.charAt(n+1)); n+=2;
-		short[][] result = new short[size1][];
+		StringBuffer!(char) sb = new StringBuffer!(char)(sa[0]);
+		for(uint i=1; i<sa.length; i++)
+			sb.pushBack(sa[i]);
+
+		uint n=0; // location in initialization string
+		uint size1 = ((cast(int)sb.charAt(n))<<16) | (cast(int)sb.charAt(n+1)); 
+		n+=2;
+		short[][] result = new short[][](size1);
+
 		for(int i=0; i<size1; i++) {
-		int size2 = ((cast(int)sb.charAt(n))<<16) | (cast(int)sb.charAt(n+1)); n+=2;
-		result[i] = new short[size2];
-		for(int j=0; j<size2; j++)
-			result[i][j] = cast(short) (sb.charAt(n++)-2);
+			int size2 = ((cast(int)sb.charAt(n))<<16) | (cast(int)sb.charAt(n+1)); 
+			n+=2;
+			result[i] = new short[size2];
+			for(int j=0; j<size2; j++) {
+				result[i][j] = cast(short) (sb.charAt(n++)-2);
+			}
 		}
 		return result;
 	}

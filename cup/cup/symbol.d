@@ -1,5 +1,7 @@
 module symbol;
 
+import hurt.conv.conv;
+
 /** Defines the Symbol class, which is used to represent all terminals
  * and nonterminals while parsing.	The lexer should pass CUP Symbols 
  * and CUP returns a Symbol. */
@@ -68,6 +70,6 @@ public class Symbol {
 
 	/** Printing this token out. (Override for pretty-print). */
 	public override string toString() {
-		return "#" ~ this.sym;
+		return "#" ~ conv!(int,string)(this.sym);
 	}
 }

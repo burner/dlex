@@ -1,4 +1,8 @@
-package cup.virtualparsestack;
+module cup.virtualparsestack;
+
+import cup.symbol;
+
+import hurt.container.stack;
 
 /** This class implements a temporary or "virtual" parse stack that 
  * replaces the top portion of the actual parse stack (the part that 
@@ -14,11 +18,13 @@ package cup.virtualparsestack;
 public class VirtualParseStack {
 
 	/** Constructor to build a virtual stack out of a real stack. */
-	public this(Stack shadowing_stack) {
+	public this(Stack!(Symbol) shadowing_stack) {
 		/* sanity check */
 		if(shadowing_stack is null)
-		throw new Exception(
-			"Internal parser error: attempt to create null virtual stack");
+			assert(0, "attempt to create null virtual stack");
+
+		//throw new Exception(
+		//	"Internal parser error: attempt to create null virtual stack");
 
 		/* set up our internals */
 		this.real_stack = shadowing_stack;
@@ -32,7 +38,7 @@ public class VirtualParseStack {
 	/** The real stack that we shadow.	This is accessed when we move off
 	 *	the bottom of the virtual portion of the stack, but is always left
 	 *	unmodified. */
-	protected Stack real_stack;
+	protected Stack!(Symbol) real_stack;
 
 	/** Top of stack indicator for where we leave off in the real stack.
 	 *	This is measured from top of stack, so 0 would indicate that no
@@ -67,7 +73,7 @@ public class VirtualParseStack {
 	}
 
 	/** Indicate whether the stack is empty. */
-	public boolean empty() {
+	public bool empty() {
 		/* if vstack is empty then we were unable to transfer onto it and 
 		 * the whole thing is empty. */
 		return this.vstack.empty();

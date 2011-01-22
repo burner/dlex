@@ -7,6 +7,7 @@ import cup.symbol;
 
 import hurt.container.stack;
 import hurt.conv.conv;
+import hurt.string.stringbuffer;
 
 import std.stdio;
 
@@ -488,7 +489,7 @@ public abstract class lr_parser {
 			/* current state is always on the top of the stack */
 
 			/* look up action out of the current state with the current input */
-			act = get_action((cast(Symbol)stack.top()).parse_state, cur_token.sym);
+			act = get_action(stack.top().parse_state, cur_token.sym);
 
 			/* decode the action -- > 0 encodes shift */
 			if(act > 0) {
@@ -515,7 +516,7 @@ public abstract class lr_parser {
 				}
 			
 				/* look up the state to go to from the one popped back to */
-				act = get_reduce((cast(Symbol)stack.top()).parse_state, lhs_sym_num);
+				act = get_reduce(stack.top().parse_state, lhs_sym_num);
 
 				/* shift to that state */
 				lhs_sym.parse_state = act;
@@ -536,7 +537,7 @@ public abstract class lr_parser {
 					/* just in case that wasn't fatal enough, end parse */
 					done_parsing();
 				} else {
-					lhs_sym = cast(Symbol)stack.top();
+					lhs_sym = stack.top();
 				}
 			}
 		}
@@ -563,8 +564,8 @@ public abstract class lr_parser {
 
 		/* dump the stack */
 		for(int i=0; i<stack.getSize(); i++) {
-			debug_message("Symbol: " + (cast(Symbol)stack.elementAt(i)).sym +
-				" State: " + (cast(Symbol)stack.elementAt(i)).parse_state);
+			debug_message("Symbol: " ~ conv!(int,string)(stack.elementAt(i).sym) ~
+				" State: " ~ conv!(int,string)(stack.elementAt(i).parse_state));
 		}
 		debug_message("==========================================");
 	}
@@ -576,8 +577,8 @@ public abstract class lr_parser {
 	 * @param rhs_size	the size of the RHS.
 	 */
 	public void debug_reduce(int prod_num, int nt_num, int rhs_size) {
-		debug_message("# Reduce with prod #" + prod_num + " [NT=" + nt_num + 
-			", " + "SZ=" + rhs_size + "]");
+		debug_message("# Reduce with prod #" ~ conv!(int,string)(prod_num) ~ " [NT=" + conv!(int,string)(nt_num) ~ 
+			", " ~ "SZ=" ~ conv!(int,string)(rhs_size) ~ "]");
 	}
 
 	/** Do debug output for shift. 
@@ -585,20 +586,21 @@ public abstract class lr_parser {
 	 * @param shift_tkn the Symbol being shifted onto the stack.
 	 */
 	public void debug_shift(Symbol shift_tkn) {
-		debug_message("# Shift under term #" + shift_tkn.sym + 
-			" to state #" + shift_tkn.parse_state);
+		debug_message("# Shift under term #" ~ conv!(int,string)(shift_tkn.sym) ~ 
+			" to state #" ~ conv!(int,string)(shift_tkn.parse_state));
 	}
 
 	/** Do debug output for stack state. [CSA]
 	 */
 	public void debug_stack() {
-		StringBuffer sb=new StringBuffer("## STACK:");
-		for(int i=0; i<stack.size(); i++) {
-			Symbol s = cast(Symbol)stack.elementAt(i);
-			sb.append(" <state "+s.parse_state+", sym "+s.sym+">");
-			if((i%3)==2 || (i==(stack.size()-1))) {
+		StringBuffer!(char) sb = new StringBuffer!(char)("## STACK:");
+		for(int i=0; i < stack.getSize(); i++) {
+			Symbol s = stack.elementAt(i);
+			sb.pushBack(" <state " ~ conv!(int,string)(s.parse_state) ~", sym " ~ 
+				conv!(int,string)(s.sym) ~">");
+			if( (i % 3) == 2 || (i == (stack.getSize()-1)) ) {
 				debug_message(sb.toString());
-				sb = new StringBuffer("		 ");
+				sb = new StringBuffer!(char)("		 ");
 			}
 		}
 	}
@@ -634,10 +636,10 @@ public abstract class lr_parser {
 		/* the current Symbol */
 		cur_token = scan(); 
 
-		debug_message("# Current Symbol is #" + cur_token.sym);
+		debug_message("# Current Symbol is #" + conv!(int,string)(cur_token.sym) );
 
 		/* push dummy Symbol with start state to get us underway */
-		stack.removeAllElements();
+		stack.clear();
 		stack.push(getSymbolFactory().startSymbol("START",0, start_state()));
 		tos = 0;
 
@@ -651,7 +653,7 @@ public abstract class lr_parser {
 			//debug_stack();
 
 			/* look up action out of the current state with the current input */
-			act = get_action((cast(Symbol)stack.top()).parse_state, cur_token.sym);
+			act = get_action(stack.top().parse_state, cur_token.sym);
 
 			/* decode the action -- > 0 encodes shift */
 			if(act > 0) {
@@ -664,7 +666,7 @@ public abstract class lr_parser {
 
 				/* advance to the next Symbol */
 				cur_token = scan();
-				debug_message("# Current token is " + cur_token);
+				debug_message("# Current token is " ~ cur_token.toString());
 			} else if(act < 0) { /* if its less than zero, then it encodes a reduce action */
 				/* perform the action for the reduce */
 				lhs_sym = do_action((-act)-1, this, stack, tos);
@@ -682,10 +684,10 @@ public abstract class lr_parser {
 				}
 				
 				/* look up the state to go to from the one popped back to */
-				act = get_reduce((cast(Symbol)stack.top()).parse_state, lhs_sym_num);
-				debug_message("# Reduce rule: top state " +
-					 (cast(Symbol)stack.top()).parse_state +
-					 ", lhs sym " + lhs_sym_num + " -> state " + act); 
+				act = get_reduce(stack.top().parse_state, lhs_sym_num);
+				debug_message("# Reduce rule: top state " ~
+					conv!(int,string)( stack.top().parse_state) ~
+					 ", lhs sym " ~ conv!(short,string)(lhs_sym_num) ~ " -> state " ~ conv!(int,string)(act) ); 
 
 				/* shift to that state */
 				lhs_sym.parse_state = act;
@@ -706,7 +708,7 @@ public abstract class lr_parser {
 					/* just in case that wasn't fatal enough, end parse */
 					done_parsing();
 				} else {
-					lhs_sym = cast(Symbol)stack.top();
+					lhs_sym = stack.top();
 				}
 			}
 		}
@@ -800,7 +802,7 @@ public abstract class lr_parser {
 	protected bool shift_under_error()
 	{
 		/* is there a shift under error Symbol */
-		return get_action((cast(Symbol)stack.top()).parse_state, error_sym()) > 0;
+		return get_action(stack.top().parse_state, error_sym()) > 0;
 	}
 
 	/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
@@ -820,7 +822,7 @@ public abstract class lr_parser {
 		if(debugflag) debug_message("# Finding recovery state on stack");
 
 		/* Remember the right-position of the top symbol on the stack */
-		Symbol right = (cast(Symbol)stack.top());// TUM 20060327 removed .right	
+		Symbol right = stack.top();// TUM 20060327 removed .right	
 		Symbol left	= right;// TUM 20060327 removed .left	
 
 		/* pop down until we can shift under error Symbol */
@@ -829,8 +831,8 @@ public abstract class lr_parser {
 		/* pop the stack */
 		if(debugflag) 
 		debug_message("# Pop stack by one, state was # " +
-						(cast(Symbol)stack.top()).parse_state);
-			left = (cast(Symbol)stack.pop()); // TUM 20060327 removed .left	
+						stack.top().parse_state);
+			left = stack.pop(); // TUM 20060327 removed .left	
 		tos--;
 
 		/* if we have hit bottom, we fail */
@@ -842,11 +844,11 @@ public abstract class lr_parser {
 	}
 
 		/* state on top of the stack can shift under error, find the shift */
-		act = get_action((cast(Symbol)stack.top()).parse_state, error_sym());
+		act = get_action(stack.top().parse_state, error_sym());
 		if(debugflag) 
 	{
 		debug_message("# Recover state found (#" + 
-			(cast(Symbol)stack.top()).parse_state + ")");
+			stack.top().parse_state + ")");
 		debug_message("# Shifting on error to state #" + (act-1));
 	}
 
@@ -1027,7 +1029,7 @@ public abstract class lr_parser {
 		debug_message("# Reparsing saved input with actions");
 		debug_message("# Current Symbol is #" + cur_err_token().sym);
 		debug_message("# Current state is #" + 
-			(cast(Symbol)stack.top()).parse_state);
+			stack.top().parse_state);
 	}
 
 		/* continue until we accept or have read all lookahead input */
@@ -1037,7 +1039,7 @@ public abstract class lr_parser {
 
 		/* look up action out of the current state with the current input */
 		act = 
-		get_action((cast(Symbol)stack.top()).parse_state, cur_err_token().sym);
+		get_action(stack.top().parse_state, cur_err_token().sym);
 
 		/* decode the action -- > 0 encodes shift */
 		if(act > 0)
@@ -1087,7 +1089,7 @@ public abstract class lr_parser {
 		}
 			
 			/* look up the state to go to from the one popped back to */
-			act = get_reduce((cast(Symbol)stack.top()).parse_state, lhs_sym_num);
+			act = get_reduce(stack.top().parse_state, lhs_sym_num);
 
 			/* shift to that state */
 			lhs_sym.parse_state = act;

@@ -543,40 +543,31 @@ public abstract class lr_parser {
 		return lhs_sym;
 	}
 
-	/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
-
 	/** Write a debugging message to System.err for the debugging version 
 	 *	of the parser. 
 	 *
 	 * @param mess the text of the debugging message.
 	 */
 	public void debug_message(string mess) {
-		System.err.println(mess);
+		writeln(mess);
 	}
-
-	/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 
 	/** Dump the parse stack for debugging purposes. */
-	public void dump_stack()
-	{
-		if(stack is null)
-	{
-		debug_message("# Stack dump requested, but stack is null");
-		return;
-	}
+	public void dump_stack() {
+		if(stack is null) {
+			debug_message("# Stack dump requested, but stack is null");
+			return;
+		}
 
 		debug_message("============ Parse Stack Dump ============");
 
 		/* dump the stack */
-		for(int i=0; i<stack.size(); i++)
-	{
-		debug_message("Symbol: " + (cast(Symbol)stack.elementAt(i)).sym +
-			" State: " + (cast(Symbol)stack.elementAt(i)).parse_state);
-	}
+		for(int i=0; i<stack.getSize(); i++) {
+			debug_message("Symbol: " + (cast(Symbol)stack.elementAt(i)).sym +
+				" State: " + (cast(Symbol)stack.elementAt(i)).parse_state);
+		}
 		debug_message("==========================================");
 	}
-
-	/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 
 	/** Do debug output for a reduce. 
 	 *
@@ -584,41 +575,33 @@ public abstract class lr_parser {
 	 * @param nt_num	the index of the LHS non terminal.
 	 * @param rhs_size	the size of the RHS.
 	 */
-	public void debug_reduce(int prod_num, int nt_num, int rhs_size)
-	{
+	public void debug_reduce(int prod_num, int nt_num, int rhs_size) {
 		debug_message("# Reduce with prod #" + prod_num + " [NT=" + nt_num + 
-				", " + "SZ=" + rhs_size + "]");
+			", " + "SZ=" + rhs_size + "]");
 	}
-
-	/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 
 	/** Do debug output for shift. 
 	 *
 	 * @param shift_tkn the Symbol being shifted onto the stack.
 	 */
-	public void debug_shift(Symbol shift_tkn)
-	{
+	public void debug_shift(Symbol shift_tkn) {
 		debug_message("# Shift under term #" + shift_tkn.sym + 
 			" to state #" + shift_tkn.parse_state);
 	}
-
-	/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 
 	/** Do debug output for stack state. [CSA]
 	 */
 	public void debug_stack() {
 		StringBuffer sb=new StringBuffer("## STACK:");
 		for(int i=0; i<stack.size(); i++) {
-		Symbol s = cast(Symbol)stack.elementAt(i);
-		sb.append(" <state "+s.parse_state+", sym "+s.sym+">");
-		if((i%3)==2 || (i==(stack.size()-1))) {
-			debug_message(sb.toString());
-			sb = new StringBuffer("		 ");
-		}
+			Symbol s = cast(Symbol)stack.elementAt(i);
+			sb.append(" <state "+s.parse_state+", sym "+s.sym+">");
+			if((i%3)==2 || (i==(stack.size()-1))) {
+				debug_message(sb.toString());
+				sb = new StringBuffer("		 ");
+			}
 		}
 	}
-
-	/*. . . . . . . . . . . . . . . . . . . . . . . . . . . . . .*/
 
 	/** Perform a parse with debugging output.	This does exactly the
 	 *	same things as parse(), except that it calls debug_shift() and
@@ -637,8 +620,8 @@ public abstract class lr_parser {
 
 		/* set up direct reference to tables to drive the parser */
 		production_tab = production_table();
-		action_tab	 = action_table();
-		reduce_tab	 = reduce_table();
+		action_tab = action_table();
+		reduce_tab = reduce_table();
 
 		debug_message("# Initializing parser");
 
@@ -659,84 +642,74 @@ public abstract class lr_parser {
 		tos = 0;
 
 		/* continue until we are told to stop */
-		for(_done_parsing = false; !_done_parsing; )
-	{
-		/* Check current token for freshness. */
-		if(cur_token.used_by_parser)
-		throw new Error("Symbol recycling detected (fix your scanner).");
+		for(_done_parsing = false; !_done_parsing; ) {
+			/* Check current token for freshness. */
+			if(cur_token.used_by_parser)
+				throw new Error("Symbol recycling detected (fix your scanner).");
 
-		/* current state is always on the top of the stack */
-		//debug_stack();
+			/* current state is always on the top of the stack */
+			//debug_stack();
 
-		/* look up action out of the current state with the current input */
-		act = get_action((cast(Symbol)stack.top()).parse_state, cur_token.sym);
+			/* look up action out of the current state with the current input */
+			act = get_action((cast(Symbol)stack.top()).parse_state, cur_token.sym);
 
-		/* decode the action -- > 0 encodes shift */
-		if(act > 0)
-		{
-			/* shift to the encoded state by pushing it on the stack */
-			cur_token.parse_state = act-1;
-			cur_token.used_by_parser = true;
-			debug_shift(cur_token);
-			stack.push(cur_token);
-			tos++;
+			/* decode the action -- > 0 encodes shift */
+			if(act > 0) {
+				/* shift to the encoded state by pushing it on the stack */
+				cur_token.parse_state = act-1;
+				cur_token.used_by_parser = true;
+				debug_shift(cur_token);
+				stack.push(cur_token);
+				tos++;
 
-			/* advance to the next Symbol */
-			cur_token = scan();
+				/* advance to the next Symbol */
+				cur_token = scan();
 				debug_message("# Current token is " + cur_token);
+			} else if(act < 0) { /* if its less than zero, then it encodes a reduce action */
+				/* perform the action for the reduce */
+				lhs_sym = do_action((-act)-1, this, stack, tos);
+
+				/* look up information about the production */
+				lhs_sym_num = production_tab[(-act)-1][0];
+				handle_size = production_tab[(-act)-1][1];
+
+				debug_reduce((-act)-1, lhs_sym_num, handle_size);
+
+				/* pop the handle off the stack */
+				for(int i = 0; i < handle_size; i++) {
+					stack.pop();
+					tos--;
+				}
+				
+				/* look up the state to go to from the one popped back to */
+				act = get_reduce((cast(Symbol)stack.top()).parse_state, lhs_sym_num);
+				debug_message("# Reduce rule: top state " +
+					 (cast(Symbol)stack.top()).parse_state +
+					 ", lhs sym " + lhs_sym_num + " -> state " + act); 
+
+				/* shift to that state */
+				lhs_sym.parse_state = act;
+				lhs_sym.used_by_parser = true;
+				stack.push(lhs_sym);
+				tos++;
+
+				debug_message("# Goto state #" + act);
+			} else if(act == 0) { /* finally if the entry is zero, we have an error */
+				/* call user syntax error reporting routine */
+				syntax_error(cur_token);
+
+				/* try to error recover */
+				if(!error_recovery(true)) {
+					/* if that fails give up with a fatal syntax error */
+					unrecovered_syntax_error(cur_token);
+
+					/* just in case that wasn't fatal enough, end parse */
+					done_parsing();
+				} else {
+					lhs_sym = cast(Symbol)stack.top();
+				}
+			}
 		}
-		/* if its less than zero, then it encodes a reduce action */
-		else if(act < 0)
-		{
-			/* perform the action for the reduce */
-			lhs_sym = do_action((-act)-1, this, stack, tos);
-
-			/* look up information about the production */
-			lhs_sym_num = production_tab[(-act)-1][0];
-			handle_size = production_tab[(-act)-1][1];
-
-			debug_reduce((-act)-1, lhs_sym_num, handle_size);
-
-			/* pop the handle off the stack */
-			for(int i = 0; i < handle_size; i++)
-		{
-			stack.pop();
-			tos--;
-		}
-			
-			/* look up the state to go to from the one popped back to */
-			act = get_reduce((cast(Symbol)stack.top()).parse_state, lhs_sym_num);
-			debug_message("# Reduce rule: top state " +
-				 (cast(Symbol)stack.top()).parse_state +
-				 ", lhs sym " + lhs_sym_num + " -> state " + act); 
-
-			/* shift to that state */
-			lhs_sym.parse_state = act;
-			lhs_sym.used_by_parser = true;
-			stack.push(lhs_sym);
-			tos++;
-
-			debug_message("# Goto state #" + act);
-		}
-		/* finally if the entry is zero, we have an error */
-		else if(act == 0)
-		{
-			/* call user syntax error reporting routine */
-			syntax_error(cur_token);
-
-			/* try to error recover */
-			if(!error_recovery(true))
-		{
-			/* if that fails give up with a fatal syntax error */
-			unrecovered_syntax_error(cur_token);
-
-			/* just in case that wasn't fatal enough, end parse */
-			done_parsing();
-		} else {
-			lhs_sym = cast(Symbol)stack.top();
-		}
-		}
-	}
 		return lhs_sym;
 	}
 

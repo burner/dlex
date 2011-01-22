@@ -58,12 +58,12 @@ public class VirtualParseStack {
 		Symbol stack_sym;
 
 		/* don't transfer if the real stack is empty */
-		if(this.real_next >= this.real_stack.size())
+		if(this.real_next >= this.real_stack.getSize())
 			 return;
 
 		/* get a copy of the first Symbol we have not transfered */
 		stack_sym = cast(Symbol)
-			this.real_stack.get(this.real_stack.size() - 1 - this.real_next);
+			this.real_stack.elementAt(this.real_stack.getSize() - 1 - this.real_next);
 
 		/* record the transfer */
 		this.real_next++;
@@ -86,7 +86,7 @@ public class VirtualParseStack {
 				"Internal parser error: top() called on empty virtual stack");
 		}
 
-		return this.vstack.peek();
+		return this.vstack.top();
 	}
 
 	/** Pop the stack. */

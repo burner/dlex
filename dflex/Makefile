@@ -2,14 +2,14 @@ include ../makeconfig.conf
 
 IPATH=-I../../libhurt/
 
-OBJS=
+OBJS=dflex.action.o
 
-all:
+all:dflex
 
-cup.a: $(OBJS)
+dflex: $(OBJS)
 
 clean:
 	rm *.o
 
-complexsymbolfactory.o: cup/complexsymbolfactory.d cup/symbol.d cup/symbolfactory.d Makefile ../makeconfig.conf
-	$(DC) $(CFLAGS) $(IPATH) -ofcup.complexsymbolfactory.o cup/complexsymbolfactory.d
+dflex.action.o: dflex/action.d Makefile ../makeconfig.conf
+	$(DC) $(CFLAGS) $(IPATH) dflex/action.d -ofdflex.action.o 

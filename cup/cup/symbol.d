@@ -34,11 +34,11 @@ public class Symbol {
 	public int left, right;
 	public Object value;
 
-	public this(int id, Symbol left, Symbol right, Object o){
+	public this(int id, Symbol left, Symbol right, Object o) {
 		this(id,left.left,right.right,o);
 	}
 
-	public this(int id, Symbol left, Symbol right){
+	public this(int id, Symbol left, Symbol right) {
 		this(id,left.left,right.right);
 	}
 

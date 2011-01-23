@@ -16,7 +16,6 @@ import hurt.container.stack;
  * state is maintained on the virtual stack, not full Symbol objects. */
 
 public class VirtualParseStack {
-
 	/** Constructor to build a virtual stack out of a real stack. */
 	public this(Stack!(Symbol) shadowing_stack) {
 		/* sanity check */

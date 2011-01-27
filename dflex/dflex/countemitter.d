@@ -18,94 +18,85 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package JFlex;
+module dflex.countemitter;
 
-/**
- * An emitter for an array encoded as count/value pairs in a string.
+import dflex.packemitter;
+
+/** An emitter for an array encoded as count/value pairs in a string.
  * 
- * @author Gerwin Klein
- * @version $Revision: 433 $, $Date: 2009-01-31 19:52:34 +1100 (Sat, 31 Jan 2009) $
- */
-public class CountEmitter extends PackEmitter {
+ * @author Gerwin Klein */
+public class CountEmitter : PackEmitter {
   /** number of entries in expanded array */
   private int numEntries;
   
   /** translate all values by this amount */ 
   private int translate = 0;
 
-
-  /**
-   * Create a count/value emitter for a specific field.
+  /** Create a count/value emitter for a specific field.
    * 
-   * @param name   name of the generated array
-   */
-  protected CountEmitter(String name) {
+   * @param name   name of the generated array */
+  protected this(string name) {
     super(name);
   }
 
-  /**
-   * Emits count/value unpacking code for the generated array. 
+  /** Emits count/value unpacking code for the generated array. 
    * 
-   * @see JFlex.PackEmitter#emitUnPack()
-   */
-  public void emitUnpack() {
+   * @see JFlex.PackEmitter#emitUnPack() */
+  public override void emitUnpack() {
     // close last string chunk:
-    println("\";");
+    writefln("\";");
     
     nl();
-    println("  private static int [] zzUnpack"+name+"() {");
-    println("    int [] result = new int["+numEntries+"];");
-    println("    int offset = 0;");
+    writefln("  private static int [] zzUnpack" ~ name ~ "() {");
+    writefln("    int [] result = new int[" ~ numEntries ~ "];");
+    writefln("    int offset = 0;");
 
-    for (int i = 0; i < chunks; i++) {
-      println("    offset = zzUnpack"+name+"("+constName()+"_PACKED_"+i+", offset, result);");
+    for(int i = 0; i < chunks; i++) {
+      writefln("    offset = zzUnpack" ~ name ~ "(" ~ constName() ~ 
+			"_PACKED_" ~ i ~ ", offset, result);");
     }
 
-    println("    return result;");
-    println("  }");
+    writefln("    return result;");
+    writefln("  }");
     nl();
 
-    println("  private static int zzUnpack"+name+"(String packed, int offset, int [] result) {");
-    println("    int i = 0;       /* index in packed string  */");
-    println("    int j = offset;  /* index in unpacked array */");
-    println("    int l = packed.length();");
-    println("    while (i < l) {");
-    println("      int count = packed.charAt(i++);");
-    println("      int value = packed.charAt(i++);");
-    if (translate == 1) {
-      println("      value--;");
-    } 
-    else if (translate != 0) {
-      println("      value-= "+translate);
+    writefln("  private static int zzUnpack"+name+"(String packed, int offset, int [] result) {");
+    writefln("    int i = 0;       /* index in packed string  */");
+    writefln("    int j = offset;  /* index in unpacked array */");
+    writefln("    int l = packed.length();");
+    writefln("    while (i < l) {");
+    writefln("      int count = packed.charAt(i++);");
+    writefln("      int value = packed.charAt(i++);");
+
+    if(translate == 1) {
+      writefln("      value--;");
+    } else if(translate != 0) {
+      writefln("      value-= "+translate);
     }
-    println("      do result[j++] = value; while (--count > 0);");
-    println("    }");
-    println("    return j;");
-    println("  }");
+    writefln("      do result[j++] = value; while (--count > 0);");
+    writefln("    }");
+    writefln("    return j;");
+    writefln("  }");
   }
 
-  /**
-   * Translate all values by given amount.
+  /** Translate all values by given amount.
    * 
    * Use to move value interval from [0, 0xFFFF] to something different.
    * 
    * @param i   amount the value will be translated by. 
-   *            Example: <code>i = 1</code> allows values in [-1, 0xFFFE].
-   */
+   *            Example: <code>i = 1</code> allows values in [-1, 0xFFFE]. */
   public void setValTranslation(int i) {
     this.translate = i;    
   }
 
-  /**
-   * Emit one count/value pair. 
+  /** Emit one count/value pair. 
    * 
    * Automatically translates value by the <code>translate</code> value. 
    * 
    * @param count
    * @param value
    * 
-   * @see CountEmitter#setValTranslation(int)
-   */
+   * @see CountEmitter#setValTranslation(int) */
   public void emit(int count, int value) {
     numEntries+= count;
     breaks();

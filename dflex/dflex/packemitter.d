@@ -18,11 +18,11 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package JFlex;
+module dflex.packemitter;
 
+import hurt.string.stringbuffer;
 
-/**
- * Encodes <code>int</code> arrays as strings.
+/** Encodes <code>int</code> arrays as strings.
  * 
  * Also splits up strings when longer than 64K in UTF8 encoding.
  * Subclasses emit unpacking code.
@@ -32,25 +32,23 @@ package JFlex;
  * <code>for each data: p.emitData(data);</code><br>
  * <code>p.emitUnpack();</code> 
  * 
- * @author Gerwin Klein
- * @version $Revision: 433 $, $Date: 2009-01-31 19:52:34 +1100 (Sat, 31 Jan 2009) $
- */
+ * @author Gerwin Klein */
 public abstract class PackEmitter {
 
   /** name of the generated array (mixed case, no yy prefix) */
-  protected String name;
+  protected string name;
     
   /** current UTF8 length of generated string in current chunk */
-  private int UTF8Length;
+  private int UTF8LengthVar;
 
   /** position in the current line */
   private int linepos;
   
   /** max number of entries per line */
-  private static final int maxEntries = 16;
+  private static immutable maxEntries = 16;
   
   /** output buffer */
-  protected StringBuffer out = new StringBuffer();
+  protected StringBuffer!(char) outsb = new StringBuffer!(char)(16);
 
   /** number of existing string chunks */ 
   protected int chunks;
@@ -59,17 +57,17 @@ public abstract class PackEmitter {
   // String constants are stored as UTF8 with 2 bytes length
   // field in class files. One Unicode char can be up to 3 
   // UTF8 bytes. 64K max and two chars safety. 
-  private static final int maxSize = 0xFFFF-6;
+  private static immutable maxSize = 0xFFFF-6;
   
   /** indent for string lines */
-  private static final String indent = "    ";
+  private static immutable indent = "    ";
   
   /**
    * Create new emitter for an array.
    * 
    * @param name  the name of the generated array
    */
-  public PackEmitter(String name) {
+  public this(string name) {
     this.name = name;
   }
   
@@ -80,27 +78,27 @@ public abstract class PackEmitter {
    * @return <code>name</code> as a internal constant name.
    * @see PackEmitter#name
    */
-  protected String constName() {
-    return "ZZ_" + name.toUpperCase();
+  protected string constName() {
+    return "ZZ_" ~ name.toUpperCase();
   }
   
   /**
    * Return current output buffer.
    */
-  public String toString() {
-    return out.toString();
+  public override string toString() {
+    return outsb.toString();
   }
 
   /**
    * Emit declaration of decoded member and open first chunk.
    */  
   public void emitInit() {
-    out.append("  private static final int [] ");
-    out.append(constName());
-    out.append(" = zzUnpack");
-    out.append(name);
-    out.append("();");
-    nl();
+    outsb.append("  private static final int [] ");
+    outsb.append(constName());
+    outsb.append(" = zzUnpack");
+    outsb.append(name);
+    outsb.append("();");
+    outsb.append("\n");
     nextChunk();
   }
 
@@ -117,10 +115,10 @@ public abstract class PackEmitter {
       throw new IllegalArgumentException("character value expected");
   
     // cast ok because of prec  
-    char c = (char) i;    
+    char c = cast(char)i;    
      
     printUC(c);
-    UTF8Length += UTF8Length(c);
+    UTF8Lengthvar += UTF8Length(c);
     linepos++;   
   }
 
@@ -129,20 +127,20 @@ public abstract class PackEmitter {
    * Leave space for at least two chars.
    */  
   public void breaks() {
-    if (UTF8Length >= maxSize) {
+    if (UTF8Lengthvar >= maxSize) {
       // close current chunk
-      out.append("\";");
-      nl();
+      outsb.append("\";");
+      outsb.append("\n");
       
       nextChunk();
     }
     else {
       if (linepos >= maxEntries) {
         // line break
-        out.append("\"+");
-        nl();
-        out.append(indent);
-        out.append("\"");
+        outsb.append("\"+");
+        outsb.append("\n");
+        outsb.append(indent);
+        outsb.append("\"");
         linepos = 0;      
       }
     }
@@ -157,26 +155,19 @@ public abstract class PackEmitter {
    *  emit next chunk 
    */
   private void nextChunk() {
-    nl();
-    out.append("  private static final String ");
-    out.append(constName());
-    out.append("_PACKED_");
-    out.append(chunks);
-    out.append(" =");
-    nl();
-    out.append(indent);
-    out.append("\"");
+    outsb.append("\n");
+    outsb.append("  private static final String ");
+    outsb.append(constName());
+    outsb.append("_PACKED_");
+    outsb.append(chunks);
+    outsb.append(" =");
+    outsb.append("\n");
+    outsb.append(indent);
+    outsb.append("\"");
 
     UTF8Length = 0;
     linepos = 0;
     chunks++;
-  }
-  
-  /**
-   *  emit newline 
-   */
-  protected void nl() {
-    out.append(Out.NL);
   }
   
   /**
@@ -187,13 +178,13 @@ public abstract class PackEmitter {
    */
   private void printUC(char c) {
     if (c > 255) {
-      out.append("\\u");
-      if (c < 0x1000) out.append("0");
-      out.append(Integer.toHexString(c));
+      outsb.append("\\u");
+      if (c < 0x1000) outsb.append("0");
+      outsb.append(Integer.toHexString(c));
     }
     else {
-      out.append("\\");
-      out.append(Integer.toOctalString(c));
+      outsb.append("\\");
+      outsb.append(Integer.toOctalString(c));
     }
   } 
 
@@ -222,9 +213,4 @@ public abstract class PackEmitter {
     return 3;
   }
 
-  // convenience
-  protected void println(String s) {
-    out.append(s);
-    nl();
-  }
 }

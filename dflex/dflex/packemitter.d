@@ -48,7 +48,7 @@ public abstract class PackEmitter {
   private static immutable maxEntries = 16;
   
   /** output buffer */
-  protected StringBuffer!(char) outsb = new StringBuffer!(char)(16);
+  protected StringBuffer!(char) outsb;
 
   /** number of existing string chunks */ 
   protected int chunks;
@@ -68,6 +68,7 @@ public abstract class PackEmitter {
    * @param name  the name of the generated array
    */
   public this(string name) {
+	this.outsb = new StringBuffer!(char)(16);
     this.name = name;
   }
   

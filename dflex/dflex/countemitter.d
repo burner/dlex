@@ -22,6 +22,10 @@ module dflex.countemitter;
 
 import dflex.packemitter;
 
+import hurt.conv.conv;
+
+import std.stdio;
+
 /** An emitter for an array encoded as count/value pairs in a string.
  * 
  * @author Gerwin Klein */
@@ -44,23 +48,21 @@ public class CountEmitter : PackEmitter {
    * @see JFlex.PackEmitter#emitUnPack() */
   public override void emitUnpack() {
     // close last string chunk:
-    writefln("\";");
+    writefln("\";\n");
     
-    nl();
     writefln("  private static int [] zzUnpack" ~ name ~ "() {");
-    writefln("    int [] result = new int[" ~ numEntries ~ "];");
+    writefln("    int [] result = new int[" ~ conv!(int,string)(numEntries) ~ "];");
     writefln("    int offset = 0;");
 
     for(int i = 0; i < chunks; i++) {
       writefln("    offset = zzUnpack" ~ name ~ "(" ~ constName() ~ 
-			"_PACKED_" ~ i ~ ", offset, result);");
+			"_PACKED_" ~ conv!(int,string)(i) ~ ", offset, result);");
     }
 
     writefln("    return result;");
-    writefln("  }");
-    nl();
+    writefln("  }\n");
 
-    writefln("  private static int zzUnpack"+name+"(String packed, int offset, int [] result) {");
+    writefln("  private static int zzUnpack" ~ name ~ "(String packed, int offset, int [] result) {");
     writefln("    int i = 0;       /* index in packed string  */");
     writefln("    int j = offset;  /* index in unpacked array */");
     writefln("    int l = packed.length();");
@@ -71,7 +73,7 @@ public class CountEmitter : PackEmitter {
     if(translate == 1) {
       writefln("      value--;");
     } else if(translate != 0) {
-      writefln("      value-= "+translate);
+      writefln("      value-= " ~ conv!(int,string)(translate));
     }
     writefln("      do result[j++] = value; while (--count > 0);");
     writefln("    }");

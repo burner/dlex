@@ -20,6 +20,9 @@
 
 module dflex.charclasses;
 
+import dflex.intcharset;
+import dflex.charclassinterval;
+
 import hurt.container.vector;
 
 
@@ -32,10 +35,10 @@ public class CharClasses {
 	private immutable DEBUG = false;
 
 	/** the largest character that can be used in char classes */
-	public immutable maxChar = '\0000FFFF';
+	public immutable maxChar = 0x0000FFFF;
 
 	/** the char classes */
-	private Vector /* of IntCharSet */ classes;
+	private Vector!(IntCharSet) /* of IntCharSet */ classes;
 
 	/** the largest character actually used in a specification */
 	private char maxCharUsed;
@@ -96,7 +99,7 @@ public class CharClasses {
 	 * @param set       the set of characters to distinguish from the rest    
 	 * @param caseless  if true upper/lower/title case are considered equivalent  
 	 */
-	public void makeClass(IntCharSet set, boolean caseless) {
+	public void makeClass(IntCharSet set, bool caseless) {
 		if (caseless) set = set.getCaseless();
 
 		if ( DEBUG ) {
@@ -106,7 +109,7 @@ public class CharClasses {
 
 		int oldSize = classes.size();
 		for (int i = 0; i < oldSize; i++) {
-			IntCharSet x  = (IntCharSet) classes.elementAt(i);
+			IntCharSet x  = classes.get(i);
 
 			if (x.equals(set)) return;
 
@@ -146,7 +149,7 @@ public class CharClasses {
 	public int getClassCode(char letter) {
 		int i = -1;
 		while (true) {
-			IntCharSet x = (IntCharSet) classes.elementAt(++i);
+			IntCharSet x = classes.get(++i);
 			if ( x.contains(letter) ) return i;      
 		}
 	}
@@ -164,7 +167,7 @@ public class CharClasses {
 	 *
 	 * @param theClass  the index of the class to
 	 */
-	public String toString(int theClass) {
+	public string toString(int theClass) {
 		return classes.elementAt(theClass).toString();
 	}
 
@@ -175,7 +178,7 @@ public class CharClasses {
 	 *
 	 * Enumerates the classes by index.
 	 */
-	public String toString() {
+	public string toString() {
 		StringBuffer result = new StringBuffer("CharClasses:");
 
 		result.append(Out.NL);
@@ -192,7 +195,7 @@ public class CharClasses {
 	 *    
 	 * @param caseless  if true upper/lower/title case are considered equivalent  
 	 */
-	public void makeClass(char singleChar, boolean caseless) {
+	public void makeClass(char singleChar, bool caseless) {
 		makeClass(new IntCharSet(singleChar), caseless);
 	}
 
@@ -202,7 +205,7 @@ public class CharClasses {
 	 *    
 	 * @param caseless  if true upper/lower/title case are considered equivalent  
 	 */
-	public void makeClass(String str, boolean caseless) {
+	public void makeClass(string str, bool caseless) {
 		for (int i = 0; i < str.length(); i++) makeClass(str.charAt(i), caseless);
 	}  
 
@@ -220,7 +223,7 @@ public class CharClasses {
 	 *    
 	 * @param caseless  if true upper/lower/title case are considered equivalent  
 	 */
-	public void makeClass(Vector /* Interval */ v, boolean caseless) {
+	public void makeClass(Vector!(Interval) /* Interval */ v, bool caseless) {
 		makeClass(new IntCharSet(v), caseless);
 	}
 
@@ -240,7 +243,7 @@ public class CharClasses {
 	 * 
 	 * @param caseless  if true upper/lower/title case are considered equivalent  
 	 */
-	public void makeClassNot(Vector v, boolean caseless) {
+	public void makeClassNot(Vector!(Interval) v, bool caseless) {
 		makeClass(new IntCharSet(v), caseless);
 	}
 
@@ -249,7 +252,7 @@ public class CharClasses {
 	 * Returns an array that contains the character class codes of all characters
 	 * in the specified set of input characters.
 	 */
-	private int [] getClassCodes(IntCharSet set, boolean negate) {
+	private int [] getClassCodes(IntCharSet set, bool negate) {
 
 		if (DEBUG) {
 			Out.dump("getting class codes for "+set);
@@ -264,7 +267,7 @@ public class CharClasses {
 		int length  = 0;
 
 		for (int i = 0; i < size; i++) {
-			IntCharSet x = (IntCharSet) classes.elementAt(i);
+			IntCharSet x = classes.get(i);
 			if ( negate ) {
 				if ( !set.and(x).containsElements() ) {
 					temp[length++] = i;
@@ -295,7 +298,7 @@ public class CharClasses {
 	 *
 	 * @return an array with the class codes for intervallVec
 	 */
-	public int [] getClassCodes(Vector /* Interval */ intervallVec) {
+	public int [] getClassCodes(Vector!(Interval) /* Interval */ intervallVec) {
 		return getClassCodes(new IntCharSet(intervallVec), false);
 	}
 
@@ -309,7 +312,7 @@ public class CharClasses {
 	 *
 	 * @return an array with the class codes for the complement of intervallVec
 	 */
-	public int [] getNotClassCodes(Vector /* Interval */ intervallVec) {
+	public int [] getNotClassCodes(Vector!(Interval) /* Interval */ intervallVec) {
 		return getClassCodes(new IntCharSet(intervallVec), true);
 	}
 
@@ -323,12 +326,12 @@ public class CharClasses {
 	public void check() {
 		for (int i = 0; i < classes.size(); i++)
 			for (int j = i+1; j < classes.size(); j++) {
-				IntCharSet x = (IntCharSet) classes.elementAt(i);
-				IntCharSet y = (IntCharSet) classes.elementAt(j);
+				IntCharSet x = classes.get(i);
+				IntCharSet y = classes.get(j);
 				if ( x.and(y).containsElements() ) {
-					System.out.println("Error: non disjoint char classes "+i+" and "+j);
-					System.out.println("class "+i+": "+x);
-					System.out.println("class "+j+": "+y);
+					writeln("Error: non disjoint char classes " ~ i ~ " and " ~ j);
+					writeln("class " ~ i ~ ": " ~ x);
+					writeln("class " ~ j ~ ": " ~ y);
 				}
 			}
 
@@ -336,7 +339,7 @@ public class CharClasses {
 		// (= if getClassCode terminates)
 		for (char c = 0; c < maxChar; c++) {
 			getClassCode(c);
-			if (c % 100 == 0) System.out.print(".");
+			if (c % 100 == 0) writeln(".");
 		}
 
 		getClassCode(maxChar);   
@@ -353,22 +356,22 @@ public class CharClasses {
 	 * Each CharClassInterval contains the number of the
 	 * char class it belongs to.
 	 */
-	public CharClassInterval [] getIntervals() {
+	public CharClassInterval[] getIntervals() {
 		int i, c;
 		int size = classes.size();
 		int numIntervalls = 0;   
 
 		for (i = 0; i < size; i++) 
-			numIntervalls+= ((IntCharSet) classes.elementAt(i)).numIntervalls();    
+			numIntervalls+= classes.get(i).numIntervalls();    
 
 		CharClassInterval [] result = new CharClassInterval[numIntervalls];
 
 		i = 0; 
 		c = 0;
 		while (i < numIntervalls) {
-			int       code = getClassCode((char) c);
-			IntCharSet set = (IntCharSet) classes.elementAt(code);
-			Interval  iv  = set.getNext();
+			int code = getClassCode(cast(char) c);
+			IntCharSet set = classes.get(code);
+			Interval iv  = set.getNext();
 
 			result[i++]    = new CharClassInterval(iv.start, iv.end, code);
 			c              = iv.end+1;

@@ -18,11 +18,9 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package JFlex;
+module dflex.interval;
 
-
-/**
- * An intervall of characters with basic operations.
+/** An intervall of characters with basic operations.
  *
  * @author Gerwin Klein
  * @version JFlex 1.4.3, $Revision: 433 $, $Date: 2009-01-31 19:52:34 +1100 (Sat, 31 Jan 2009) $
@@ -31,61 +29,51 @@ public final class Interval {
 
   /* start and end of the intervall */
   public char start, end;
-  
 
-  /**
-   * Constuct a new intervall from <code>start</code> to <code>end</code>.
+  /** Constuct a new intervall from <code>start</code> to <code>end</code>.
    *
    * @param start  first character the intervall should contain
    * @param end    last  character the intervall should contain
    */
-  public Interval(char start, char end) {
+  public this(char start, char end) {
     this.start = start;
     this.end = end;
   }
 
-
-  /**
-   * Copy constructor
+  /** Copy constructor
    */
-  public Interval(Interval other) {
+  public this(Interval other) {
     this.start = other.start;
     this.end   = other.end;
   }
 
-
-  /**
-   * Return <code>true</code> iff <code>point</code> is contained in this intervall.
+  /** Return <code>true</code> iff <code>point</code> is contained in this intervall.
    *
    * @param point  the character to check
    */
-  public boolean contains(char point) {
+  public bool contains(char point) {
     return start <= point && end >= point;
   }
 
-
-  /**
-   * Return <code>true</code> iff this intervall completely contains the 
+  /** Return <code>true</code> iff this intervall completely contains the 
    * other one.
    *
    * @param other    the other intervall 
    */
-  public boolean contains(Interval other) {
+  public bool contains(Interval other) {
     return this.start <= other.start && this.end >= other.end;
   }
-  
 
-  /**
-   * Return <code>true</code> if <code>o</code> is an intervall
+  /** Return <code>true</code> if <code>o</code> is an intervall
    * with the same borders.
    *
    * @param o  the object to check equality with
    */
-  public boolean equals(Object o) {
+  public bool equals(Object o) {
     if ( o == this ) return true;
-    if ( !(o instanceof Interval) ) return false;
+    if ( !is(o == Interval) ) return false;
 
-    Interval other = (Interval) o;
+    Interval other = cast(Interval) o;
     return other.start == this.start && other.end == this.end;
   }
   
@@ -115,7 +103,7 @@ public final class Interval {
    *
    * @param c the character to check
    */
-  private static boolean isPrintable(char c) {
+  private static bool isPrintable(char c) {
     // fixme: should make unicode test here
     return c > 31 && c < 127; 
   }
@@ -130,13 +118,13 @@ public final class Interval {
    *         <code>end</code> are either a number (the character code)
    *         or something of the from <code>'a'</code>.  
    */
-  public String toString() {
-    StringBuffer result = new StringBuffer("[");
+  public override string toString() {
+    StringBuffer!(char) result = new StringBuffer!(char)("[");
 
     if ( isPrintable(start) )
       result.append("'"+start+"'");
     else
-      result.append( (int) start );
+      result.append( cast(int) start );
 
     if (start != end) {
       result.append("-");
@@ -144,7 +132,7 @@ public final class Interval {
       if ( isPrintable(end) )
         result.append("'"+end+"'");
       else
-        result.append( (int) end );
+        result.append( cast(int) end );
     }
 
     result.append("]");

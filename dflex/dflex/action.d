@@ -111,7 +111,8 @@ public final class Action {
 	 * @return string representation of the action */
 	public override string toString() {
 		return "Action (priority " ~ conv!(int,string)(priority) ~ ", lookahead " ~ 
-			conv!(int,string)(kind) ~ ") :" ~ /*conv!(int,string)(Out.NL) ~*/ 
+			//conv!(int,string)(kind) ~ ") :" ~ conv!(int,string)(Out.NL) ~ 
+			conv!(int,string)(kind) ~ ") :\n" ~  
 			content; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
@@ -133,10 +134,10 @@ public final class Action {
 
 	/** Calculate hash value.
 	 * 
-	 * @return a hash value for this Action 
+	 * @return a hash value for this Action */
 	public int hashCode() {
-		return content.hash();
-	}*/
+		return hurt.string.stringutil.hashCode(this.content);
+	}
 
 
 	/** Test for equality to another object.

@@ -21,6 +21,7 @@
 module dflex.charclasses;
 
 import dflex.intcharset;
+import dflex.interval;
 import dflex.charclassinterval;
 
 import hurt.container.vector;
@@ -178,13 +179,13 @@ public class CharClasses {
 	 *
 	 * Enumerates the classes by index.
 	 */
-	public string toString() {
+	public override string toString() {
 		StringBuffer result = new StringBuffer("CharClasses:");
 
 		result.append(Out.NL);
 
 		for (int i = 0; i < classes.size(); i++) 
-			result.append("class "+i+":"+Out.NL+classes.elementAt(i)+Out.NL);    
+			result.append("class "~i~":\n"~classes.elementAt(i)~"\n");    
 
 		return result.toString();
 	}

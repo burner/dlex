@@ -18,10 +18,9 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package JFlex;
+module dflex.charclassinterval;
 
-/**
- * Stores an interval of characters together with the character class
+/** Stores an interval of characters together with the character class
  *
  * A character belongs to an interval, if its Unicode value is greater than or equal
  * to the Unicode value of <CODE>start</code> and smaller than or euqal to the Unicode
@@ -58,7 +57,7 @@ public class CharClassInterval {
    * @param end           The last character of the interval  
    * @param charClass     The code of the class all characters of this interval belong to.
    */
-  public CharClassInterval(int start, int end, int charClass) {
+  public this(int start, int end, int charClass) {
     this.start = start;
     this.end = end;
     this.charClass = charClass;
@@ -67,7 +66,7 @@ public class CharClassInterval {
   /**
    * returns string representation of this class interval
    */
-  public String toString() {
-    return "["+start+"-"+end+"="+charClass+"]";
+  public override string toString() {
+    return "["~start~"-"~end~"="~charClass~"]";
   }
 }

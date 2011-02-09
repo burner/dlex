@@ -25,6 +25,7 @@ import dflex.interval;
 import dflex.charclassinterval;
 
 import hurt.container.vector;
+import hurt.exception.illegalargumentexception;
 
 
 /** @author Gerwin Klein
@@ -36,7 +37,7 @@ public class CharClasses {
 	private immutable DEBUG = false;
 
 	/** the largest character that can be used in char classes */
-	public immutable maxChar = 0x0000FFFF;
+	public dchar maxChar = '\U0000FFFF';
 
 	/** the char classes */
 	private Vector!(IntCharSet) /* of IntCharSet */ classes;
@@ -62,8 +63,8 @@ public class CharClasses {
 		// TODO cast
 		maxCharUsed = cast(char) maxCharCode;
 
-		classes = new Vector();
-		classes.addElement(new IntCharSet(new Interval(cast(char) 0, maxChar)));
+		classes = new Vector!(IntCharSet)();
+		classes.append(new IntCharSet(new Interval!(dchar)(cast(dchar) 0, maxChar)));
 	}
 
 	/** Returns the greatest Unicode value of the current input character set.
@@ -224,7 +225,7 @@ public class CharClasses {
 	 *    
 	 * @param caseless  if true upper/lower/title case are considered equivalent  
 	 */
-	public void makeClass(Vector!(Interval) /* Interval */ v, bool caseless) {
+	public void makeClass(Vector!(Interval!(char)) /* Interval */ v, bool caseless) {
 		makeClass(new IntCharSet(v), caseless);
 	}
 
@@ -244,7 +245,7 @@ public class CharClasses {
 	 * 
 	 * @param caseless  if true upper/lower/title case are considered equivalent  
 	 */
-	public void makeClassNot(Vector!(Interval) v, bool caseless) {
+	public void makeClassNot(Vector!(Interval!(char)) v, bool caseless) {
 		makeClass(new IntCharSet(v), caseless);
 	}
 
@@ -299,7 +300,7 @@ public class CharClasses {
 	 *
 	 * @return an array with the class codes for intervallVec
 	 */
-	public int [] getClassCodes(Vector!(Interval) /* Interval */ intervallVec) {
+	public int [] getClassCodes(Vector!(Interval!(char)) /* Interval */ intervallVec) {
 		return getClassCodes(new IntCharSet(intervallVec), false);
 	}
 
@@ -313,7 +314,7 @@ public class CharClasses {
 	 *
 	 * @return an array with the class codes for the complement of intervallVec
 	 */
-	public int [] getNotClassCodes(Vector!(Interval) /* Interval */ intervallVec) {
+	public int [] getNotClassCodes(Vector!(Interval!(char)) /* Interval */ intervallVec) {
 		return getClassCodes(new IntCharSet(intervallVec), true);
 	}
 

@@ -20,22 +20,25 @@
 
 module dflex.interval;
 
-/** An intervall of characters with basic operations.
+import hurt.string.stringbuffer;
+import hurt.conv.conv;
+
+/** An intervall of Tacters with basic operations.
  *
  * @author Gerwin Klein
  * @version JFlex 1.4.3, $Revision: 433 $, $Date: 2009-01-31 19:52:34 +1100 (Sat, 31 Jan 2009) $
  */
-public final class Interval {
+public final class Interval(T) {
 
   /* start and end of the intervall */
-  public char start, end;
+  public T start, end;
 
   /** Constuct a new intervall from <code>start</code> to <code>end</code>.
    *
-   * @param start  first character the intervall should contain
-   * @param end    last  character the intervall should contain
+   * @param start  first Tacter the intervall should contain
+   * @param end    last  Tacter the intervall should contain
    */
-  public this(char start, char end) {
+  public this(T start, T end) {
     this.start = start;
     this.end = end;
   }
@@ -49,9 +52,9 @@ public final class Interval {
 
   /** Return <code>true</code> iff <code>point</code> is contained in this intervall.
    *
-   * @param point  the character to check
+   * @param point  the Tacter to check
    */
-  public bool contains(char point) {
+  public bool contains(T point) {
     return start <= point && end >= point;
   }
 
@@ -71,39 +74,39 @@ public final class Interval {
    */
   public bool equals(Object o) {
     if ( o == this ) return true;
-    if ( !is(o == Interval) ) return false;
+    if ( !is(o : Interval) ) return false;
 
-    Interval other = cast(Interval) o;
-    return other.start == this.start && other.end == this.end;
+    //Interval!(T) other = cast(Interval!(T)) o;
+    //return other.start == this.start && other.end == this.end;
   }
   
 
   /**
-   * Set a new last character
+   * Set a new last Tacter
    *
-   * @param end  the new last character of this intervall
+   * @param end  the new last Tacter of this intervall
    */
-  public void setEnd(char end) {
+  public void setEnd(T end) {
     this.end = end;
   }
 
 
   /** 
-   * Set a new first character
+   * Set a new first Tacter
    *
-   * @param start the new first character of this intervall
+   * @param start the new first Tacter of this intervall
    */ 
-  public void setStart(char start) {
+  public void setStart(T start) {
     this.start = start;
   } 
   
   
   /**
-   * Check wether a character is printable.
+   * Check wether a Tacter is printable.
    *
-   * @param c the character to check
+   * @param c the Tacter to check
    */
-  private static bool isPrintable(char c) {
+  private static bool isPrintable(T c) {
     // fixme: should make unicode test here
     return c > 31 && c < 127; 
   }
@@ -113,29 +116,29 @@ public final class Interval {
    * Get a String representation of this intervall.
    *
    * @return a string <code>"[start-end]"</code> or
-   *         <code>"[start]"</code> (if there is only one character in
+   *         <code>"[start]"</code> (if there is only one Tacter in
    *         the intervall) where <code>start</code> and
-   *         <code>end</code> are either a number (the character code)
+   *         <code>end</code> are either a number (the Tacter code)
    *         or something of the from <code>'a'</code>.  
    */
   public override string toString() {
-    StringBuffer!(char) result = new StringBuffer!(char)("[");
+    StringBuffer!(T) result = new StringBuffer!(T)("[");
 
     if ( isPrintable(start) )
-      result.append("'"+start+"'");
+      result.pushBack("'"d~conv!(dchar,char)(start)~"'"d);
     else
-      result.append( cast(int) start );
+      result.pushBack( conv!(dchar,char)(start) );
 
     if (start != end) {
-      result.append("-");
+      result.pushBack("-"d);
 
       if ( isPrintable(end) )
-        result.append("'"+end+"'");
+        result.pushBack("'"d~conv!(dchar,char)(end)~"'"d);
       else
-        result.append( cast(int) end );
+        result.pushBack( cast(int) end );
     }
 
-    result.append("]");
+    result.pushBack("]"d);
     return result.toString();
   }
 

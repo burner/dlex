@@ -36,26 +36,26 @@ public final class IntCharSet {
 	private immutable DEBUG = false;
 
 	/* invariant: all intervals are disjoint, ordered */
-	private Vector!(Interval) intervalls;  
+	private Vector!(Interval!(char)) intervalls;  
 	private int pos; 
 
 	public this() {
-		this.intervalls = new Vector!(Interval)();
+		this.intervalls = new Vector!(Interval!(char))();
 	}
 
 	public this(char c) {
-		this(new Interval(c,c));
+		this(new Interval!(char)(c,c));
 	}
 
-	public this(Interval intervall) {
+	public this(Interval!(char) intervall) {
 		this();
 		intervalls.addElement(intervall);
 	}
 
-	public this(Vector!(Interval) /* Interval */ chars) {
+	public this(Vector!(Interval!(char)) /* Interval */ chars) {
 		int size = chars.getSize();
 
-		this.intervalls = new Vector!(Interval)(size);
+		this.intervalls = new Vector!(Interval!(char))(size);
 
 		for (int i = 0; i < size; i++) 
 			add(chars.get(i));    
@@ -104,7 +104,7 @@ public final class IntCharSet {
 		return this;
 	}
 
-	public void add(Interval intervall) {
+	public void add(Interval!(char) intervall) {
 
 		int size = intervalls.getSize();
 
@@ -116,7 +116,7 @@ public final class IntCharSet {
 			if ( elem.contains(intervall) ) return;      
 
 			if ( elem.start > intervall.end+1 ) {
-				intervalls.insertElementAt(new Interval(intervall), i);
+				intervalls.insertElementAt(new Interval!(char)(intervall), i);
 				return;
 			}
 
@@ -141,7 +141,7 @@ public final class IntCharSet {
 			return;      
 		}
 
-		intervalls.pushBack(new Interval(intervall));
+		intervalls.pushBack(new Interval!(char)(intervall));
 	}
 
 	public void add(char c) {
@@ -342,7 +342,7 @@ public final class IntCharSet {
 	}
 
 	// beware: depends on caller protocol, single user only 
-	public Interval getNext() {
+	public Interval!(char) getNext() {
 		if (pos == intervalls.getSize()) pos = 0;
 		return intervalls.get(pos++);
 	}

@@ -31,31 +31,31 @@ import hurt.container.vector;
  * @author Gerwin Klein
  * @version JFlex 1.4.3, $Revision: 433 $, $Date: 2009-01-31 19:52:34 +1100 (Sat, 31 Jan 2009) $
  */
-public final class IntCharSet {
+public final class IntCharSet(T) {
 
 	private immutable DEBUG = false;
 
 	/* invariant: all intervals are disjoint, ordered */
-	private Vector!(Interval!(char)) intervalls;  
+	private Vector!(Interval!(T)) intervalls;  
 	private int pos; 
 
 	public this() {
-		this.intervalls = new Vector!(Interval!(char))();
+		this.intervalls = new Vector!(Interval!(T))();
 	}
 
 	public this(char c) {
-		this(new Interval!(char)(c,c));
+		this(new Interval!(T)(c,c));
 	}
 
-	public this(Interval!(char) intervall) {
+	public this(Interval!(T) intervall) {
 		this();
-		intervalls.addElement(intervall);
+		intervalls.append(intervall);
 	}
 
-	public this(Vector!(Interval!(char)) /* Interval */ chars) {
+	public this(Vector!(Interval!(T)) /* Interval */ chars) {
 		int size = chars.getSize();
 
-		this.intervalls = new Vector!(Interval!(char))(size);
+		this.intervalls = new Vector!(Interval!(T))(size);
 
 		for (int i = 0; i < size; i++) 
 			add(chars.get(i));    
@@ -77,7 +77,7 @@ public final class IntCharSet {
 
 		while (start <= end) {
 			int check = (start+end) / 2;
-			Interval i = intervalls.get(check);
+			Interval!(T) i = intervalls.get(check);
 
 			if (start == end) 
 				return i.contains(c) ? start : -1;      
@@ -104,19 +104,19 @@ public final class IntCharSet {
 		return this;
 	}
 
-	public void add(Interval!(char) intervall) {
+	public void add(Interval!(T) intervall) {
 
 		int size = intervalls.getSize();
 
 		for (int i = 0; i < size; i++) {
-			Interval elem = intervalls.get(i);
+			Interval!(T) elem = intervalls.get(i);
 
 			if ( elem.end+1 < intervall.start ) continue;
 
 			if ( elem.contains(intervall) ) return;      
 
 			if ( elem.start > intervall.end+1 ) {
-				intervalls.insertElementAt(new Interval!(char)(intervall), i);
+				intervalls.insertElementAt(new Interval!(T)(intervall), i);
 				return;
 			}
 
@@ -141,7 +141,7 @@ public final class IntCharSet {
 			return;      
 		}
 
-		intervalls.pushBack(new Interval!(char)(intervall));
+		intervalls.pushBack(new Interval!(T)(intervall));
 	}
 
 	public void add(char c) {
@@ -185,7 +185,7 @@ public final class IntCharSet {
 	} 
 
 
-	public bool contains(char singleChar) {
+	public bool contains(dchar singleChar) {
 		return indexOf(singleChar) >= 0;
 	}
 
@@ -309,20 +309,20 @@ public final class IntCharSet {
 			// x.start < x.end 
 
 			if ( x.start == y.start ) {
-				x.start = cast(char) (y.end+1);
+				x.start = cast(T) (y.end+1);
 				j++;
 				continue;
 			}
 
 			if ( x.end == y.end ) {
-				x.end = cast(char) (y.start-1);
+				x.end = cast(T) (y.start-1);
 				i++;
 				j++;
 				continue;
 			}
 
-			intervalls.insertElementAt(new Interval(x.start, cast(char) (y.start-1)), i);
-			x.start = cast(char) (y.end+1);
+			intervalls.insertElementAt(new Interval(x.start, cast(T) (y.start-1)), i);
+			x.start = cast(T) (y.end+1);
 
 			i++;
 			j++;
@@ -342,7 +342,7 @@ public final class IntCharSet {
 	}
 
 	// beware: depends on caller protocol, single user only 
-	public Interval!(char) getNext() {
+	public Interval!(T) getNext() {
 		if (pos == intervalls.getSize()) pos = 0;
 		return intervalls.get(pos++);
 	}

@@ -18,11 +18,11 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package JFlex;
+module dflex.errormessages;
 
-import java.text.MessageFormat;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+//import java.text.MessageFormat;
+//import java.util.MissingResourceException;
+//import java.util.ResourceBundle;
 
 
 /**
@@ -34,18 +34,18 @@ import java.util.ResourceBundle;
  * @version JFlex 1.4.3, $Revision: 433 $, $Date: 2009-01-31 19:52:34 +1100 (Sat, 31 Jan 2009) $
  */
 public class ErrorMessages {  
-  private String key;
+  private string key;
 
   /* not final static, because initializing here seems too early
    * for OS/2 JDK 1.1.8. See bug 1065521.
    */ 
-  private static ResourceBundle resourceBundle = null;
+  //private static ResourceBundle resourceBundle = null;
 
-  private ErrorMessages(String key) {
+  private this(string key) {
     this.key = key;
   }
-
-  public static String get(ErrorMessages msg) {
+/*
+  public static string get(ErrorMessages msg) {
     if (resourceBundle == null) {
       resourceBundle = ResourceBundle.getBundle("JFlex.Messages"); 
     }    
@@ -56,20 +56,20 @@ public class ErrorMessages {
     }
   }
   
-  public static String get(ErrorMessages msg, String data) {
-    Object [] args = { data };
+  public static string get(ErrorMessages msg, string data) {
+    Object[] args = { data };
     return MessageFormat.format(get(msg),args);
   }
   
-  public static String get(ErrorMessages msg, String data1, String data2) {
-    Object [] args = { data1, data2 };
+  public static string get(ErrorMessages msg, string data1, string data2) {
+    Object[] args = { data1, data2 };
     return MessageFormat.format(get(msg),args);
   }
 
-  public static String get(ErrorMessages msg, int data) {
-    Object [] args = { new Integer(data) };
+  public static string get(ErrorMessages msg, int data) {
+    Object[] args = { new Integer(data) };
     return MessageFormat.format(get(msg),args);
-  }
+  }*/
 
   // typesafe enumeration (generated, do not edit)  
   public static ErrorMessages UNTERMINATED_STR = new ErrorMessages("UNTERMINATED_STR");

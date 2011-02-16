@@ -24,6 +24,7 @@ import dflex.interval;
 import dflex.outmodule;
 
 import hurt.container.vector;
+import hurt.conv.conv;
 import hurt.stdio.output;
 
 /** CharSet implemented with intervalls
@@ -100,8 +101,8 @@ public final class IntCharSet(T) {
 		return -1;
 	} 
 
-	public IntCharSet add(IntCharSet set) {
-		for (int i = 0; i < set.intervalls.getSize(); i++) 
+	public IntCharSet!(T) add(IntCharSet!(T) set) {
+		for (uint i = 0; i < set.intervalls.getSize(); i++) 
 			add(set.intervalls.get(i) );    
 		return this;
 	}
@@ -268,8 +269,8 @@ public final class IntCharSet(T) {
 	public void sub(IntCharSet set) {
 		if (DEBUG) {
 			Out.dump("complement");
-			Out.dump("this  : "+this);
-			Out.dump("other : "+set);
+			Out.dump("this  : " ~ this.toString());
+			Out.dump("other : " ~ set.toString());
 		}
 
 		int i = 0;  // index in this.intervalls
@@ -277,14 +278,14 @@ public final class IntCharSet(T) {
 
 		int setSize = set.intervalls.getSize();
 
-		while (i < intervalls.size() && j < setSize) {
-			Interval x = this.intervalls.get(i);
-			Interval y = set.intervalls.get(j);
+		while (i < intervalls.getSize() && j < setSize) {
+			Interval!(T) x = this.intervalls.get(i);
+			Interval!(T) y = set.intervalls.get(j);
 
-			if (DEBUG) {
-				Out.dump("this      : "+this);
-				Out.dump("this  ["+i+"] : "+x);
-				Out.dump("other ["+j+"] : "+y);
+			if(DEBUG) {
+				Out.dump("this      : "~this.toString());
+				Out.dump("this  ["~conv!(int,string)(i)~"] : "~x.toString());
+				Out.dump("other ["~conv!(int,string)(j)~"] : "~y.toString());
 			}
 
 			if (x.end < y.start) {
@@ -301,7 +302,7 @@ public final class IntCharSet(T) {
 			// x.end <= y.end && x.start >= y.start (prec)
 
 			if ( x.start == y.start && x.end == y.end ) {
-				intervalls.removeElementAt(i);
+				intervalls.remove(i);
 				j++;
 				continue;
 			}
@@ -323,7 +324,7 @@ public final class IntCharSet(T) {
 				continue;
 			}
 
-			intervalls.insertElementAt(new Interval(x.start, cast(T) (y.start-1)), i);
+			intervalls.insert(i, new Interval!(T)(x.start, cast(T) (y.start-1)));
 			x.start = cast(T) (y.end+1);
 
 			i++;
@@ -331,7 +332,7 @@ public final class IntCharSet(T) {
 		}   
 
 		if (DEBUG) {
-			Out.dump("result: "+this);
+			Out.dump("result: "~this.toString());
 		}
 	}
 
@@ -358,15 +359,15 @@ public final class IntCharSet(T) {
 	 * @return a caseless copy of this set
 	 */
 	public IntCharSet getCaseless() {
-		IntCharSet n = copy();
+		IntCharSet!(T) n = copy();
 
-		int size = intervalls.size();
-		for (int i=0; i < size; i++) {
-			Interval elem = intervalls.get(i);
-			for (char c = elem.start; c <= elem.end; c++) {
-				n.add(Character.toLowerCase(c)); 
-				n.add(Character.toUpperCase(c)); 
-				n.add(Character.toTitleCase(c)); 
+		uint size = intervalls.getSize();
+		for(uint i=0; i < size; i++) {
+			Interval!(T) elem = intervalls.get(i);
+			for(T c = elem.start; c <= elem.end; c++) {
+				n.add(toLowerCase(c)); 
+				n.add(toUpperCase(c)); 
+				n.add(toTitleCase(c)); 
 			}
 		}
 
@@ -396,12 +397,12 @@ public final class IntCharSet(T) {
 	 * 
 	 * @return the copy
 	 */
-	public IntCharSet copy() {
-		IntCharSet result = new IntCharSet();
-		int size = intervalls.size();
-		for (int i=0; i < size; i++) {
-			Interval iv = intervalls.get(i).copy();
-			result.intervalls.addElement(iv);
+	public IntCharSet!(T) copy() {
+		IntCharSet!(T) result = new IntCharSet!(T)();
+		uint size = intervalls.getSize();
+		for(uint i=0; i < size; i++) {
+			Interval!(T) iv = intervalls.get(i).copy();
+			result.intervalls.append(iv);
 		}
 		return result;
 	}

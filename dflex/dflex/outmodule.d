@@ -20,6 +20,10 @@
 
 module dflex.outmodule;
 
+import dflex.errormessages;
+import dflex.timer;
+
+import std.stdio;
 
 /**
  * In this class all output to the java console is filtered.
@@ -47,50 +51,25 @@ public final class Out {
   /** count total errors */
   private static int errors;
 
-  /** output device */
-  private static StdOutWriter out = new StdOutWriter();
-
-
-  /**
-   * Switches to GUI mode if <code>text</code> is not <code>null</code>
-   *
-   * @param text  the message TextArea of the JFlex GUI
-   */
-  public static void setGUIMode(TextArea text) {
-    out.setGUIMode(text);
-  }
-  
-  /**
-   * Sets a new output stream and switches to non-gui mode.
-   * 
-   * @param stream  the new output stream
-   */
-  public static void setOutputStream(OutputStream stream) {
-    out = new StdOutWriter(stream);
-    out.setGUIMode(null);
-  }
-
-  /**
-   * Report time statistic data.
+  /** Report time statistic data.
    *
    * @param message  the message to be printed
    * @param time     elapsed time
    */
   public static void time(ErrorMessages message, Timer time) {
-    if (Options.time) {
-      String msg = ErrorMessages.get(message, time.toString());
-      out.println(msg);
+    if(Options.time) {
+      string msg = ErrorMessages.get(message, time.toString());
+      writeln(msg);
     } 
   }
   
-  /**
-   * Report time statistic data.
+  /** Report time statistic data.
    *
    * @param message  the message to be printed
    */
-  public static void time(String message) {
-    if (Options.time) {
-      out.println(message);
+  public static void time(string message) {
+    if(Options.time) {
+      writeln(message);
     } 
   }
 
@@ -99,9 +78,9 @@ public final class Out {
    *
    * @param message  the message to be printed
    */
-  public static void println(String message) {
+  public static void println(string message) {
     if (Options.verbose) 
-      out.println(message);
+      writeln(message);
   }
 
   /**
@@ -110,9 +89,9 @@ public final class Out {
    * @param message  the message to be printed
    * @param data     data to be inserted into the message
    */
-  public static void println(ErrorMessages message, String data) {
+  public static void println(ErrorMessages message, string data) {
     if (Options.verbose) {      
-      out.println(ErrorMessages.get(message,data));
+      writeln(ErrorMessages.get(message,data));
     }
   }
 
@@ -124,7 +103,7 @@ public final class Out {
    */
   public static void println(ErrorMessages message, int data) {
     if (Options.verbose) {      
-      out.println(ErrorMessages.get(message,data));
+      writeln(ErrorMessages.get(message,data));
     }
   }
 
@@ -133,8 +112,8 @@ public final class Out {
    *
    * @param message  the message to be printed
    */
-  public static void print(String message) {
-    if (Options.verbose) out.print(message);
+  public static void print(string message) {
+    if (Options.verbose) write(message);
   }
 
   /**
@@ -147,8 +126,8 @@ public final class Out {
    * to save performance during normal operation (when DEBUG
    * is turned off).
    */
-  public static void debug(String message) {
-    if (Options.DEBUG) System.out.println(message); 
+  public static void debugPrint(string message) {
+    if (Options.DEBUG) writeln(message); 
   }
 
 
@@ -158,8 +137,8 @@ public final class Out {
    *
    * @message the message to be printed 
    */
-  public static void dump(String message) {
-    if (Options.dump) out.println(message);
+  public static void dump(string message) {
+    if (Options.dump) writeln(message);
   }
 
   
@@ -169,8 +148,8 @@ public final class Out {
    *
    * @message  the message to be printed
    */
-  private static void err(String message) {
-    out.println(message);
+  private static void err(string message) {
+    writeln(message);
   }
   
   
@@ -211,7 +190,7 @@ public final class Out {
    *
    * @param message   the warning message
    */  
-  public static void warning(String message) {
+  public static void warning(string message) {
     warnings++;
 
     err(NL+"Warning : "+message);
@@ -246,7 +225,7 @@ public final class Out {
    */
   public static void warning(File file, ErrorMessages message, int line, int column) {
 
-    String msg = NL+"Warning";
+    string msg = NL+"Warning";
     if (file != null) msg += " in file \""+file+"\"";
     if (line >= 0) msg = msg+" (line "+(line+1)+")";
 
@@ -273,7 +252,7 @@ public final class Out {
    *
    * @param message  the message to print
    */
-  public static void error(String message) {
+  public static void error(string message) {
     errors++;
     err(NL+message);
   }
@@ -300,7 +279,7 @@ public final class Out {
    *
    * @see ErrorMessages   
    */ 
-  public static void error(ErrorMessages message, String data) {
+  public static void error(ErrorMessages message, string data) {
     errors++;    
     err(NL+"Error: "+ ErrorMessages.get(message,data));
   }
@@ -403,7 +382,7 @@ public final class Out {
    *
    * @throw IOException  if any error occurs
    */
-  private static String getLine(File file, int line) throws IOException {
+  private static string getLine(File file, int line) {
     BufferedReader reader = new BufferedReader(new FileReader(file));
 
     String msg = "";
@@ -421,18 +400,18 @@ public final class Out {
    * Print system information (e.g. in case of unexpected exceptions)
    */
   public static void printSystemInfo() {
-    err("Java version:  "+System.getProperty("java.version"));
-    err("Runtime name:  "+System.getProperty("java.runtime.name"));
-    err("Vendor:        "+System.getProperty("java.vendor")); 
-    err("VM version:    "+System.getProperty("java.vm.version")); 
-    err("VM vendor:     "+System.getProperty("java.vm.vendor"));
-    err("VM name:       "+System.getProperty("java.vm.name"));
-    err("VM info:       "+System.getProperty("java.vm.info"));
-    err("OS name:       "+System.getProperty("os.name"));
-    err("OS arch:       "+System.getProperty("os.arch"));
-    err("OS version:    "+System.getProperty("os.version"));
-    err("Encoding:      "+System.getProperty("file.encoding"));
-    err("JFlex version: "+Main.version);
+    /* err("Java version:  " ~ System.getProperty("java.version"));
+    err("Runtime name:  " ~ System.getProperty("java.runtime.name"));
+    err("Vendor:        " ~ System.getProperty("java.vendor")); 
+    err("VM version:    " ~ System.getProperty("java.vm.version")); 
+    err("VM vendor:     " ~ System.getProperty("java.vm.vendor"));
+    err("VM name:       " ~ System.getProperty("java.vm.name"));
+    err("VM info:       " ~ System.getProperty("java.vm.info"));
+    err("OS name:       " ~ System.getProperty("os.name"));
+    err("OS arch:       " ~ System.getProperty("os.arch"));
+    err("OS version:    " ~ System.getProperty("os.version"));
+    err("Encoding:      " ~ System.getProperty("file.encoding"));
+    err("JFlex version: " ~ Main.version); */
   }
 
 
@@ -441,15 +420,13 @@ public final class Out {
    */
   public static void requestBugReport(Error e) {
     err("An unexpected error occurred. Please send a report of this to");
-    err("<bugs@jflex.de> and include the following information:");
+    err("<rburners@gmail.com> and include the following information:");
     err("");
-    printSystemInfo();
     err("Exception:");
-    e.printStackTrace(out);
     err("");
     err("Please also include a specification (as small as possible)");
     err("that triggers this error. You may also want to check at");
-    err("http://www.jflex.de if there is a newer version available");
+    err("dc at github if there is a newer version available");
     err("that doesn't have this problem");
     err("");
     err("Thanks for your support.");

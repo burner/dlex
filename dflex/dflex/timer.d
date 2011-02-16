@@ -17,7 +17,7 @@
  * 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA                 *
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-package JFlex;
+module timer;
 
 /**
  * Very simple timer for code generation time statistics.
@@ -33,15 +33,15 @@ public class Timer {
   private long startTime, stopTime; 
 
   /* flag if the timer is running (if stop time is valid) */
-  private boolean running; 
+  private bool running; 
 
 
   /**
    * Construct a new timer that starts immediatly.
    */
-  public Timer() {
-    startTime = System.currentTimeMillis();
-    running = true;
+  public this() {
+    this.startTime = System.currentTimeMillis();
+    this.running = true;
   }
 
   
@@ -50,8 +50,8 @@ public class Timer {
    * time is lost.
    */
   public void start() {
-    startTime = System.currentTimeMillis();
-    running = true;
+    this.startTime = System.currentTimeMillis();
+    this.running = true;
   }
 
 
@@ -59,8 +59,8 @@ public class Timer {
    * Stop the timer.
    */
   public void stop() {
-    stopTime = System.currentTimeMillis();
-    running = false;
+    this.stopTime = System.currentTimeMillis();
+    this.running = false;
   }
 
   
@@ -70,7 +70,7 @@ public class Timer {
    * (up till now, if it still runs, up to the stop time if it has been stopped)
    */
   public long diff() {
-    if (running) 
+    if(this.running) 
       return System.currentTimeMillis()-startTime;
     else 
       return stopTime-startTime;    
@@ -84,7 +84,7 @@ public class Timer {
    *
    * @see Timer#diff
    */
-  public String toString() {
+  public override string toString() {
     long diff = diff();
     
     long millis = diff%1000;

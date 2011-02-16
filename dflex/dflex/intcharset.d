@@ -116,7 +116,7 @@ public final class IntCharSet(T) {
 			if ( elem.contains(intervall) ) return;      
 
 			if ( elem.start > intervall.end+1 ) {
-				intervalls.insertElementAt(new Interval!(T)(intervall), i);
+				intervalls.insert(i, new Interval!(T)(intervall));
 				return;
 			}
 
@@ -131,7 +131,7 @@ public final class IntCharSet(T) {
 			i++;      
 			// delete all x with x.contains( intervall.end )
 			while (i < size) {
-				Interval x = intervalls.get(i);
+				Interval!(T) x = intervalls.get(i);
 				if (x.start > elem.end+1) return;
 
 				elem.end = x.end;

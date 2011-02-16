@@ -21,8 +21,10 @@
 module dflex.intcharset;;
 
 import dflex.interval;
+import dflex.outmodule;
 
 import hurt.container.vector;
+import hurt.stdio.output;
 
 /** CharSet implemented with intervalls
  *
@@ -71,7 +73,7 @@ public final class IntCharSet(T) {
 	 * @param c  the character
 	 * @return the index of the enclosing interval, -1 if no such interval  
 	 */
-	private int indexOf(char c) {
+	private int indexOf(T c) {
 		int start = 0;
 		int end = intervalls.getSize()-1;
 
@@ -135,20 +137,20 @@ public final class IntCharSet(T) {
 				if (x.start > elem.end+1) return;
 
 				elem.end = x.end;
-				intervalls.removeElementAt(i);
+				intervalls.remove(i);
 				size--;
 			}
 			return;      
 		}
 
-		intervalls.pushBack(new Interval!(T)(intervall));
+		intervalls.append(new Interval!(T)(intervall));
 	}
 
 	public void add(char c) {
-		int size = intervalls.size();
+		int size = intervalls.getSize();
 
 		for (int i = 0; i < size; i++) {
-			Interval elem = intervalls.get(i);
+			Interval!(T) elem = intervalls.get(i);
 			if (elem.end+1 < c) continue;
 
 			if (elem.contains(c)) return; // already there, nothing to do
@@ -156,7 +158,7 @@ public final class IntCharSet(T) {
 			// assert(elem.end+1 >= c && (elem.start > c || elem.end < c));
 
 			if (elem.start > c+1) {
-				intervalls.insertElementAt(new Interval(c,c), i);
+				intervalls.insert(i, new Interval!(T)(c,c));
 				return;                 
 			}
 
@@ -172,16 +174,16 @@ public final class IntCharSet(T) {
 
 			// merge with next interval if it contains c
 			if (i+1 >= size) return;
-			Interval x = intervalls.get(i+1);
+			Interval!(T) x = intervalls.get(i+1);
 			if (x.start <= c+1) {
 				elem.end = x.end;
-				intervalls.removeElementAt(i+1);
+				intervalls.remove(i+1);
 			}
 			return;
 		}
 
 		// end reached but nothing found -> append at end
-		intervalls.pushBack(new Interval(c,c));
+		intervalls.append(new Interval!(T)(c,c));
 	} 
 
 
@@ -195,43 +197,43 @@ public final class IntCharSet(T) {
 	 */
 	public bool equals(Object o) {
 		IntCharSet set = cast(IntCharSet) o;
-		if ( intervalls.getSize() != set.intervalls.size() ) return false;
+		if( intervalls.getSize() != set.intervalls.getSize() ) return false;
 
-		for (int i = 0; i < intervalls.getSize(); i++) {
-			if ( !intervalls.get(i).equals( set.intervalls.get(i)) ) 
+		for(int i = 0; i < intervalls.getSize(); i++) {
+			if( !intervalls.get(i).equals( set.intervalls.get(i)) ) 
 				return false;
 		}
 
 		return true;
 	}
 
-	private char min(char a, char b) {
+	private T min(T)(T a, T b) {
 		return a <= b ? a : b;
 	}
 
-	private char max(char a, char b) {
+	private T max(T)(T a, T b) {
 		return a >= b ? a : b;
 	}
 
 	/* intersection */
-	public IntCharSet and(IntCharSet set) {
-		if (DEBUG) {
-			Out.dump("intersection");
-			Out.dump("this  : "+this);
-			Out.dump("other : "+set);
+	public IntCharSet!(T) and(IntCharSet set) {
+		if(DEBUG) {
+			write("intersection");
+			write("this  : " ~ this.toString());
+			write("other : " ~ set.toString());
 		}
 
-		IntCharSet result = new IntCharSet();
+		IntCharSet!(T) result = new IntCharSet!(T)();
 
 		int i = 0;  // index in this.intervalls
 		int j = 0;  // index in set.intervalls
 
 		int size = intervalls.getSize();
-		int setSize = set.intervalls.size();
+		int setSize = set.intervalls.getSize();
 
 		while (i < size && j < setSize) {
-			Interval x = this.intervalls.get(i);
-			Interval y = set.intervalls.get(j);
+			Interval!(T) x = this.intervalls.get(i);
+			Interval!(T) y = set.intervalls.get(j);
 
 			if (x.end < y.start) {
 				i++;
@@ -243,8 +245,8 @@ public final class IntCharSet(T) {
 				continue;
 			}
 
-			result.intervalls.addElement(
-					new Interval(
+			result.intervalls.append(
+					new Interval!(T)(
 						max(x.start, y.start), 
 						min(x.end, y.end)
 						)
@@ -255,7 +257,7 @@ public final class IntCharSet(T) {
 		}
 
 		if (DEBUG) {
-			Out.dump("result: "+result);
+			write("result: " ~ result.toString());
 		}
 
 		return result;

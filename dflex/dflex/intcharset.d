@@ -26,6 +26,8 @@ import dflex.outmodule;
 import hurt.container.vector;
 import hurt.conv.conv;
 import hurt.stdio.output;
+import hurt.string.stringutil;
+import hurt.string.stringbuffer;
 
 /** CharSet implemented with intervalls
  *
@@ -46,7 +48,7 @@ public final class IntCharSet(T) {
 		this.intervalls = new Vector!(Interval!(T))();
 	}
 
-	public this(char c) {
+	public this(T c) {
 		this(new Interval!(T)(c,c));
 	}
 
@@ -364,10 +366,10 @@ public final class IntCharSet(T) {
 		uint size = intervalls.getSize();
 		for(uint i=0; i < size; i++) {
 			Interval!(T) elem = intervalls.get(i);
-			for(T c = elem.start; c <= elem.end; c++) {
-				n.add(toLowerCase(c)); 
-				n.add(toUpperCase(c)); 
-				n.add(toTitleCase(c)); 
+			for(T c = elem.start; c <= elem.end; c++) {		//FIXME the IntCharSet stuff following is new
+				n.add(new IntCharSet!(T)(toLowerCase!(T)(c))); 
+				n.add(new IntCharSet!(T)(toUpperCase!(T)(c))); 
+				n.add(new IntCharSet!(T)(toTitleCase!(T)(c))); 
 			}
 		}
 
@@ -381,12 +383,12 @@ public final class IntCharSet(T) {
 	 * @return a string representing this char set.
 	 */
 	public override string toString() {
-		StringBuffer result = new StringBuffer("{ ");
+		StringBuffer!(char) result = new StringBuffer!(char)("{ ");
 
-		for (int i = 0; i < intervalls.size(); i++)
-			result.append( intervalls.elementAt(i) );
+		for (int i = 0; i < intervalls.getSize(); i++)
+			result.pushBack( intervalls.get(i).toString() );
 
-		result.append(" }");
+		result.pushBack(" }");
 
 		return result.toString();
 	}

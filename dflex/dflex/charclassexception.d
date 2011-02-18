@@ -18,32 +18,30 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package JFlex;
+module dflex.charclassexception;
 
 
-
-/**
- * This Exception is used in class CharClasses.
+/** This Exception is used in class CharClasses.
  *
  * @author Gerwin Klein
  * @version JFlex 1.4.3, $Revision: 433 $, $Date: 2009-01-31 19:52:34 +1100 (Sat, 31 Jan 2009) $
  */
-public class CharClassException extends RuntimeException {
+public class CharClassException : Exception {
 
-  /**
-   * Creates a new CharClassException without message
-   */
-  public CharClassException() {
-  }
+	/**
+	 * Creates a new CharClassException without message
+	 */
+	public this() {
+		super("CharClassException");
+	}
 
 
-  /**
-   * Creates a new CharClassException with the specified message
-   *
-   * @param message   the error description presented to the user.
-   */
-  public CharClassException(String message) {
-    super(message);
-  }
+	/** Creates a new CharClassException with the specified message
+	 *
+	 * @param message   the error description presented to the user.
+	 */
+	public this(string message) {
+		super(message);
+	}
 
 }

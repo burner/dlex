@@ -20,6 +20,8 @@
 
 module dflex.charclassinterval;
 
+import hurt.conv.conv;
+
 /** Stores an interval of characters together with the character class
  *
  * A character belongs to an interval, if its Unicode value is greater than or equal
@@ -33,40 +35,36 @@ module dflex.charclassinterval;
  */
 public class CharClassInterval {
 
-  /**
-   * The first character of the interval
-   */
-  int start;
+	/** The first character of the interval
+	 */
+	int start;
 
-  /**
-   * The last character of the interval
-   */
-  int end;
+	/** The last character of the interval
+	 */
+	int end;
 
-  /**
-   * The code of the class all characters of this interval belong to.
-   */
-  int charClass;
-  
+	/** The code of the class all characters of this interval belong to.
+	 */
+	int charClass;
 
-  /**
-   * Creates a new CharClassInterval from <CODE>start</code> to <CODE>end</code>
-   * that belongs to character class <CODE>charClass</code>.
-   *
-   * @param start         The first character of the interval
-   * @param end           The last character of the interval  
-   * @param charClass     The code of the class all characters of this interval belong to.
-   */
-  public this(int start, int end, int charClass) {
-    this.start = start;
-    this.end = end;
-    this.charClass = charClass;
-  }
 
-  /**
-   * returns string representation of this class interval
-   */
-  public override string toString() {
-    return "["~start~"-"~end~"="~charClass~"]";
-  }
+	/** Creates a new CharClassInterval from <CODE>start</code> to <CODE>end</code>
+	 * that belongs to character class <CODE>charClass</code>.
+	 *
+	 * @param start         The first character of the interval
+	 * @param end           The last character of the interval  
+	 * @param charClass     The code of the class all characters of this interval belong to.
+	 */
+	public this(int start, int end, int charClass) {
+		this.start = start;
+		this.end = end;
+		this.charClass = charClass;
+	}
+
+	/** returns string representation of this class interval
+	 */
+	public override string toString() {
+		return "[" ~ conv!(int,string)(start) ~ "-" ~ conv!(int,string)(end) 
+			~ "=" ~ conv!(int,string)(charClass) ~ "]";
+	}
 }

@@ -18,8 +18,9 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package JFlex;
+module dflex.charsetenumerator;
 
+import dflex.charset;
 
 /**
  * Enumerator for the elements of a CharSet.
@@ -37,7 +38,7 @@ final public class CharSetEnumerator {
 
   private CharSet set;
   
-  public CharSetEnumerator(CharSet characters) {
+  public this(CharSet characters) {
     set = characters;
 
     while (index < set.bits.length && set.bits[index] == 0) 
@@ -74,7 +75,7 @@ final public class CharSetEnumerator {
     }
   }
 
-  public boolean hasMoreElements() {
+  public bool hasMoreElements() {
     return index < set.bits.length;
   }
 

@@ -18,8 +18,9 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package JFlex;
+module dflex.charset;
 
+import dflex.charsetenumerator;
 
 /**
  * 
@@ -28,85 +29,87 @@ package JFlex;
  */
 public final class CharSet {
 
-  final static int BITS = 6;           // the number of bits to shift (2^6 = 64)
-  final static int MOD = (1<<BITS)-1;  // modulus
-  
-  long bits[];
+	immutable BITS = 6;           // the number of bits to shift (2^6 = 64)
+	immutable MOD = (1<<BITS)-1;  // modulus
 
-  private int numElements;
-  
-  
-  public CharSet() {
-    bits = new long[1];
-  }
+	long bits[];
+
+	private int numElements;
 
 
-  public CharSet(int initialSize, int character) {
-    bits = new long[(initialSize >> BITS)+1];
-    add(character);
-  }
+	public this() {
+		this.bits = new long[1];
+	}
 
 
-  public void add(int character) {
-    resize(character);
-
-    if ( (bits[character >> BITS] & (1L << (character & MOD))) == 0) numElements++;
-
-    bits[character >> BITS] |= (1L << (character & MOD));    
-  }
+	public this(int initialSize, int character) {
+		this.bits = new long[(initialSize >> BITS)+1];
+		this.add(character);
+	}
 
 
-  private int nbits2size (int nbits) {
-    return ((nbits >> BITS) + 1);
-  }
+	public void add(int character) {
+		this.resize(character);
+
+		if( (bits[character >> BITS] & (1L << (character & MOD))) == 0) numElements++;
+
+		bits[character >> BITS] |= (1L << (character & MOD));    
+	}
 
 
-  private void resize(int nbits) {
-    int needed = nbits2size(nbits);
-
-    if (needed < bits.length) return;
-         
-    long newbits[] = new long[Math.max(bits.length*2,needed)];
-    System.arraycopy(bits, 0, newbits, 0, bits.length);
-    
-    bits = newbits;
-  }
+	private int nbits2size (int nbits) {
+		return ((nbits >> BITS) + 1);
+	}
 
 
-  public boolean isElement(int character) {
-    int index = character >> BITS;
-    if (index >= bits.length)  return false;
-    return (bits[index] & (1L << (character & MOD))) != 0;
-  }
+	private void resize(int nbits) {
+		int needed = nbits2size(nbits);
+
+		if (needed < bits.length) return;
+
+		long newbits[] = new long[Math.max(bits.length*2,needed)];
+		//System.arraycopy(bits, 0, newbits, 0, bits.length);
+		bits = newbits.dup;
+
+		bits = newbits;
+	}
 
 
-  public CharSetEnumerator characters() {
-    return new CharSetEnumerator(this);
-  }
+	public bool isElement(int character) {
+		int index = character >> BITS;
+		if(index >= bits.length)
+			return false;
+		return (bits[index] & (1L << (character & MOD))) != 0;
+	}
 
 
-  public boolean containsElements() {
-    return numElements > 0;
-  }
+	public CharSetEnumerator characters() {
+		return new CharSetEnumerator(this);
+	}
 
-  public int size() {
-    return numElements;
-  }
-  
-  public String toString() {
-    CharSetEnumerator set = characters();
 
-    StringBuffer result = new StringBuffer("{");
+	public bool containsElements() {
+		return numElements > 0;
+	}
 
-    if ( set.hasMoreElements() ) result.append(""+set.nextElement());
+	public int size() {
+		return numElements;
+	}
 
-    while ( set.hasMoreElements() ) {
-      int i = set.nextElement();
-      result.append( ", "+i);
-    }
+	public override string toString() {
+		CharSetEnumerator set = characters();
 
-    result.append("}");
+		StringBuffer!(T) result = new StringBuffer!(T)("{");
 
-    return result.toString();
-  }
+		if ( set.hasMoreElements() ) result.pushBack("" ~ set.nextElement());
+
+		while ( set.hasMoreElements() ) {
+			int i = set.nextElement();
+			result.append( ", " ~ conv!(int,string)(i));
+		}
+
+		result.append("}");
+
+		return result.toString();
+	}
 }

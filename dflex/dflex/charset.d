@@ -22,6 +22,10 @@ module dflex.charset;
 
 import dflex.charsetenumerator;
 
+import hurt.conv.conv;
+import hurt.math.mathutil;
+import hurt.string.stringbuffer;
+
 /**
  * 
  * @author Gerwin Klein 
@@ -67,7 +71,7 @@ public final class CharSet {
 
 		if (needed < bits.length) return;
 
-		long newbits[] = new long[Math.max(bits.length*2,needed)];
+		long newbits[] = new long[max!(int)(bits.length*2,needed)];
 		//System.arraycopy(bits, 0, newbits, 0, bits.length);
 		bits = newbits.dup;
 
@@ -99,16 +103,16 @@ public final class CharSet {
 	public override string toString() {
 		CharSetEnumerator set = characters();
 
-		StringBuffer!(T) result = new StringBuffer!(T)("{");
+		StringBuffer!(char) result = new StringBuffer!(char)("{");
 
-		if ( set.hasMoreElements() ) result.pushBack("" ~ set.nextElement());
+		if ( set.hasMoreElements() ) result.pushBack("" ~ conv!(int,string)(set.nextElement()));
 
 		while ( set.hasMoreElements() ) {
 			int i = set.nextElement();
-			result.append( ", " ~ conv!(int,string)(i));
+			result.pushBack( ", " ~ conv!(int,string)(i));
 		}
 
-		result.append("}");
+		result.pushBack("}");
 
 		return result.toString();
 	}

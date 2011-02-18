@@ -1,9 +1,9 @@
 include ../makeconfig.conf
 
-IPATH=-I../../libhurt/
+IPATH=-I../../libhurt/ -I../cup/
 
 OBJS=dflex.action.o dflex.charclasses.o dflex.charclassexception.o dflex.charclassinterval.o \
-dflex.charset.o dflex.countemitter.o
+dflex.charset.o dflex.countemitter.o dflex.charsetenumerator.o dflex.dfa.o
 
 all:dflex
 
@@ -27,5 +27,11 @@ dflex.charclassinterval.o: dflex/charclassinterval.d Makefile ../makeconfig.conf
 dflex.charset.o: dflex/charset.d Makefile ../makeconfig.conf
 	$(DC) $(CFLAGS) $(IPATH) dflex/charset.d -ofdflex.charset.o 
 
+dflex.charsetenumerator.o: dflex/charsetenumerator.d Makefile ../makeconfig.conf
+	$(DC) $(CFLAGS) $(IPATH) dflex/charsetenumerator.d -ofdflex.charsetenumerator.o 
+
 dflex.countemitter.o: dflex/countemitter.d Makefile ../makeconfig.conf
 	$(DC) $(CFLAGS) $(IPATH) dflex/countemitter.d -ofdflex.countemitter.o 
+
+dflex.dfa.o: dflex/dfa.d Makefile ../makeconfig.conf
+	$(DC) $(CFLAGS) $(IPATH) dflex/dfa.d -ofdflex.dfa.o 

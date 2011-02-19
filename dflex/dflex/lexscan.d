@@ -29,7 +29,10 @@ import cup.scanner;
 
 import hurt.container.stack;
 import hurt.container.vector;
+import hurt.string.stringbuffer;
 import hurt.util.array;
+
+import std.stdio;
 
 /** The lexer of JFlex.
  *
@@ -75,7 +78,7 @@ public final class LexScan : sym, Scanner {
 	/** 
 	 * Translates characters to character classes
 	 */
-	private string ZZ_CMAP_PACKED = 
+	private auto ZZ_CMAP_PACKED = 
 		"\10\25\1\26\1\10\1\13\2\11\1\12\16\25\4\0\1\10\1\76"~
 		"\1\32\1\0\1\103\1\35\1\22\1\33\1\100\1\101\1\30\1\102"~
 		"\1\15\1\106\1\14\1\31\1\7\1\66\2\7\2\3\1\67\1\64"~
@@ -170,62 +173,62 @@ public final class LexScan : sym, Scanner {
 	/** 
 	 * Translates characters to character classes
 	 */
-	private static string ZZ_CMAP = zzUnpackCMap(ZZ_CMAP_PACKED);
+	private static string ZZ_CMAP;
 
 	/** 
 	 * Translates DFA states to action switch labels.
 	 */
 	private static immutable(int)[] ZZ_ACTION = zzUnpackAction();
 
-	private static string ZZ_ACTION_PACKED_0 =
-		"\1\1\1\2\15\0\1\1\2\3\1\1\1\2\3\4"+
-		"\1\5\1\6\2\7\1\6\1\10\2\6\1\4\1\11"+
-		"\1\12\1\6\1\11\1\13\1\14\1\4\1\15\2\16"+
-		"\1\6\2\17\1\20\1\21\1\16\1\22\1\23\1\24"+
-		"\1\25\1\26\1\27\1\30\1\31\1\32\1\33\1\34"+
-		"\1\35\1\36\1\37\3\4\1\40\1\41\1\6\1\42"+
-		"\1\43\1\44\1\4\2\45\1\46\1\16\1\47\1\50"+
-		"\1\51\1\52\1\16\1\53\1\54\1\4\2\44\1\4"+
-		"\1\55\1\4\1\56\1\13\1\57\1\60\1\61\3\0"+
-		"\1\62\1\63\1\0\1\64\1\0\2\11\1\0\15\11"+
-		"\3\0\1\65\1\11\1\66\1\11\2\0\1\67\1\6"+
-		"\1\70\1\71\2\70\1\71\1\72\1\73\1\74\1\75"+
-		"\1\76\1\0\1\77\2\0\1\100\1\101\3\0\2\102"+
-		"\10\0\1\103\1\104\2\103\1\104\1\105\1\106\1\107"+
-		"\1\110\1\111\1\112\3\0\1\113\5\0\1\114\1\0"+
-		"\1\60\1\61\2\6\1\11\2\115\35\11\3\0\2\116"+
-		"\1\11\2\117\1\11\1\0\1\71\1\0\1\120\6\0"+
-		"\1\121\1\122\1\0\1\37\4\0\1\104\1\0\1\123"+
-		"\1\124\2\125\3\0\2\11\1\126\24\11\1\127\12\11"+
-		"\3\0\2\11\1\0\2\120\14\0\2\123\3\0\20\11"+
-		"\1\130\3\11\1\131\10\11\1\132\6\11\1\133\1\11"+
-		"\1\134\1\130\1\0\2\11\1\0\1\120\13\0\1\123"+
-		"\5\0\11\11\1\0\1\11\1\135\5\11\1\136\1\137"+
-		"\17\11\1\140\1\141\2\11\7\0\2\37\10\0\2\142"+
-		"\3\0\11\11\1\143\1\0\11\11\1\144\4\11\1\145"+
-		"\1\0\3\11\1\146\1\147\2\11\6\0\1\150\1\37"+
-		"\3\0\1\37\6\0\2\151\4\0\1\141\1\11\1\152"+
-		"\1\126\3\11\1\153\2\154\1\143\4\0\11\11\2\155"+
-		"\2\11\1\156\1\11\2\157\1\11\1\160\6\0\1\37"+
-		"\6\0\1\37\13\0\1\11\1\161\2\11\1\154\1\162"+
-		"\1\154\1\143\3\0\2\11\1\163\2\11\1\164\3\11"+
-		"\1\155\1\165\1\155\1\166\1\0\1\11\1\156\1\0"+
-		"\1\167\1\157\2\170\1\157\4\0\1\171\1\172\2\37"+
-		"\4\0\2\37\7\0\2\173\1\0\3\11\2\162\2\143"+
-		"\1\174\2\175\1\0\1\11\1\0\5\11\2\165\2\0"+
-		"\1\11\1\0\2\170\2\0\1\176\2\0\1\37\2\0"+
-		"\2\37\4\0\1\37\2\0\2\37\7\0\2\177\1\11"+
-		"\1\162\1\0\1\143\1\0\1\174\1\0\1\175\1\200"+
-		"\1\175\2\0\2\11\1\201\1\11\1\202\1\203\2\204"+
-		"\1\165\1\0\1\205\3\0\1\205\1\0\1\205\1\156"+
-		"\3\0\1\206\1\0\4\37\3\0\4\37\3\0\2\207"+
-		"\1\0\1\177\1\210\1\177\1\211\3\0\2\200\2\0"+
-		"\2\11\1\201\2\212\1\204\1\213\1\204\12\0\3\37"+
-		"\5\0\3\37\1\0\2\214\1\0\2\210\2\143\1\174"+
-		"\1\200\3\0\2\11\1\212\1\215\1\212\2\213\1\205"+
-		"\2\0\1\216\1\217\4\0\1\37\3\0\1\37\2\220"+
-		"\1\210\1\0\1\143\1\163\1\0\1\163\1\11\2\215"+
-		"\1\213\1\0\2\205\1\0\1\205\3\0\1\37\2\0"+
+	private static auto ZZ_ACTION_PACKED_0 =
+		"\1\1\1\2\15\0\1\1\2\3\1\1\1\2\3\4"~
+		"\1\5\1\6\2\7\1\6\1\10\2\6\1\4\1\11"~
+		"\1\12\1\6\1\11\1\13\1\14\1\4\1\15\2\16"~
+		"\1\6\2\17\1\20\1\21\1\16\1\22\1\23\1\24"~
+		"\1\25\1\26\1\27\1\30\1\31\1\32\1\33\1\34"~
+		"\1\35\1\36\1\37\3\4\1\40\1\41\1\6\1\42"~
+		"\1\43\1\44\1\4\2\45\1\46\1\16\1\47\1\50"~
+		"\1\51\1\52\1\16\1\53\1\54\1\4\2\44\1\4"~
+		"\1\55\1\4\1\56\1\13\1\57\1\60\1\61\3\0"~
+		"\1\62\1\63\1\0\1\64\1\0\2\11\1\0\15\11"~
+		"\3\0\1\65\1\11\1\66\1\11\2\0\1\67\1\6"~
+		"\1\70\1\71\2\70\1\71\1\72\1\73\1\74\1\75"~
+		"\1\76\1\0\1\77\2\0\1\100\1\101\3\0\2\102"~
+		"\10\0\1\103\1\104\2\103\1\104\1\105\1\106\1\107"~
+		"\1\110\1\111\1\112\3\0\1\113\5\0\1\114\1\0"~
+		"\1\60\1\61\2\6\1\11\2\115\35\11\3\0\2\116"~
+		"\1\11\2\117\1\11\1\0\1\71\1\0\1\120\6\0"~
+		"\1\121\1\122\1\0\1\37\4\0\1\104\1\0\1\123"~
+		"\1\124\2\125\3\0\2\11\1\126\24\11\1\127\12\11"~
+		"\3\0\2\11\1\0\2\120\14\0\2\123\3\0\20\11"~
+		"\1\130\3\11\1\131\10\11\1\132\6\11\1\133\1\11"~
+		"\1\134\1\130\1\0\2\11\1\0\1\120\13\0\1\123"~
+		"\5\0\11\11\1\0\1\11\1\135\5\11\1\136\1\137"~
+		"\17\11\1\140\1\141\2\11\7\0\2\37\10\0\2\142"~
+		"\3\0\11\11\1\143\1\0\11\11\1\144\4\11\1\145"~
+		"\1\0\3\11\1\146\1\147\2\11\6\0\1\150\1\37"~
+		"\3\0\1\37\6\0\2\151\4\0\1\141\1\11\1\152"~
+		"\1\126\3\11\1\153\2\154\1\143\4\0\11\11\2\155"~
+		"\2\11\1\156\1\11\2\157\1\11\1\160\6\0\1\37"~
+		"\6\0\1\37\13\0\1\11\1\161\2\11\1\154\1\162"~
+		"\1\154\1\143\3\0\2\11\1\163\2\11\1\164\3\11"~
+		"\1\155\1\165\1\155\1\166\1\0\1\11\1\156\1\0"~
+		"\1\167\1\157\2\170\1\157\4\0\1\171\1\172\2\37"~
+		"\4\0\2\37\7\0\2\173\1\0\3\11\2\162\2\143"~
+		"\1\174\2\175\1\0\1\11\1\0\5\11\2\165\2\0"~
+		"\1\11\1\0\2\170\2\0\1\176\2\0\1\37\2\0"~
+		"\2\37\4\0\1\37\2\0\2\37\7\0\2\177\1\11"~
+		"\1\162\1\0\1\143\1\0\1\174\1\0\1\175\1\200"~
+		"\1\175\2\0\2\11\1\201\1\11\1\202\1\203\2\204"~
+		"\1\165\1\0\1\205\3\0\1\205\1\0\1\205\1\156"~
+		"\3\0\1\206\1\0\4\37\3\0\4\37\3\0\2\207"~
+		"\1\0\1\177\1\210\1\177\1\211\3\0\2\200\2\0"~
+		"\2\11\1\201\2\212\1\204\1\213\1\204\12\0\3\37"~
+		"\5\0\3\37\1\0\2\214\1\0\2\210\2\143\1\174"~
+		"\1\200\3\0\2\11\1\212\1\215\1\212\2\213\1\205"~
+		"\2\0\1\216\1\217\4\0\1\37\3\0\1\37\2\220"~
+		"\1\210\1\0\1\143\1\163\1\0\1\163\1\11\2\215"~
+		"\1\213\1\0\2\205\1\0\1\205\3\0\1\37\2\0"~
 		"\1\37\2\221\1\215\10\0\1\222\3\205";
 
 	private static int[] zzUnpackAction() {
@@ -380,9 +383,9 @@ public final class LexScan : sym, Scanner {
 	/** 
 	 * The transition table of the DFA
 	 */
-	private static final int [] ZZ_TRANS = zzUnpackTrans();
+	private static immutable int[] ZZ_TRANS = zzUnpackTrans();
 
-	private static final string ZZ_TRANS_PACKED_0 =
+	private static string ZZ_TRANS_PACKED_0 =
 		"\11\20\2\21\1\22\13\20\1\21\5\20\1\23\51\20"+
 		"\30\24\1\25\1\26\55\24\2\27\1\30\2\27\2\30"+
 		"\1\27\1\31\1\32\1\33\1\32\1\27\1\34\6\27"+
@@ -1489,21 +1492,18 @@ public final class LexScan : sym, Scanner {
 
 
 	/* error codes */
-	private static final int ZZ_UNKNOWN_ERROR = 0;
-	private static final int ZZ_NO_MATCH = 1;
-	private static final int ZZ_PUSHBACK_2BIG = 2;
+	private static immutable int ZZ_UNKNOWN_ERROR = 0;
+	private static immutable int ZZ_NO_MATCH = 1;
+	private static immutable int ZZ_PUSHBACK_2BIG = 2;
 
 	/* error messages for the codes above */
-	private static final string ZZ_ERROR_MSG[] = {
+	private static immutable string[] ZZ_ERROR_MSG = [
 		"Unkown internal scanner error",
 		"Error: could not match input",
 		"Error: pushback value was too large"
-	};
+	];
 
-	/**
-	 * ZZ_ATTRIBUTE[aState] contains the attributes of state <code>aState</code>
-	 */
-	private static immutable int[] ZZ_ATTRIBUTE = zzUnpackAttribute();
+	private static immutable int[] ZZ_ATTRIBUTE;
 
 	private static string ZZ_ATTRIBUTE_PACKED_0 =
 		"\2\1\15\0\2\1\1\11\4\1\1\11\2\1\1\11"+
@@ -1650,9 +1650,9 @@ public final class LexScan : sym, Scanner {
 	int bufferSize = 16384;
 
 	File file;
-	Stack files = new Stack();
+	Stack!(File) files = new Stack!(File)();
 
-	StringBuffer userCode   = new StringBuffer();
+	StringBuffer!(string) userCode = new StringBuffer!(string)();
 
 	string classCode;
 	string initCode;   
@@ -1664,8 +1664,8 @@ public final class LexScan : sym, Scanner {
 	string scanErrorException;
 	string cupSymbol = "sym";
 
-	StringBuffer actionText = new StringBuffer();
-	StringBuffer string     = new StringBuffer();
+	StringBuffer!(string) actionText = new StringBuffer!(string)();
+	StringBuffer!(string) stringbuf = new StringBuffer!(string)();
 
 	bool charCount;
 	bool lineCount;
@@ -1730,7 +1730,7 @@ public final class LexScan : sym, Scanner {
 	private Symbol symbol_countUpdate(int type, Object value) {
 		int lc = yyline;
 		int cc = yycolumn;
-		String text = yytext();
+		string text = yytext();
 
 		for(int i=0; i < text.length(); i++) {
 			char c = text.charAt(i);
@@ -1749,12 +1749,12 @@ public final class LexScan : sym, Scanner {
 		return new Symbol(type, yyline, yycolumn, value);
 	}
 
-	private String makeMacroIdent() {
-		String matched = yytext().trim();
+	private string makeMacroIdent() {
+		string matched = yytext().trim();
 		return matched.substring(1, matched.length()-1).trim();
 	}
 
-	public static String conc(Object a, Object b) {
+	public static string conc(Object a, Object b) {
 		if(a == null && b == null) return null;
 		if(a == null) return b.toString();
 		if(b == null) return a.toString();
@@ -1762,7 +1762,7 @@ public final class LexScan : sym, Scanner {
 		return a.toString()+b.toString();
 	}
 
-	public static String concExc(Object a, Object b) {
+	public static string concExc(Object a, Object b) {
 		if(a == null && b == null) return null;
 		if(a == null) return b.toString();
 		if(b == null) return a.toString();
@@ -1770,6 +1770,11 @@ public final class LexScan : sym, Scanner {
 		return a.toString()+", "+b.toString();
 	}
 
+	// static constructor
+	static this() {
+		LexScan.ZZ_CMAP = zzUnpackCMap(ZZ_CMAP_PACKED);
+		LexScan.ZZ_ATTRIBUTE = zzUnpackAttribute();
+	}
 
 	/**
 	 * Creates a new scanner
@@ -1798,7 +1803,7 @@ public final class LexScan : sym, Scanner {
 	 * @param packed   the packed character translation table
 	 * @return         the unpacked character translation table
 	 */
-	private static char [] zzUnpackCMap(String packed) {
+	private static char [] zzUnpackCMap(string packed) {
 		char [] map = new char[0x10000];
 		int i = 0;  /* index in packed string  */
 		int j = 0;  /* index in unpacked array */
@@ -1985,8 +1990,8 @@ public final class LexScan : sym, Scanner {
 	/**
 	 * Returns the text matched by the current regular expression.
 	 */
-	public final String yytext() {
-		return new String( zzBuffer, zzStartRead, zzMarkedPos-zzStartRead );
+	public final string yytext() {
+		return new string( zzBuffer, zzStartRead, zzMarkedPos-zzStartRead );
 	}
 
 
@@ -2029,7 +2034,7 @@ public final class LexScan : sym, Scanner {
 	 * @param   errorCode  the code of the errormessage to display
 	 */
 	private void zzScanError(int errorCode) {
-		String message;
+		string message;
 		try {
 			message = ZZ_ERROR_MSG[errorCode];
 		}
@@ -2263,7 +2268,7 @@ zzForAction: {
 						   }
 				 case 151: break;
 				 case 21: 
-						   { string.setLength(0); nextState = REGEXP; yybegin(STRING_CONTENT);
+						   { stringbuf.setLength(0); nextState = REGEXP; yybegin(STRING_CONTENT);
 						   }
 				 case 152: break;
 				 case 142: 
@@ -2291,7 +2296,7 @@ zzForAction: {
 						   }
 				 case 158: break;
 				 case 72: 
-						   { string.append('\r');
+						   { stringbuf.append('\r');
 						   }
 				 case 159: break;
 				 case 43: 
@@ -2338,7 +2343,7 @@ zzForAction: {
 						   }
 				 case 169: break;
 				 case 68: 
-						   { string.append( conv!(string,int)(yytext().substring(1,yytext().length()))); //TODO to base 8
+						   { stringbuf.append( conv!(string,int)(yytext().substring(1,yytext().length()))); //TODO to base 8
 						   }
 				 case 170: break;
 				 case 62: 
@@ -2354,7 +2359,7 @@ zzForAction: {
 						   }
 				 case 173: break;
 				 case 70: 
-						   { string.append('\n');
+						   { stringbuf.append('\n');
 						   }
 				 case 174: break;
 				 case 10: 
@@ -2370,7 +2375,7 @@ zzForAction: {
 						   }
 				 case 177: break;
 				 case 42: 
-						   { string.setLength(0); nextState = CHARCLASS; yybegin(STRING_CONTENT);
+						   { stringbuf.setLength(0); nextState = CHARCLASS; yybegin(STRING_CONTENT);
 						   }
 				 case 178: break;
 				 case 116: 
@@ -2426,7 +2431,7 @@ zzForAction: {
 						   }
 				 case 189: break;
 				 case 38: 
-						   { yybegin(nextState); return symbol(STRING, string.toString());
+						   { yybegin(nextState); return symbol(STRING, stringbuf.toString());
 						   }
 				 case 190: break;
 				 case 76: 
@@ -2470,7 +2475,7 @@ zzForAction: {
 						   }
 				 case 200: break;
 				 case 83: 
-						   { string.append( conv!(string,int)(yytext().substring(2,yytext().length()))); //TODO to base 16
+						   { stringbuf.append( conv!(string,int)(yytext().substring(2,yytext().length()))); //TODO to base 16
 						   }
 				 case 201: break;
 				 case 107: 
@@ -2518,7 +2523,7 @@ zzForAction: {
 						   }
 				 case 212: break;
 				 case 73: 
-						   { string.append('\f');
+						   { stringbuf.append('\f');
 						   }
 				 case 213: break;
 				 case 65: 
@@ -2531,19 +2536,19 @@ zzForAction: {
 						   }
 				 case 215: break;
 				 case 140: 
-						   { initThrow = concExc(initThrow,string);  yybegin(MACROS);
+						   { initThrow = concExc(initThrow,stringbuf);  yybegin(MACROS);
 						   }
 				 case 216: break;
 				 case 135: 
-						   { eofThrow = concExc(eofThrow,string); yybegin(MACROS);
+						   { eofThrow = concExc(eofThrow,stringbuf); yybegin(MACROS);
 						   }
 				 case 217: break;
 				 case 71: 
-						   { string.append('\t');
+						   { stringbuf.append('\t');
 						   }
 				 case 218: break;
 				 case 67: 
-						   { string.append(yytext().charAt(1));
+						   { stringbuf.append(yytext().charAt(1));
 						   }
 				 case 219: break;
 				 case 7: 
@@ -2551,7 +2556,7 @@ zzForAction: {
 						   }
 				 case 220: break;
 				 case 98: 
-						   { eofCode = conc(eofCode,string); yybegin(MACROS);
+						   { eofCode = conc(eofCode,stringbuf); yybegin(MACROS);
 						   }
 				 case 221: break;
 				 case 56: 
@@ -2571,11 +2576,11 @@ zzForAction: {
 						   }
 				 case 225: break;
 				 case 123: 
-						   { eofVal = string.toString(); yybegin(MACROS);
+						   { eofVal = stringbuf.toString(); yybegin(MACROS);
 						   }
 				 case 226: break;
 				 case 36: 
-						   { string.append(yytext());
+						   { stringbuf.append(yytext());
 						   }
 				 case 227: break;
 				 case 97: 
@@ -2583,7 +2588,7 @@ zzForAction: {
 						   }
 				 case 228: break;
 				 case 74: 
-						   { string.append('\b');
+						   { stringbuf.append('\b');
 						   }
 				 case 229: break;
 				 case 24: 
@@ -2671,11 +2676,11 @@ zzForAction: {
 						   }
 				 case 247: break;
 				 case 105: 
-						   { initCode = conc(initCode,string);    yybegin(MACROS);
+						   { initCode = conc(initCode,stringbuf);    yybegin(MACROS);
 						   }
 				 case 248: break;
 				 case 69: 
-						   { string.append('\"');
+						   { stringbuf.append('\"');
 						   }
 				 case 249: break;
 				 case 137: 
@@ -2698,7 +2703,7 @@ zzForAction: {
 						   }
 				 case 253: break;
 				 case 77: 
-						   { string.setLength(0); yybegin(COPY);
+						   { stringbuf.setLength(0); yybegin(COPY);
 						   }
 				 case 254: break;
 				 case 8: 
@@ -2710,7 +2715,7 @@ zzForAction: {
 						   }
 				 case 256: break;
 				 case 144: 
-						   { lexThrow = concExc(lexThrow,string); yybegin(MACROS);
+						   { lexThrow = concExc(lexThrow,stringbuf); yybegin(MACROS);
 						   }
 				 case 257: break;
 				 case 53: 
@@ -2849,7 +2854,7 @@ zzForAction: {
 						   }
 				 case 286: break;
 				 case 85: 
-						   { classCode = conc(classCode,string);  yybegin(MACROS);
+						   { classCode = conc(classCode,stringbuf);  yybegin(MACROS);
 						   }
 				 case 287: break;
 				 case 18: 
@@ -2986,7 +2991,7 @@ zzForAction: {
 	 * @param argv   the command line, contains the filenames to run
 	 *               the scanner on.
 	 */
-	public static void main(String argv[]) {
+	public static void main(string argv[]) {
 		if(argv.length == 0) {
 			writeln("Usage : java LexScan <inputfile>");
 		}

@@ -171,7 +171,7 @@ final public class DFA {
 				}
 				result.pushBack("] ");
 			}
-			result.pushBack(i~":\n");
+			result.pushBack(i ~ ":\n");
 
 			for(char j=0; j < numInput; j++) {
 				if(table[i][j] >= 0) 
@@ -198,22 +198,21 @@ final public class DFA {
 	public string dotFormat() {
 		StringBuffer!(T) result = new StringBuffer!(T)();
 
-		result.append("digraph DFA {\n");
-		result.append("rankdir = LR\n");
+		result.pushBack("digraph DFA {\n");
+		result.pushBack("rankdir = LR\n");
 
 		for(int i = 0; i < numStates; i++) {
 			if(isFinal[i]) {
-				result.append(i);
-				result.append(" [shape = doublecircle]");
-				result.append(Out.NL);
+				result.pushBack(i);
+				result.pushBack(" [shape = doublecircle]\n");
 			}
 		}
 
 		for(int i=0; i < numStates; i++) {
 			for(int input = 0; input < numInput; input++) {
 				if(table[i][input] >= 0) {
-					result.append(i ~ " -> " ~ conv!(int,string)(table[i][input]));
-					result.append(" [label=\"[" ~ conv!(int,string)(input) ~ "]\"]\n");
+					result.pushBack(i ~ " -> " ~ conv!(int,string)(table[i][input]));
+					result.pushBack(" [label=\"[" ~ conv!(int,string)(input) ~ "]\"]\n");
 					//          result.append(" [label=\"["+classes.toString(input)+"]\"]\n");
 				}
 			}
@@ -244,7 +243,7 @@ final public class DFA {
 	 * Space: O(c n), size < 4*(5*c*n + 13*n + 3*c) byte
 	 */
 	public void minimize() {
-		Out.print(numStates ~ " states before minimization, ");
+		Out.print(conv!(int,string)(numStates) ~ " states before minimization, ");
 
 		if(numStates == 0) {
 			Out.error(ErrorMessages.ZERO_STATES);
@@ -336,7 +335,7 @@ final public class DFA {
 			for(int s = 0; s < n; s++) {
 				int i = inv_delta[s][c];  inv_delta[s][c] = lastDelta;
 				int j = inv_list_last[s];
-				boolean go_on = (i != -1);
+				bool go_on = (i != -1);
 				while(go_on) {
 					go_on = (i != j);
 					inv_delta_set[lastDelta++] = i;
@@ -372,8 +371,7 @@ final public class DFA {
 				// check, if s could be equivalent with t
 				if(isFinal[s-1]) {
 					found = isFinal[t-1] && action[s-1].isEquiv(action[t-1]);
-				}
-				else {
+				} else {
 					found = !isFinal[t-1];
 				}
 
@@ -434,9 +432,9 @@ final public class DFA {
 		int index = (B_i-b0)*numInput;  // (B_i, 0)
 		while(index < (B_i+1-b0)*numInput) {
 			int last = l_backward[anchorL];
-			l_forward[last]     = index;
-			l_forward[index]    = anchorL;
-			l_backward[index]   = last;
+			l_forward[last] = index;
+			l_forward[index] = anchorL;
+			l_backward[index] = last;
 			l_backward[anchorL] = index;
 			index++;
 		}
@@ -447,9 +445,9 @@ final public class DFA {
 				index = (B_i-b0)*numInput;
 				while(index < (B_i+1-b0)*numInput) {
 					int last = l_backward[anchorL];
-					l_forward[last]     = index;
-					l_forward[index]    = anchorL;
-					l_backward[index]   = last;
+					l_forward[last] = index;
+					l_forward[index] = anchorL;
+					l_backward[index] = last;
 					l_backward[anchorL] = index;
 					index++;
 				}
@@ -476,7 +474,7 @@ final public class DFA {
 			l_forward[B_j_a] = 0;
 			// take B_j_a = (B_j-b0)*numInput+c apart into (B_j, a)
 			int B_j = b0 + B_j_a / numInput;
-			int a   = B_j_a % numInput;
+			int a = B_j_a % numInput;
 
 			// printL(l_forward, l_backward, anchorL);      
 
@@ -594,8 +592,7 @@ final public class DFA {
 						l_forward[last] = B_k_c;
 						l_backward[B_k_c] = last;
 						l_forward[B_k_c] = anchorL;
-					}
-					else {
+					} else {
 						// put the smaller block in L
 						if(block[B_i] <= block[B_k]) {
 							int last = l_backward[anchorL];
@@ -603,8 +600,7 @@ final public class DFA {
 							l_forward[last] = B_i_c;
 							l_backward[B_i_c] = last;
 							l_forward[B_i_c] = anchorL;              
-						}
-						else {
+						} else {
 							int last = l_backward[anchorL];
 							l_backward[anchorL] = B_k_c;
 							l_forward[last] = B_k_c;
@@ -621,9 +617,9 @@ final public class DFA {
 
 		/*
 		   System.out.println("Old minimization:");
-		   boolean [] [] equiv = old_minimize();
+		   bool [] [] equiv = old_minimize();
 
-		   boolean error = false;
+		   bool error = false;
 		   for(int i = 1; i < equiv.length; i++) {
 		   for(int j = 0; j < equiv[i].length; j++) {
 		   if(equiv[i][j] != (block[i+1] == block[j+1])) {
@@ -642,14 +638,14 @@ final public class DFA {
 
 		// trans[i] is the state j that will replace state i, i.e. 
 		// states i and j are equivalent
-		int trans [] = new int [numStates];
+		int[] trans = new int[numStates];
 
 		// kill[i] is true iff state i is redundant and can be removed
-		boolean kill [] = new boolean [numStates];
+		bool[] kill = new bool[numStates];
 
 		// move[i] is the amount line i has to be moved in the transition table
 		// (because states j < i have been removed)
-		int move [] = new int [numStates];
+		int[] move = new int[numStates];
 
 		// fill arrays trans[] and kill[] (in O(n))
 		for(int b = b0+1; b <= lastBlock; b++) { // b0 contains the error state
@@ -689,8 +685,7 @@ final public class DFA {
 					if( table[i][c] >= 0 ) {
 						table[j][c] = trans[ table[i][c] ];
 						table[j][c]-= move[ table[j][c] ];
-					}
-					else {
+					} else {
 						table[j][c] = table[i][c];
 					}
 				}
@@ -710,25 +705,27 @@ final public class DFA {
 			entryState[i]-= move[ entryState[i] ];
 		}
 
-		Out.println(numStates+" states in minimized DFA");
+		Out.println(conv!(int,string)(numStates) ~ " states in minimized DFA");
 	}
 
-	public String toString(int [] a) {
-		String r = "{";
+	public string toString(int[] a) {
+		string r = "{";
 		int i;
-		for(i = 0; i < a.length-1; i++) r += a[i]+",";
-		return r+a[i]+"}";
+		for(i = 0; i < a.length-1; i++) 
+			r ~= conv!(int,string)(a[i]) ~ ",";
+
+		return r ~ conv!(int,string)(a[i]) ~ "}";
 	}
 
-	public void printBlocks(int [] b, int [] b_f, int [] b_b, int last) {
-		Out.dump("block     : "+toString(b));
-		Out.dump("b_forward : "+toString(b_f));
-		Out.dump("b_backward: "+toString(b_b));
-		Out.dump("lastBlock : "+last);
+	public void printBlocks(int[] b, int[] b_f, int[] b_b, int last) {
+		Out.dump("block     : " ~ toString(b));
+		Out.dump("b_forward : " ~ toString(b_f));
+		Out.dump("b_backward: " ~ toString(b_b));
+		Out.dump("lastBlock : " ~ conv!(int,string)(last));
 		final int n = numStates+1;
 		for(int i = n; i <= last; i ++) {
 			Out.dump("Block "+(i-n)+" (size "+b[i]+"):");
-			String line = "{";
+			string line = "{";
 			int s = b_f[i];
 			while(s != i) {
 				line = line+(s-1);
@@ -736,41 +733,45 @@ final public class DFA {
 				s = b_f[s];
 				if(s != i) {
 					line = line+",";
-					if(b[s] != i) Out.dump("consistency error for state "+(s-1)+" (block "+b[s]+")");
+					if(b[s] != i) 
+						Out.dump("consistency error for state "+(s-1)+" (block "+b[s]+")");
 				}
-				if(b_b[s] != t) Out.dump("consistency error for b_back in state "+(s-1)+" (back = "+b_b[s]+", should be = "+t+")");
+				if(b_b[s] != t) 
+					Out.dump("consistency error for b_back in state " ~(s-1)
+						~ " (back = " ~b_b[s]~ ", should be = " ~t~ ")");
 			}
-			Out.dump(line+"}");
+			Out.dump(line~ "}");
 		}
 	}
 
-	public void printL(int [] l_f, int [] l_b, int anchor) {
-		String l = "L = {";
+	public void printL(int[] l_f, int[] l_b, int anchor) {
+		string l = "L = {";
 		int bc = l_f[anchor];
 		while(bc != anchor) {
 			int b = bc / numInput;
 			int c = bc % numInput;
-			l+= "("+b+","+c+")";
+			l ~= "("~ b ~","~ c ~")";
 			int old_bc = bc;
 			bc = l_f[bc];
-			if(bc != anchor) l+= ",";
-			if(l_b[bc] != old_bc) Out.dump("consistency error for("+b+","+c+")");
+			if(bc != anchor) 
+				l ~= ",";
+			if(l_b[bc] != old_bc) 
+				Out.dump("consistency error for(" ~ conv!(int,string)(b) ~ "," 
+					~ conv!(int,string)(c) ~ ")");
 		}
-		Out.dump(l+"}");
+		Out.dump(conv!(int,string)(l) ~ "}");
 	}
 
 
-	/**
-	 * Much simpler, but slower and less memory efficient minimization algorithm.
+	/** Much simpler, but slower and less memory efficient minimization algorithm.
 	 * 
 	 * @return the equivalence relation on states.
 	 */
-	public boolean [] [] old_minimize() {
-
+	public bool[][] old_minimize() {
 		int i,j;
 		char c;
 
-		Out.print(numStates+" states before minimization, ");
+		Out.print(numStates ~ " states before minimization, ");
 
 		if(numStates == 0) {
 			Out.error(ErrorMessages.ZERO_STATES);
@@ -783,17 +784,17 @@ final public class DFA {
 		}
 
 		// equiv[i][j] == true <=> state i and state j are equivalent
-		boolean [] [] equiv = new boolean [numStates] [];
+		bool[][] equiv = new bool[numStates][];
 
 		// list[i][j] contains all pairs of states that have to be marked "not equivalent"
 		// if states i and j are recognized to be not equivalent
-		StatePairList [] [] list = new StatePairList [numStates] [];
+		StatePairList[][] list = new StatePairList[numStates][];
 
 		// construct a triangular matrix equiv[i][j] with j < i
 		// and mark pairs (final state, not final state) as not equivalent
 		for(i = 1; i < numStates; i++) {
 			list[i] = new StatePairList[i];
-			equiv[i] = new boolean [i];
+			equiv[i] = new bool [i];
 			for(j = 0; j < i; j++) {
 				// i and j are equivalent, iff :
 				// i and j are both final and their actions are equivalent and have same pushback behaviour or
@@ -808,15 +809,11 @@ final public class DFA {
 
 
 		for(i = 1; i < numStates; i++) {
-
 			Out.debugPrint("Testing state "~ conv!(int,string)(i));
 
 			for(j = 0; j < i; j++) {
-
 				if( equiv[i][j] ) {
-
 					for(c = 0; c < numInput; c++) {
-
 						if(equiv[i][j]) {              
 
 							int p = table[i][c]; 
@@ -841,9 +838,7 @@ final public class DFA {
 					// if i and j are still marked equivalent..
 
 					if( equiv[i][j] ) {
-
 						// Out.debug("("+i+","+j+") are still marked equivalent");
-
 						for(c = 0; c < numInput; c++) {
 
 							int p = table[i][c];
@@ -861,8 +856,7 @@ final public class DFA {
 								list[p][q].addPair(i,j);
 							}
 						}      
-					}
-					else {
+					} else {
 						// Out.debug("("+i+","+j+") are not equivalent");
 					}
 
@@ -874,39 +868,38 @@ final public class DFA {
 		// printTable(equiv); 
 
 		return equiv;
-}
+	}
 
-
-public void printInvDelta(int [] [] inv_delta, int [] inv_delta_set) {
-	Out.dump("Inverse of transition table: ");
-	for(int s = 0; s < numStates+1; s++) {
-		Out.dump("State ["+(s-1)+"]");
-		for(int c = 0; c < numInput; c++) {
-			String line = "With <"+c+"> in {";
-			int t = inv_delta[s][c];
-			while(inv_delta_set[t] != -1) {
-				line += inv_delta_set[t++]-1;
-				if(inv_delta_set[t] != -1) line += ",";
+	public void printInvDelta(int[][] inv_delta, int[] inv_delta_set) {
+		Out.dump("Inverse of transition table: ");
+		for(int s = 0; s < numStates+1; s++) {
+			Out.dump("State [" ~ conv!(int,string)(s-1) ~ "]");
+			for(int c = 0; c < numInput; c++) {
+				string line = "With <" ~ conv!(int,string)(c) ~ "> in {";
+				int t = inv_delta[s][c];
+				while(inv_delta_set[t] != -1) {
+					line ~= conv!(int,string)(inv_delta_set[t++]-1);
+					if(inv_delta_set[t] != -1) 
+						line ~= ",";
+				}
+				if(inv_delta_set[inv_delta[s][c]] != -1) 
+					Out.dump(line ~ "}");
 			}
-			if(inv_delta_set[inv_delta[s][c]] != -1) 
-				Out.dump(line+"}");
 		}
 	}
-}
-
-public void printTable(boolean [] [] equiv) {
-
-	Out.dump("Equivalence table is : ");
-	for(int i = 1; i < numStates; i++) {
-		String line = i+" :";
-		for(int j = 0; j < i; j++) {
-			if(equiv[i][j]) 
-				line+= " E";
-			else
-				line+= " x";
+	
+	public void printTable(bool[][] equiv) {
+		Out.dump("Equivalence table is : ");
+		for(int i = 1; i < numStates; i++) {
+			string line = conv!(int,string)(i) ~ " :";
+			for(int j = 0; j < i; j++) {
+				if(equiv[i][j]) 
+					line ~= " E";
+				else
+					line ~= " x";
+			}
+			Out.dump(line);
 		}
-		Out.dump(line);
 	}
-}
 
 }

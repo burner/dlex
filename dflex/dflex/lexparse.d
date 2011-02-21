@@ -6,12 +6,23 @@
 
 module dflex.lexparse;
 
+import dflex.charclasses;
 import dflex.interval;
+import dflex.lexscan;
+import dflex.eofactions;
+
+import cup.lrparser;
+import cup.scanner;
+import cup.symbol;
+import cup.symbolfactory;
+
+import hurt.container.stack;
+import hurt.container.vector;
 
 /** CUP v0.11a beta 20060608 generated parser.
  * @version Sat Jan 31 23:52:43 EST 2009
  */
-public class LexParse : cup.lr_parser {
+public class LexParse : cup.lrparser.lr_parser {
 
 	/** Default constructor. */
 	public this() {
@@ -19,13 +30,17 @@ public class LexParse : cup.lr_parser {
 	}
 
 	/** Constructor which sets the default scanner. */
-	public this(cup.Scanner s) {super(s);}
+	public this(Scanner s) {
+		super(s);
+	}
 
 	/** Constructor which sets the default scanner. */
-	public this(cup.Scanner s, cup.SymbolFactory sf) {super(s,sf);}
+	public this(Scanner s, SymbolFactory sf) {
+		super(s,sf);
+	}
 
 	/** Production table. */
-	protected static final short _production_table[][] = 
+	protected static immutable short[][] _production_table = 
 		unpackFromStrings(new string[] [
 				"\000\113\000\002\002\004\000\002\005\006\000\002\005" ~
 				"\002\000\002\002\002\000\002\002\004\000\002\002\003" ~
@@ -53,10 +68,12 @@ public class LexParse : cup.lr_parser {
 				"\002\020\003" ]);
 
 	/** Access to production table. */
-	public short[][] production_table() {return _production_table;}
+	public override short[][] production_table() {
+		return _production_table;
+	}
 
 	/** Parse-action table. */
-	protected static final short[][] _action_table = 
+	protected static immutable short[][] _action_table = 
 		unpackFromStrings(new string[] = [
 				//"\000\156\000\006\002\uffff\041\004\001\002\000\016\003" ~
 				"\000\156\000\006\002\xfffe\041\004\001\002\000\016\003" ~
@@ -332,12 +349,12 @@ public class LexParse : cup.lr_parser {
 				"\052\uffef\053\uffef\054\uffef\001\002" ]);
 
 	/** Access to parse-action table. */
-	public short[][] action_table() {
+	public override short[][] action_table() {
 		return _action_table;
 	}
 
 	/** <code>reduce_goto</code> table. */
-	protected static final short[][] _reduce_table = 
+	protected static immutable short[][] _reduce_table = 
 		unpackFromStrings(new string[] = [
 				"\000\156\000\004\005\004\001\001\000\004\002\007\001" ~
 				"\001\000\002\001\001\000\002\001\001\000\002\001\001" ~
@@ -390,39 +407,39 @@ public class LexParse : cup.lr_parser {
 				"" ]);
 
 	/** Access to <code>reduce_goto</code> table. */
-	public short[][] reduce_table() {return _reduce_table;}
+	public override short[][] reduce_table() {
+		return _reduce_table;
+	}
 
 	/** Instance of action encapsulation class. */
 	protected CUP_LexParse_actions action_obj;
 
 	/** Action encapsulation object initializer. */
-	protected void init_actions() {
+	protected override void init_actions() {
 		action_obj = new CUP_LexParse_actions(this);
 	}
 
 	/** Invoke a user supplied parse action. */
-	public cup.Symbol do_action(int act_num, cup.lr_parser parser, Stack stack, int top) {
-			/* call code in generated class */
-			return action_obj.CUP_LexParse_do_action(act_num, parser, stack, top);
-		}
-
-	/** Indicates start state. */
-	public int start_state() {return 0;}
-	/** Indicates start production. */
-	public int start_production() {return 0;}
-
-	/** <code>EOF</code> Symbol index. */
-	public int EOF_sym() {return 0;}
-
-	/** <code>error</code> Symbol index. */
-	public int error_sym() {return 1;}
-
-
-	/** User initialization code. */
-	public void user_init() {
-		action_obj.scanner = this.scanner;
+	public Symbol do_action(int act_num, cup.lrparser.lr_parser parser, Stack stack, int top) {
+		/* call code in generated class */
+		return action_obj.CUP_LexParse_do_action(act_num, parser, stack, top);
 	}
 
+	/** Indicates start state. */
+	public override int start_state() {return 0;}
+	/** Indicates start production. */
+	public override int start_production() {return 0;}
+
+	/** <code>EOF</code> Symbol index. */
+	public override int EOF_sym() {return 0;}
+
+	/** <code>error</code> Symbol index. */
+	public override int error_sym() {return 1;}
+
+	/** User initialization code. */
+	public override void user_init() {
+		action_obj.scanner = this.scanner;
+	}
 
 	public LexScan scanner;
 
@@ -452,7 +469,7 @@ public class LexParse : cup.lr_parser {
 			Out.error(ErrorMessages.UNKNOWN_SYNTAX);
 	}
 
-	public void report_fatal_error(String message, Object info) {
+	public void report_fatal_error(string message, Object info) {
 		// report_error(message, info);
 		throw new GeneratorException();
 	}
@@ -466,7 +483,7 @@ class CUP_LexParse_actions {
 	CharClasses charClasses = new CharClasses(Options.jlex ? 127 : 0xFFFF);
 	RegExps     regExps     = new RegExps();
 	Macros      macros      = new Macros();
-	Integer     stateNumber;
+	int     stateNumber;
 	Timer       t           = new Timer();
 	EOFActions  eofActions  = new EOFActions();
 
@@ -618,13 +635,13 @@ class CUP_LexParse_actions {
 	}
 
 	/** Method with the actual generated action code. */
-	public final cup.Symbol CUP_LexParse_do_action(
+	public final Symbol CUP_LexParse_do_action(
 			int                        CUP_LexParse_act_num,
-			cup.lr_parser CUP_LexParse_parser,
-			Stack! CUP_LexParse_stack,
+			lr_parser CUP_LexParse_parser,
+			Stack CUP_LexParse_stack,
 			int                        CUP_LexParse_top) {
 			/* Symbol object for return from actions */
-			java_cup.Symbol CUP_LexParse_result;
+			Symbol CUP_LexParse_result;
 
 			/* select the action based on the action number */
 			switch (CUP_LexParse_act_num) {
@@ -846,10 +863,10 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int listleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int listright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						Vector list = (Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						Vector list = cast(Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						int closeleft = (CUP_LexParse_stack.peek()).left;
 						int closeright = (CUP_LexParse_stack.peek()).right;
-						Object close = (Object)( CUP_LexParse_stack.peek()).value;
+						Object close = cast(Object)( CUP_LexParse_stack.peek()).value;
 
 						try {
 							list.addElement(new Interval('-','-'));
@@ -870,10 +887,10 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int listleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int listright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						Vector list = (Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						Vector list = cast(Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						int closeleft = (CUP_LexParse_stack.peek()).left;
 						int closeright = (CUP_LexParse_stack.peek()).right;
-						Object close = (Object)( CUP_LexParse_stack.peek()).value;
+						Object close = cast(Object)( CUP_LexParse_stack.peek()).value;
 
 						try {
 							list.addElement(new Interval('-','-'));
@@ -894,10 +911,10 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int listleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int listright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						Vector list = (Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						Vector list = cast(Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						int closeleft = (CUP_LexParse_stack.peek()).left;
 						int closeright = (CUP_LexParse_stack.peek()).right;
-						Object close = (Object)( CUP_LexParse_stack.peek()).value;
+						Object close = cast(Object)( CUP_LexParse_stack.peek()).value;
 
 						try {
 							charClasses.makeClassNot(list, Options.jlex && scanner.caseless);
@@ -917,10 +934,10 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int closeleft = (CUP_LexParse_stack.peek()).left;
 						int closeright = (CUP_LexParse_stack.peek()).right;
-						Object close = (Object)( CUP_LexParse_stack.peek()).value;
+						Object close = cast(Object)( CUP_LexParse_stack.peek()).value;
 
 						Vector list = new Vector();
-						list.addElement(new Interval((char)0,CharClasses.maxChar));
+						list.addElement(new Interval(cast(char)0,CharClasses.maxChar));
 						try {
 							charClasses.makeClass(list, false);
 						}
@@ -939,10 +956,10 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int listleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int listright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						Vector list = (Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						Vector list = cast(Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						int closeleft = (CUP_LexParse_stack.peek()).left;
 						int closeright = (CUP_LexParse_stack.peek()).right;
-						Object close = (Object)( CUP_LexParse_stack.peek()).value;
+						Object close = cast(Object)( CUP_LexParse_stack.peek()).value;
 
 						try {
 							charClasses.makeClass(list, Options.jlex && scanner.caseless);
@@ -973,7 +990,7 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int cleft = (CUP_LexParse_stack.peek()).left;
 						int cright = (CUP_LexParse_stack.peek()).right;
-						Character c = (Character)( CUP_LexParse_stack.peek()).value;
+						char c = cast(char)( CUP_LexParse_stack.peek()).value;
 
 						try {
 							if ( scanner.caseless ) {
@@ -1014,7 +1031,7 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int strleft = (CUP_LexParse_stack.peek()).left;
 						int strright = (CUP_LexParse_stack.peek()).right;
-						String str = (String)( CUP_LexParse_stack.peek()).value;
+						String str = cast(string)( CUP_LexParse_stack.peek()).value;
 
 						try {
 							if ( scanner.caseless ) {
@@ -1041,7 +1058,7 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int listleft = (CUP_LexParse_stack.peek()).left;
 						int listright = (CUP_LexParse_stack.peek()).right;
-						Vector list = (Vector)( CUP_LexParse_stack.peek()).value;
+						Vector list = cast(Vector)( CUP_LexParse_stack.peek()).value;
 
 						try {
 							// assumption [correct?]: preclasses are already closed under case
@@ -1062,7 +1079,7 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int cleft = (CUP_LexParse_stack.peek()).left;
 						int cright = (CUP_LexParse_stack.peek()).right;
-						RegExp c = (RegExp)( CUP_LexParse_stack.peek()).value;
+						RegExp c = cast(RegExp)( CUP_LexParse_stack.peek()).value;
 						RESULT = c; 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("regexp",7, (CUP_LexParse_stack.peek()), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1074,7 +1091,7 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int identleft = (CUP_LexParse_stack.peek()).left;
 						int identright = (CUP_LexParse_stack.peek()).right;
-						String ident = (String)( CUP_LexParse_stack.peek()).value;
+						String ident = cast(string)( CUP_LexParse_stack.peek()).value;
 
 						if ( !scanner.macroDefinition ) {
 							if ( ! macros.markUsed(ident) ) 
@@ -1093,7 +1110,7 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int rleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int rright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						RegExp r = (RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						RegExp r = cast(RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						RESULT = r; 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("regexp",7, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1105,13 +1122,13 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int rleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).left;
 						int rright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).right;
-						RegExp r = (RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).value;
+						RegExp r = cast(RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).value;
 						int n1left = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).left;
 						int n1right = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).right;
-						Integer n1 = (Integer)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).value;
+						int n1 = cast(int)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).value;
 						int n2left = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int n2right = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						Integer n2 = (Integer)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						int n2 = cast(int)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						RESULT = makeRepeat(r, n1.intValue(), n2.intValue(), n1left, n2right); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("regexp",7, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1123,13 +1140,13 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int rleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).left;
 						int rright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).right;
-						RegExp r = (RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).value;
+						RegExp r = cast(RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).value;
 						int nleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int nright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						Integer n = (Integer)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						int n = cast(int)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						int bleft = (CUP_LexParse_stack.peek()).left;
 						int bright = (CUP_LexParse_stack.peek()).right;
-						Object b = (Object)( CUP_LexParse_stack.peek()).value;
+						Object b = cast(Object)( CUP_LexParse_stack.peek()).value;
 						RESULT = makeRepeat(r, n.intValue(), n.intValue(), bleft, bright); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("regexp",7, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1141,7 +1158,7 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int rleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int rright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						RegExp r = (RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						RegExp r = cast(RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						RESULT = new RegExp1(sym.QUESTION, r); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("regexp",7, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1153,7 +1170,7 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int rleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int rright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						RegExp r = (RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						RegExp r = cast(RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						RESULT = new RegExp1(sym.PLUS, r); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("regexp",7, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1165,7 +1182,7 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int rleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int rright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						RegExp r = (RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						RegExp r = cast(RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						RESULT = new RegExp1(sym.STAR, r); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("regexp",7, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1177,7 +1194,7 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int rleft = (CUP_LexParse_stack.peek()).left;
 						int rright = (CUP_LexParse_stack.peek()).right;
-						RegExp r = (RegExp)( CUP_LexParse_stack.peek()).value;
+						RegExp r = cast(RegExp)( CUP_LexParse_stack.peek()).value;
 						RESULT = new RegExp1(sym.TILDE, r); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("nregexp",6, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1189,7 +1206,7 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int rleft = (CUP_LexParse_stack.peek()).left;
 						int rright = (CUP_LexParse_stack.peek()).right;
-						RegExp r = (RegExp)( CUP_LexParse_stack.peek()).value;
+						RegExp r = cast(RegExp)( CUP_LexParse_stack.peek()).value;
 						RESULT = new RegExp1(sym.BANG, r); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("nregexp",6, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1201,7 +1218,7 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int rleft = (CUP_LexParse_stack.peek()).left;
 						int rright = (CUP_LexParse_stack.peek()).right;
-						RegExp r = (RegExp)( CUP_LexParse_stack.peek()).value;
+						RegExp r = cast(RegExp)( CUP_LexParse_stack.peek()).value;
 						RESULT = r; 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("nregexp",6, (CUP_LexParse_stack.peek()), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1213,7 +1230,7 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int rleft = (CUP_LexParse_stack.peek()).left;
 						int rright = (CUP_LexParse_stack.peek()).right;
-						RegExp r = (RegExp)( CUP_LexParse_stack.peek()).value;
+						RegExp r = cast(RegExp)( CUP_LexParse_stack.peek()).value;
 						RESULT = r; 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("concs",5, (CUP_LexParse_stack.peek()), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1225,10 +1242,10 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int r1left = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int r1right = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						RegExp r1 = (RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						RegExp r1 = cast(RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						int r2left = (CUP_LexParse_stack.peek()).left;
 						int r2right = (CUP_LexParse_stack.peek()).right;
-						RegExp r2 = (RegExp)( CUP_LexParse_stack.peek()).value;
+						RegExp r2 = cast(RegExp)( CUP_LexParse_stack.peek()).value;
 						RESULT = new RegExp2(sym.CONCAT, r1, r2); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("concs",5, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1240,7 +1257,7 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int bleft = (CUP_LexParse_stack.peek()).left;
 						int bright = (CUP_LexParse_stack.peek()).right;
-						Object b = (Object)( CUP_LexParse_stack.peek()).value;
+						Object b = cast(Object)( CUP_LexParse_stack.peek()).value;
 						syntaxError(ErrorMessages.REGEXP_EXPECTED, bleft, bright); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("series",4, (CUP_LexParse_stack.peek()), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1252,7 +1269,7 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int rleft = (CUP_LexParse_stack.peek()).left;
 						int rright = (CUP_LexParse_stack.peek()).right;
-						RegExp r = (RegExp)( CUP_LexParse_stack.peek()).value;
+						RegExp r = cast(RegExp)( CUP_LexParse_stack.peek()).value;
 						RESULT = r; 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("series",4, (CUP_LexParse_stack.peek()), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1264,10 +1281,10 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int r1left = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).left;
 						int r1right = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).right;
-						RegExp r1 = (RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).value;
+						RegExp r1 = cast(RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).value;
 						int r2left = (CUP_LexParse_stack.peek()).left;
 						int r2right = (CUP_LexParse_stack.peek()).right;
-						RegExp r2 = (RegExp)( CUP_LexParse_stack.peek()).value;
+						RegExp r2 = cast(RegExp)( CUP_LexParse_stack.peek()).value;
 						RESULT = new RegExp2(sym.BAR, r1, r2); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("series",4, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1299,7 +1316,7 @@ class CUP_LexParse_actions {
 						Vector RESULT =null;
 						int cleft = (CUP_LexParse_stack.peek()).left;
 						int cright = (CUP_LexParse_stack.peek()).right;
-						Object c = (Object)( CUP_LexParse_stack.peek()).value;
+						Object c = cast(Object)( CUP_LexParse_stack.peek()).value;
 						syntaxError(ErrorMessages.REGEXP_EXPECTED, cleft, cright+1); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("states",11, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1311,7 +1328,7 @@ class CUP_LexParse_actions {
 						Vector RESULT =null;
 						int idleft = (CUP_LexParse_stack.peek()).left;
 						int idright = (CUP_LexParse_stack.peek()).right;
-						String id = (String)( CUP_LexParse_stack.peek()).value;
+						String id = cast(string)( CUP_LexParse_stack.peek()).value;
 
 						Vector list = new Vector();
 						stateNumber = scanner.states.getNumber( id );
@@ -1333,10 +1350,10 @@ class CUP_LexParse_actions {
 						Vector RESULT =null;
 						int idleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).left;
 						int idright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).right;
-						String id = (String)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).value;
+						String id = cast(string)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).value;
 						int listleft = (CUP_LexParse_stack.peek()).left;
 						int listright = (CUP_LexParse_stack.peek()).right;
-						Vector list = (Vector)( CUP_LexParse_stack.peek()).value;
+						Vector list = cast(Vector)( CUP_LexParse_stack.peek()).value;
 
 						stateNumber = scanner.states.getNumber( id );
 						if ( stateNumber != null )
@@ -1366,7 +1383,7 @@ class CUP_LexParse_actions {
 						Vector RESULT =null;
 						int listleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int listright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						Vector list = (Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						Vector list = cast(Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						RESULT = list; 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("statesOPT",12, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1387,7 +1404,7 @@ class CUP_LexParse_actions {
 						Action RESULT =null;
 						int aleft = (CUP_LexParse_stack.peek()).left;
 						int aright = (CUP_LexParse_stack.peek()).right;
-						Action a = (Action)( CUP_LexParse_stack.peek()).value;
+						Action a = cast(Action)( CUP_LexParse_stack.peek()).value;
 						RESULT = a; 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("actions",18, (CUP_LexParse_stack.peek()), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1399,7 +1416,7 @@ class CUP_LexParse_actions {
 						Action RESULT =null;
 						int aleft = (CUP_LexParse_stack.peek()).left;
 						int aright = (CUP_LexParse_stack.peek()).right;
-						Action a = (Action)( CUP_LexParse_stack.peek()).value;
+						Action a = cast(Action)( CUP_LexParse_stack.peek()).value;
 						RESULT = a; 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("act",17, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1411,7 +1428,7 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int sleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int sright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						RegExp s = (RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						RegExp s = cast(RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						RESULT = new RegExp2(sym.CONCAT, s, makeNL()); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("lookahead",9, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1423,7 +1440,7 @@ class CUP_LexParse_actions {
 						RegExp RESULT =null;
 						int rleft = (CUP_LexParse_stack.peek()).left;
 						int rright = (CUP_LexParse_stack.peek()).right;
-						RegExp r = (RegExp)( CUP_LexParse_stack.peek()).value;
+						RegExp r = cast(RegExp)( CUP_LexParse_stack.peek()).value;
 						RESULT = r; 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("lookahead",9, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1441,7 +1458,7 @@ class CUP_LexParse_actions {
 					/*. . . . . . . . . . . . . . . . . . . .*/
 				case 19: // rule ::= error 
 					{
-						Integer RESULT =null;
+						int RESULT =null;
 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("rule",2, (CUP_LexParse_stack.peek()), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1450,13 +1467,13 @@ class CUP_LexParse_actions {
 					/*. . . . . . . . . . . . . . . . . . . .*/
 				case 18: // rule ::= statesOPT EOFRULE ACTION 
 					{
-						Integer RESULT =null;
+						int RESULT =null;
 						int sleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).left;
 						int sright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).right;
-						Vector s = (Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).value;
+						Vector s = cast(Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).value;
 						int aleft = (CUP_LexParse_stack.peek()).left;
 						int aright = (CUP_LexParse_stack.peek()).right;
-						Action a = (Action)( CUP_LexParse_stack.peek()).value;
+						Action a = cast(Action)( CUP_LexParse_stack.peek()).value;
 						RESULT = new Integer(regExps.insert(s, a)); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("rule",2, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1465,22 +1482,22 @@ class CUP_LexParse_actions {
 					/*. . . . . . . . . . . . . . . . . . . .*/
 				case 17: // rule ::= statesOPT hatOPT series lookahead NOACTION 
 					{
-						Integer RESULT =null;
+						int RESULT =null;
 						int sleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-4)).left;
 						int sright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-4)).right;
-						Vector s = (Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-4)).value;
+						Vector s = cast(Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-4)).value;
 						int bolleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).left;
 						int bolright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).right;
-						Boolean bol = (Boolean)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).value;
+						bool bol = cast(bool)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).value;
 						int rleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).left;
 						int rright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).right;
-						RegExp r = (RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).value;
+						RegExp r = cast(RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).value;
 						int lleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int lright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						RegExp l = (RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						RegExp l = cast(RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						int aleft = (CUP_LexParse_stack.peek()).left;
 						int aright = (CUP_LexParse_stack.peek()).right;
-						Object a = (Object)( CUP_LexParse_stack.peek()).value;
+						Object a = cast(Object)( CUP_LexParse_stack.peek()).value;
 						syntaxError(ErrorMessages.LOOKAHEAD_NEEDS_ACTION, aleft, aright+1); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("rule",2, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-4)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1489,22 +1506,22 @@ class CUP_LexParse_actions {
 					/*. . . . . . . . . . . . . . . . . . . .*/
 				case 16: // rule ::= statesOPT hatOPT series lookahead act 
 					{
-						Integer RESULT =null;
+						int RESULT =null;
 						int sleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-4)).left;
 						int sright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-4)).right;
-						Vector s = (Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-4)).value;
+						Vector s = cast(Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-4)).value;
 						int bolleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).left;
 						int bolright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).right;
-						Boolean bol = (Boolean)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).value;
+						bool bol = cast(bool)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).value;
 						int rleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).left;
 						int rright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).right;
-						RegExp r = (RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).value;
+						RegExp r = cast(RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).value;
 						int lleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int lright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						RegExp l = (RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						RegExp l = cast(RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						int aleft = (CUP_LexParse_stack.peek()).left;
 						int aright = (CUP_LexParse_stack.peek()).right;
-						Action a = (Action)( CUP_LexParse_stack.peek()).value;
+						Action a = cast(Action)( CUP_LexParse_stack.peek()).value;
 						RESULT = new Integer(regExps.insert(rleft, s, r, a, bol, l)); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("rule",2, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-4)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1513,19 +1530,19 @@ class CUP_LexParse_actions {
 					/*. . . . . . . . . . . . . . . . . . . .*/
 				case 15: // rule ::= statesOPT hatOPT series actions 
 					{
-						Integer RESULT =null;
+						int RESULT =null;
 						int sleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).left;
 						int sright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).right;
-						Vector s = (Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).value;
+						Vector s = cast(Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).value;
 						int bolleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).left;
 						int bolright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).right;
-						Boolean bol = (Boolean)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).value;
+						bool bol = cast(bool)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-2)).value;
 						int rleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int rright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						RegExp r = (RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						RegExp r = cast(RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						int aleft = (CUP_LexParse_stack.peek()).left;
 						int aright = (CUP_LexParse_stack.peek()).right;
-						Action a = (Action)( CUP_LexParse_stack.peek()).value;
+						Action a = cast(Action)( CUP_LexParse_stack.peek()).value;
 						RESULT = new Integer(regExps.insert(rleft, s, r, a, bol, null)); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("rule",2, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1537,7 +1554,7 @@ class CUP_LexParse_actions {
 						Vector RESULT =null;
 						int rleft = (CUP_LexParse_stack.peek()).left;
 						int rright = (CUP_LexParse_stack.peek()).right;
-						Integer r = (Integer)( CUP_LexParse_stack.peek()).value;
+						int r = cast(int)( CUP_LexParse_stack.peek()).value;
 						RESULT = new Vector(); RESULT.addElement(r); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("rules",15, (CUP_LexParse_stack.peek()), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1549,14 +1566,14 @@ class CUP_LexParse_actions {
 						Vector RESULT =null;
 						int statesleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-4)).left;
 						int statesright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-4)).right;
-						Vector states = (Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-4)).value;
+						Vector states = cast(Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-4)).value;
 						int rlistleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int rlistright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						Vector rlist = (Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						Vector rlist = cast(Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 
 						Enumeration rs = rlist.elements();
 						while ( rs.hasMoreElements() ) {
-							Integer elem = (Integer) rs.nextElement();
+							int elem = cast(int)rs.nextElement();
 							// might be null for error case of "rule"
 							if (elem != null) { 
 								regExps.addStates( elem.intValue(), states );
@@ -1574,17 +1591,17 @@ class CUP_LexParse_actions {
 						Vector RESULT =null;
 						int rlist1left = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-6)).left;
 						int rlist1right = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-6)).right;
-						Vector rlist1 = (Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-6)).value;
+						Vector rlist1 = cast(Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-6)).value;
 						int statesleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-4)).left;
 						int statesright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-4)).right;
-						Vector states = (Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-4)).value;
+						Vector states = cast(Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-4)).value;
 						int rlist2left = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int rlist2right = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						Vector rlist2 = (Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						Vector rlist2 = cast(Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 
 						Enumeration rs = rlist2.elements();
 						while ( rs.hasMoreElements() ) {
-							Integer elem = (Integer) rs.nextElement();
+							int elem = cast(int) rs.nextElement();
 							// might be null for error case of "rule"
 							if (elem != null) { 
 								regExps.addStates( elem.intValue(), states );
@@ -1603,10 +1620,10 @@ class CUP_LexParse_actions {
 						Vector RESULT =null;
 						int rlistleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int rlistright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						Vector rlist = (Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						Vector rlist = cast(Vector)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						int rleft = (CUP_LexParse_stack.peek()).left;
 						int rright = (CUP_LexParse_stack.peek()).right;
-						Integer r = (Integer)( CUP_LexParse_stack.peek()).value;
+						int r = cast(int)( CUP_LexParse_stack.peek()).value;
 						rlist.addElement(r); RESULT = rlist; 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("rules",15, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1618,7 +1635,7 @@ class CUP_LexParse_actions {
 						Object RESULT =null;
 						int eleft = (CUP_LexParse_stack.peek()).left;
 						int eright = (CUP_LexParse_stack.peek()).right;
-						Object e = (Object)( CUP_LexParse_stack.peek()).value;
+						Object e = cast(Object)( CUP_LexParse_stack.peek()).value;
 						syntaxError(ErrorMessages.REGEXP_EXPECTED, eleft, eright); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("macro",1, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1630,10 +1647,10 @@ class CUP_LexParse_actions {
 						Object RESULT =null;
 						int nameleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).left;
 						int nameright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).right;
-						String name = (String)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).value;
+						String name = cast(string)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)).value;
 						int definitionleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int definitionright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						RegExp definition = (RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						RegExp definition = cast(RegExp)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						macros.insert(name, definition); 
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("macro",1, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-3)), (CUP_LexParse_stack.peek()), RESULT);
 					}
@@ -1764,7 +1781,7 @@ class CUP_LexParse_actions {
 						Object RESULT =null;
 						int start_valleft = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).left;
 						int start_valright = (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).right;
-						NFA start_val = (NFA)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
+						NFA start_val = cast(NFA)( CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)).value;
 						RESULT = start_val;
 						CUP_LexParse_result = parser.getSymbolFactory().newSymbol("_START",0, (CUP_LexParse_stack.elementAt(CUP_LexParse_top-1)), (CUP_LexParse_stack.peek()), RESULT);
 					}

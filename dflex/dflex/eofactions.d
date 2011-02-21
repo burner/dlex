@@ -18,77 +18,82 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package JFlex;
+module dflex.eofactions;
 
-import java.util.*;
+import dflex.action;
+
+import hurt.container.vector;
 
 
-/**
- * A simple table to store EOF actions for each lexical state.
+/** A simple table to store EOF actions for each lexical state.
  *
  * @author Gerwin Klein
  * @version JFlex 1.4.3, $Revision: 433 $, $Date: 2009-01-31 19:52:34 +1100 (Sat, 31 Jan 2009) $
  */
 public class EOFActions {
 
-  /** maps lexical states to actions */
-  private Hashtable /* Integer -> Action */ actions = new Hashtable();
-  private Action defaultAction;
-  private int numLexStates;
+	/** maps lexical states to actions */
+	//private Hashtable /* Integer -> Action */ actions = new Hashtable();
+	private Action[int] actions = new Action[];
+	private Action defaultAction;
+	private int numLexStates;
 
-  public void setNumLexStates(int num) {
-    numLexStates = num;
-  }
+	public void setNumLexStates(int num) {
+		numLexStates = num;
+	}
 
-  public void add(Vector stateList, Action action) {
+	public void add(Vector!(int) stateList, Action action) {
 
-    if (stateList != null && stateList.size() > 0) {
-      Enumeration states = stateList.elements();
-      
-      while (states.hasMoreElements()) 
-        add( (Integer) states.nextElement(), action );   
-    }
-    else {
-      defaultAction = action.getHigherPriority(defaultAction);
-      
-      for (int i = 0; i < numLexStates; i++) {
-        Integer state = new Integer(i);
-        if ( actions.get(state) != null ) {
-          Action oldAction = (Action) actions.get(state);
-          actions.put(state, oldAction.getHigherPriority(action));
-        }
-      }
-    }
-  }
+		if (stateList != null && stateList.size() > 0) {
+			int[] states = stateList.elements();
 
-  public void add(Integer state, Action action) {
-    if ( actions.get(state) == null )
-      actions.put(state, action);
-    else {
-      Action oldAction = (Action) actions.get(state);
-      actions.put(state, oldAction.getHigherPriority(action));
-    }
-  }
+			foreach(it; states) {
+				add(it, action);
+			}
+			/*while (states.hasMoreElements()) 
+				add( cast(Integer) states.nextElement(), action );   */
+		} else {
+			defaultAction = action.getHigherPriority(defaultAction);
 
-  public boolean isEOFAction(Object a) {
-    if (a == defaultAction) return true;
+			for (int i = 0; i < numLexStates; i++) {
+				Integer state = new Integer(i);
+				if ( actions.get(state) != null ) {
+					Action oldAction = cast(Action) actions.get(state);
+					actions.put(state, oldAction.getHigherPriority(action));
+				}
+			}
+		}
+	}
 
-    Enumeration e = actions.elements();
-    while ( e.hasMoreElements() ) 
-      if (a == e.nextElement()) return true;
+	public void add(int state, Action action) {
+		if ( actions.get(state) == null )
+			actions[state] =  action;
+		else {
+			Action oldAction = actions[state];
+			actionsput(state, oldAction.getHigherPriority(action));
+		}
+	}
 
-    return false;
-  }
+	public bool isEOFAction(Object a) {
+		if (a == defaultAction) 
+			return true;
 
-  public Action getAction(int state) {
-    return (Action) actions.get(new Integer(state));
-  }
+		Enumeration e = actions.elements();
+		while ( e.hasMoreElements() ) 
+			if (a == e.nextElement()) return true;
 
-  public Action getDefault() {
-    return defaultAction;
-  }
+		return false;
+	}
 
-  public int numActions() {
-    return actions.size();
-  }
+	public Action getAction(int state) {
+		return actions[state];
+	}
+
+	public Action getDefault() {
+		return defaultAction;
+	}
+
+	public int numActions() {
+		return actions.getSize();
+	}
 }

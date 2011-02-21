@@ -36,7 +36,7 @@ import JFlex.gui.MainFrame;
 public class Main {
   
   /** JFlex version */
-  final public static String version = "1.4.3"; //$NON-NLS-1$
+  public static string dflexVersion = "001"; //$NON-NLS-1$
 
   /**
    * Generates a scanner for the specified input file.

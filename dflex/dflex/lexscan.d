@@ -22,7 +22,10 @@
 
 module dflex.lexscan;
 
+import dflex.action;
 import dflex.sym;
+import dflex.lexicalstates;
+import dflex.timer;
 
 import cup.symbol;
 import cup.scanner;
@@ -32,7 +35,7 @@ import hurt.container.vector;
 import hurt.string.stringbuffer;
 import hurt.util.array;
 
-import std.stdio;
+import std.stream;
 
 /** The lexer of JFlex.
  *
@@ -1559,7 +1562,7 @@ public final class LexScan : sym, Scanner {
 	}
 
 	/** the input device */
-	private java.io.Reader zzReader;
+	private Stream zzReader;
 
 	/** the current state of the DFA */
 	private int zzState;
@@ -1608,14 +1611,14 @@ public final class LexScan : sym, Scanner {
 	private bool zzEOFDone;
 
 	/** the stack of open (nested) input streams to read from */
-	private Stack zzStreams = new Stack();
+	private Stack!(Stream) zzStreams = new Stack!(Stream)();
 
 	/**
 	 * inner class used to store info for nested
 	 * input streams
 	 */
 	private class ZzFlexStreamInfo {
-		java.io.Reader zzReader;
+		Stream zzReader;
 		int zzEndRead;
 		int zzStartRead;
 		int zzCurrentPos;
@@ -1627,7 +1630,7 @@ public final class LexScan : sym, Scanner {
 		bool zzEOFDone;
 
 		/** sets all values stored in this class */
-		public this(java.io.Reader zzReader, int zzEndRead, int zzStartRead,
+		public this(Stream zzReader, int zzEndRead, int zzStartRead,
 				int zzCurrentPos, int zzMarkedPos, 
 				char [] zzBuffer, bool zzAtEOF, int yyline, int yycolumn) {
 			this.zzReader = zzReader;
@@ -1700,7 +1703,7 @@ public final class LexScan : sym, Scanner {
 
 	LexicalStates states = new LexicalStates();
 
-	Vector actions = new Vector();
+	Vector!(Action) actions = new Vector!(Action)();
 
 	private int nextState;
 
@@ -1782,7 +1785,7 @@ public final class LexScan : sym, Scanner {
 	 *
 	 * @param   in  the java.io.Reader to read input from.
 	 */
-	public this(java.io.Reader inReader) {
+	public this(Stream inReader) {
 		states.insert("YYINITIAL", true);
 		this.zzReader = inReader;
 	}
@@ -1792,10 +1795,10 @@ public final class LexScan : sym, Scanner {
 	 * There is also java.io.Reader version of this constructor.
 	 *
 	 * @param   in  the java.io.Inputstream to read input from.
-	 */
-	public this(java.io.InputStream inStream) {
+	 
+	public this(tjava.io.InputStream inStream) {
 		this(new java.io.InputStreamReader(inStream));
-	}
+	}*/
 
 	/** 
 	 * Unpacks the compressed character translation table.
@@ -1876,7 +1879,7 @@ public final class LexScan : sym, Scanner {
 		zzAtEOF = true;            /* indicate end of file */
 		zzEndRead = zzStartRead;  /* invalidate buffer    */
 
-		if(zzReader != null)
+		if(zzReader !is null)
 			zzReader.close();
 	}
 
@@ -1893,7 +1896,7 @@ public final class LexScan : sym, Scanner {
 	 *
 	 * @see #yypopStream()
 	 */
-	public final void yypushStream(java.io.Reader reader) {
+	public final void yypushStream(InputStream reader) {
 		zzStreams.push(
 				new ZzFlexStreamInfo(zzReader, zzEndRead, zzStartRead, zzCurrentPos,
 					zzMarkedPos, zzBuffer, zzAtEOF,
@@ -1957,7 +1960,7 @@ public final class LexScan : sym, Scanner {
 	 * @see #yypushStream(java.io.Reader)
 	 * @see #yypopStream()
 	 */
-	public final void yyreset(java.io.Reader reader) {
+	public final void yyreset(InputStream reader) {
 		zzReader = reader;
 		zzAtBOL  = true;
 		zzAtEOF  = false;
@@ -2085,17 +2088,17 @@ public final class LexScan : sym, Scanner {
 		int zzInput;
 		int zzAction;
 
-		int [] zzTransL = ZZ_TRANS;
-		int [] zzRowMapL = ZZ_ROWMAP;
-		int [] zzAttrL = ZZ_ATTRIBUTE;
+		int[] zzTransL = ZZ_TRANS;
+		int[] zzRowMapL = ZZ_ROWMAP;
+		int[] zzAttrL = ZZ_ATTRIBUTE;
 
 		while(true) {
 			// cached fields:
 			int zzCurrentPosL;
 			int zzMarkedPosL = zzMarkedPos;
 			int zzEndReadL = zzEndRead;
-			char [] zzBufferL = zzBuffer;
-			char [] zzCMapL = ZZ_CMAP;
+			char[] zzBufferL = zzBuffer;
+			char[] zzCMapL = ZZ_CMAP;
 
 			bool zzR = false;
 			for(zzCurrentPosL = zzStartRead; zzCurrentPosL < zzMarkedPosL;

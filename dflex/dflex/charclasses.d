@@ -20,9 +20,10 @@
 
 module dflex.charclasses;
 
+import dflex.charclassinterval;
 import dflex.intcharset;
 import dflex.interval;
-import dflex.charclassinterval;
+import dflex.outmodule;
 
 import hurt.container.vector;
 import hurt.conv.conv;
@@ -110,7 +111,7 @@ public class CharClasses {
 			set = set.getCaseless();
 
 		if( DEBUG ) {
-			write("makeClass(" ~ set.toString() ~ ")");
+			Out.dump("makeClass(" ~ set.toString() ~ ")");
 			dump();
 		}
 
@@ -131,7 +132,7 @@ public class CharClasses {
 					x.sub(and);
 					classes.append(and);
 					if(DEBUG) {
-						write("makeClass(..) finished");
+						Out.dump("makeClass(..) finished");
 						dump();
 					}
 					return;
@@ -144,7 +145,7 @@ public class CharClasses {
 		}
 
 		if(DEBUG) {
-			write("makeClass(..) finished");
+			Out.dump("makeClass(..) finished");
 			dump();
 		}
 	}
@@ -165,7 +166,7 @@ public class CharClasses {
 	 * Dump charclasses to the dump output stream
 	 */
 	public void dump() {
-		write(this.toString());
+		Out.dump(this.toString());
 	}  
 
 
@@ -264,9 +265,9 @@ public class CharClasses {
 	private int [] getClassCodes(IntCharSet!(dchar) set, bool negate) {
 
 		if(DEBUG) {
-			write("getting class codes for " ~ set.toString());
+			Out.dump("getting class codes for " ~ set.toString());
 			if(negate)
-				write("[negated]");
+				Out.dump("[negated]");
 		}
 
 		uint size = classes.getSize();
@@ -280,13 +281,13 @@ public class CharClasses {
 			if( negate ) {
 				if( !set.and(x).containsElements() ) {
 					temp[tlength++] = i;
-					if(DEBUG) write("code " ~ conv!(int,string)(i));
+					if(DEBUG) Out.dump("code " ~ conv!(int,string)(i));
 				}
 			}
 			else {
 				if( set.and(x).containsElements() ) {
 					temp[tlength++] = i;
-					if(DEBUG) write("code " ~ conv!(int,string)(i));
+					if(DEBUG) Out.dump("code " ~ conv!(int,string)(i));
 				}
 			}
 		}

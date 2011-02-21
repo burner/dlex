@@ -22,6 +22,7 @@ module dflex.dfa;
 
 import dflex.action;
 import dflex.lexscan;
+import dflex.lexparse;
 import dflex.outmodule;
 
 import hurt.math.mathutil;

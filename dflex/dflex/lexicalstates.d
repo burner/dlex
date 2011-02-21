@@ -18,13 +18,11 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package JFlex;
+module dflex.lexicalstates;
 
-import java.util.*;
+import hurt.container.vector;
 
-
-/**
- * Simple symbol table, mapping lexical state names to integers. 
+/** Simple symbol table, mapping lexical state names to integers. 
  *
  * @author Gerwin Klein
  * @version JFlex 1.4.3, $Revision: 433 $, $Date: 2009-01-31 19:52:34 +1100 (Sat, 31 Jan 2009) $
@@ -32,35 +30,32 @@ import java.util.*;
 public class LexicalStates {
   
   /** maps state name to state number */
-  Hashtable states; 
+  int[string] states; 
 
   /** codes of inclusive states (subset of states) */
-  Vector inclusive;
+  Vector!(int) inclusive;
 
   /** number of declared states */
   int numStates;
 
-
-  /**
-   * constructs a new lexical state symbol table
+  /** constructs a new lexical state symbol table
    */
-  public LexicalStates() {
-    states = new Hashtable();
-    inclusive = new Vector();
+  public this() {
+    states = new int[string];
+    inclusive = new Vector!(int)();
   }
-
   
-  /**
-   * insert a new state declaration
+  /** insert a new state declaration
    */
-  public void insert(String name, boolean is_inclusive) {
-    if ( states.containsKey(name) ) return;
+  public void insert(string name, bool is_inclusive) {
+    if ( states.containsKey(name) ) 
+		return;
 
-    Integer code = new Integer(numStates++);
-    states.put(name, code);
+    numStates++;
+    states[name] = code;
 
     if (is_inclusive) 
-      inclusive.addElement(code);
+      inclusive.append(code);
   }
 
 
@@ -68,8 +63,8 @@ public class LexicalStates {
    * returns the number (code) of a declared state, 
    * <code>null</code> if no such state has been declared.
    */
-  public Integer getNumber(String name) {
-    return (Integer) states.get(name);
+  public int getNumber(string name) {
+    return states[name];
   }
 
   
@@ -84,14 +79,14 @@ public class LexicalStates {
   /**
    * returns the names of all states
    */
-  public Enumeration names() {
-    return states.keys();
+  public string[] names() {
+    return states.keys;
   }
 
   /**
    * returns the code of all inclusive states
    */
-  public Enumeration getInclusiveStates() {
+  public int[] getInclusiveStates() {
     return inclusive.elements();
   }
 }

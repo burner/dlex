@@ -32,58 +32,58 @@ import dflex.charset;
  */
 final public class CharSetEnumerator {
 
-  private int index;
-  private int offset;
-  private long mask = 1;
+	private int index;
+	private int offset;
+	private long mask = 1;
 
-  private CharSet set;
-  
-  public this(CharSet characters) {
-    set = characters;
+	private CharSet set;
 
-    while (index < set.bits.length && set.bits[index] == 0) 
-      index++;
+	public this(CharSet characters) {
+		set = characters;
 
-    if (index >= set.bits.length) return;
-        
-    while (offset <= CharSet.MOD && ((set.bits[index] & mask) == 0)) {
-      mask<<= 1;
-      offset++;
-    }
-  }
+		while(index < set.bits.length && set.bits[index] == 0) 
+			index++;
 
-  private void advance() {
-    do {
-      offset++;
-      mask<<= 1;
-    } while (offset <= CharSet.MOD && ((set.bits[index] & mask) == 0));
+		if(index >= set.bits.length) return;
 
-    if (offset > CharSet.MOD) {
-      do 
-        index++;
-      while (index < set.bits.length && set.bits[index] == 0);
-        
-      if (index >= set.bits.length) return;
-        
-      offset = 0;
-      mask = 1;
-      
-      while (offset <= CharSet.MOD && ((set.bits[index] & mask) == 0)) {
-        mask<<= 1;
-        offset++;
-      } 
-    }
-  }
+		while(offset <= CharSet.MOD && ((set.bits[index] & mask) == 0)) {
+			mask<<= 1;
+			offset++;
+		}
+	}
 
-  public bool hasMoreElements() {
-    return index < set.bits.length;
-  }
+	private void advance() {
+		do {
+			offset++;
+			mask<<= 1;
+		} while(offset <= CharSet.MOD && ((set.bits[index] & mask) == 0));
 
-  public int nextElement() {
-    int x = (index << CharSet.BITS) + offset;
-    advance();
-    return x;
-  }
+		if(offset > CharSet.MOD) {
+			do 
+				index++;
+			while(index < set.bits.length && set.bits[index] == 0);
+
+			if(index >= set.bits.length) return;
+
+			offset = 0;
+			mask = 1;
+
+			while(offset <= CharSet.MOD && ((set.bits[index] & mask) == 0)) {
+				mask<<= 1;
+				offset++;
+			} 
+		}
+	}
+
+	public bool hasMoreElements() {
+		return index < set.bits.length;
+	}
+
+	public int nextElement() {
+		int x = (index << CharSet.BITS) + offset;
+		advance();
+		return x;
+	}
 
 }
 

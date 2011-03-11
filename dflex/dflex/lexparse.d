@@ -635,11 +635,8 @@ class CUP_LexParse_actions {
 	}
 
 	/** Method with the actual generated action code. */
-	public final Symbol CUP_LexParse_do_action(
-			int                        CUP_LexParse_act_num,
-			lr_parser CUP_LexParse_parser,
-			Stack CUP_LexParse_stack,
-			int                        CUP_LexParse_top) {
+	public final Symbol CUP_LexParse_do_action(int CUP_LexParse_act_num, lr_parser CUP_LexParse_parser,
+		 	Stack CUP_LexParse_stack, int CUP_LexParse_top) {
 			/* Symbol object for return from actions */
 			Symbol CUP_LexParse_result;
 

@@ -1,4 +1,4 @@
-module cnfapair;
+module dlex.cnfapair;
 
 import dlex.cnfa;
 

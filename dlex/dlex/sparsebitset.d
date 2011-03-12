@@ -2,6 +2,10 @@ module sparsebitset;
 
 import dlex.enumeration;
 
+import hurt.conv.conv;
+import hurt.util.array;
+import hurt.string.stringbuffer;
+
 //final class SparseBitSet implements Cloneable {
 final class SparseBitSet {
 	/** Sorted array of bit-block offsets. */
@@ -17,17 +21,24 @@ final class SparseBitSet {
 	/** BITS-1, using the identity: x % BITS == x & (BITS-1) */
 	static private immutable BITS_M1 = BITS - 1;
 
-	public static this() {
-		this.AND = new BinAnd();
-		this.OR = new BinOr();
-		this.XOR = new BinXor();
-	}
+	/*public static this() {
+		SparseBitSet.AND = new BinAnd();
+		SparseBitSet.OR = new BinOr();
+		SparseBitSet.XOR = new BinXor();
+	}*/
+
+	private BinOp AND;
+	private BinOp OR;
+	private BinOp XOR;
 
 	/** Creates an empty set.  */
 	public this() {
 		bits = new long[4];
 		offs = new int[4];
 		size = 0;
+		//this.AND = new BinAnd();
+		//this.OR = new BinOr();
+		//this.XOR = new BinXor();
 	}
 
 	/** Creates an empty set with the specified size.
@@ -53,11 +64,11 @@ final class SparseBitSet {
 	}
 
 	private void new_block(int idx, int bnum) {
-		if (size == bits.length) { // resize
+		if(size == bits.length) { // resize
 			long[] nbits = new long[size * 3];
 			int[] noffs = new int[size * 3];
-			System.arraycopy(bits, 0, nbits, 0, size);
-			System.arraycopy(offs, 0, noffs, 0, size);
+			arrayCopy(bits, 0, nbits, 0, size);
+			arrayCopy(offs, 0, noffs, 0, size);
 			bits = nbits;
 			offs = noffs;
 		}
@@ -68,8 +79,8 @@ final class SparseBitSet {
 	private void insert_block(int idx, int bnum) {
 		assert(idx <= size);
 		assert(idx == size || offs[idx] != bnum);
-		System.arraycopy(bits, idx, bits, idx + 1, size - idx);
-		System.arraycopy(offs, idx, offs, idx + 1, size - idx);
+		arrayCopy(bits, idx, bits, idx + 1, size - idx);
+		arrayCopy(offs, idx, offs, idx + 1, size - idx);
 		offs[idx] = bnum;
 		bits[idx] = 0; // clear them bits.
 		size++;
@@ -77,11 +88,11 @@ final class SparseBitSet {
 
 	private int bsearch(int bnum) {
 		int l = 0, r = size; // search interval is [l, r)
-		while (l < r) {
+		while(l < r) {
 			int p = (l + r) / 2;
-			if (bnum < offs[p])
+			if(bnum < offs[p])
 				r = p;
-			else if (bnum > offs[p])
+			else if(bnum > offs[p])
 				l = p + 1;
 			else
 				return p;
@@ -99,7 +110,7 @@ final class SparseBitSet {
 	public void set(int bit) {
 		int bnum = bit >> LG_BITS;
 		int idx = bsearch(bnum);
-		if (idx >= size || offs[idx] != bnum)
+		if(idx >= size || offs[idx] != bnum)
 			new_block(idx, bnum);
 		bits[idx] |= (1L << (bit & BITS_M1));
 	}
@@ -113,7 +124,7 @@ final class SparseBitSet {
 	public void clear(int bit) {
 		int bnum = bit >> LG_BITS;
 		int idx = bsearch(bnum);
-		if (idx >= size || offs[idx] != bnum)
+		if(idx >= size || offs[idx] != bnum)
 			new_block(idx, bnum);
 		bits[idx] &= ~(1L << (bit & BITS_M1));
 	}
@@ -134,7 +145,7 @@ final class SparseBitSet {
 	public bool get(int bit) {
 		int bnum = bit >> LG_BITS;
 		int idx = bsearch(bnum);
-		if (idx >= size || offs[idx] != bnum)
+		if(idx >= size || offs[idx] != bnum)
 			return false;
 		return 0 != (bits[idx] & (1L << (bit & BITS_M1)));
 	}
@@ -170,7 +181,7 @@ final class SparseBitSet {
 	}
 
 	// BINARY OPERATION MACHINERY
-	private static interface BinOp {
+	private interface BinOp {
 		public long op(long a, long b);
 	}
 
@@ -192,17 +203,13 @@ final class SparseBitSet {
 		}
 	}
 
-	private static BinOp AND;
-	private static BinOp OR;
-	private static BinOp XOR;
-
 	private static final void binop(SparseBitSet a, SparseBitSet b, BinOp op) {
 		int nsize = a.size + b.size;
 		long[] nbits;
 		int[] noffs;
 		int a_zero, a_size;
 		// be very clever and avoid allocating more memory if we can.
-		if (a.bits.length < nsize) { // oh well, have to make working space.
+		if(a.bits.length < nsize) { // oh well, have to make working space.
 			nbits = new long[nsize];
 			noffs = new int[nsize];
 			a_zero = 0;
@@ -212,19 +219,19 @@ final class SparseBitSet {
 			noffs = a.offs;
 			a_zero = a.bits.length - a.size;
 			a_size = a.bits.length;
-			System.arraycopy(a.bits, 0, a.bits, a_zero, a.size);
-			System.arraycopy(a.offs, 0, a.offs, a_zero, a.size);
+			arrayCopy(a.bits, 0, a.bits, a_zero, a.size);
+			arrayCopy(a.offs, 0, a.offs, a_zero, a.size);
 		}
 		// ok, crunch through and binop those sets!
 		nsize = 0;
-		for (int i = a_zero, j = 0; i < a_size || j < b.size;) {
+		for(int i = a_zero, j = 0; i < a_size || j < b.size;) {
 			long nb;
 			int no;
-			if (i < a_size && (j >= b.size || a.offs[i] < b.offs[j])) {
+			if(i < a_size && (j >= b.size || a.offs[i] < b.offs[j])) {
 				nb = op.op(a.bits[i], 0);
 				no = a.offs[i];
 				i++;
-			} else if (j < b.size && (i >= a_size || a.offs[i] > b.offs[j])) {
+			} else if(j < b.size && (i >= a_size || a.offs[i] > b.offs[j])) {
 				nb = op.op(0, b.bits[j]);
 				no = b.offs[j];
 				j++;
@@ -234,7 +241,7 @@ final class SparseBitSet {
 				i++;
 				j++;
 			}
-			if (nb != 0) {
+			if(nb != 0) {
 				nbits[nsize] = nb;
 				noffs[nsize] = no;
 				nsize++;
@@ -250,7 +257,7 @@ final class SparseBitSet {
 	 */
 	public int hashCode() {
 		long h = 1234;
-		for (int i = 0; i < size; i++)
+		for(int i = 0; i < size; i++)
 			h ^= bits[i] * offs[i];
 		return conv!(long,int)((h >> 32) ^ h);
 	}
@@ -270,7 +277,7 @@ final class SparseBitSet {
 	 * @return true if the objects are the same; false otherwise.
 	 */
 	public bool equals(Object obj) {
-		if ((obj !is null) && is(obj == SparseBitSet))
+		if((obj !is null) && is(obj == SparseBitSet))
 			return equals(this, cast(SparseBitSet) obj);
 		return false;
 	}
@@ -281,15 +288,15 @@ final class SparseBitSet {
 	 * @return true if the objects are the same; false otherwise.
 	 */
 	public static bool equals(SparseBitSet a, SparseBitSet b) {
-		for (int i = 0, j = 0; i < a.size || j < b.size;) {
-			if (i < a.size && (j >= b.size || a.offs[i] < b.offs[j])) {
-				if (a.bits[i++] != 0)
+		for(int i = 0, j = 0; i < a.size || j < b.size;) {
+			if(i < a.size && (j >= b.size || a.offs[i] < b.offs[j])) {
+				if(a.bits[i++] != 0)
 					return false;
-			} else if (j < b.size && (i >= a.size || a.offs[i] > b.offs[j])) {
-				if (b.bits[j++] != 0)
+			} else if(j < b.size && (i >= a.size || a.offs[i] > b.offs[j])) {
+				if(b.bits[j++] != 0)
 					return false;
 			} else { // equal keys
-				if (a.bits[i++] != b.bits[j++])
+				if(a.bits[i++] != b.bits[j++])
 					return false;
 			}
 		}
@@ -312,7 +319,7 @@ final class SparseBitSet {
 	 * represent set bit indices in this SparseBitSet.
 	 */
 	public Enumeration!(long) elements() {
-		return new Enumeration!(long)(this.offs, this.bits, this.BITS);
+		return new Enumeration!(long)(this.offs, this.bits, this.BITS, this.size);
 	}
 
 	/**
@@ -320,26 +327,26 @@ final class SparseBitSet {
 	 */
 	public override string toString() {
 		StringBuffer!(char) sb = new StringBuffer!(char)();
-		sb.append('{');
-		for(Enumeration e = elements(); e.hasMoreElements();) {
-			if(sb.length() > 1)
-				sb.append(", ");
-			sb.append(e.nextElement());
+		sb.pushBack('{');
+		for(Enumeration!(long) e = elements(); e.hasMoreElements();) {
+			if(sb.getSize() > 1)
+				sb.pushBack(", ");
+			sb.pushBack(conv!(long,string)(e.nextElement()));
 		}
-		sb.append('}');
+		sb.pushBack('}');
 		return sb.toString();
 	}
 
 	/** Check validity. */
 	private bool isValid() {
-		if (bits.length != offs.length)
+		if(bits.length != offs.length)
 			return false;
-		if (size > bits.length)
+		if(size > bits.length)
 			return false;
-		if (size != 0 && 0 <= offs[0])
+		if(size != 0 && 0 <= offs[0])
 			return false;
-		for (int i = 1; i < size; i++)
-			if (offs[i] < offs[i - 1])
+		for(int i = 1; i < size; i++)
+			if(offs[i] < offs[i - 1])
 				return false;
 		return true;
 	}
@@ -359,18 +366,18 @@ final class SparseBitSet {
 		assert(!a.get(0) && !a.get(1));
 		java.util.Random r = new java.util.Random();
 		java.util.Vector v = new java.util.Vector();
-		for (int n = 0; n < ITER; n++) {
+		for(int n = 0; n < ITER; n++) {
 			int rr = ((r.nextInt() >>> 1) % RANGE) << 1;
 			a.set(rr);
 			v.addElement(new Integer(rr));
 			// check that all the numbers are there.
 			assert(a.get(rr) && !a.get(rr + 1) && !a.get(rr - 1));
-			for (int i = 0; i < v.size(); i++)
+			for(int i = 0; i < v.size(); i++)
 				assert(a.get(((Integer) v.elementAt(i)).intValue()));
 		}
 		SparseBitSet b = (SparseBitSet) a.clone();
 		assert(a.equals(b) && b.equals(a));
-		for (int n = 0; n < ITER / 2; n++) {
+		for(int n = 0; n < ITER / 2; n++) {
 			int rr = (r.nextInt() >>> 1) % v.size();
 			int m = ((Integer) v.elementAt(rr)).intValue();
 			b.clear(m);

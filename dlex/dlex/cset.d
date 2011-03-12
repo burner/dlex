@@ -1,6 +1,10 @@
-module cset;
+module dlex.cset;
 
 import dlex.sparsebitset;
+import dlex.enumeration;
+
+import hurt.conv.conv;
+import hurt.string.stringutil;
 
 class CSet {
 	/********************************************************
@@ -38,10 +42,10 @@ class CSet {
 	void addncase(char c) {
 		/* Do this in a Unicode-friendly way. */
 		/* (note that duplicate adds have no effect) */
-		add(c);
-		add(Character.toLowerCase(c));
-		add(Character.toTitleCase(c));
-		add(Character.toUpperCase(c));
+		add(conv!(char,int)(c));
+		add(conv!(char,int)(toLowerCase!(char)(c)));
+		add(conv!(char,int)(toTitleCase!(char)(c)));
+		add(conv!(char,int)(toUpperCase!(char)(c)));
 	}
 
 	/********************************************************
@@ -52,7 +56,7 @@ class CSet {
 
 		result = m_set.get(i);
 
-		if (m_complement) {
+		if(m_complement) {
 			return (false == result);
 		}
 
@@ -71,10 +75,10 @@ class CSet {
 	void map(CSet set, int[] mapping) {
 		m_complement = set.m_complement;
 		m_set.clearAll();
-		for (Enumeration e = set.m_set.elements(); e.hasMoreElements();) {
+		for(Enumeration!(long) e = set.m_set.elements(); e.hasMoreElements();) {
 			//int old_value = ((Integer) e.nextElement()).intValue();
-			int old_value = e.nextElement().intValue();
-			if (old_value < mapping.length) // skip unmapped characters
+			int old_value = conv!(long,int)(e.nextElement());
+			if(old_value < mapping.length) // skip unmapped characters
 				m_set.set(mapping[old_value]);
 		}
 	}

@@ -2,7 +2,12 @@ module dlex.csimplifynfa;
 
 import dlex.cnfa;
 import dlex.cspec;
-import dlex.enumeration;
+import dlex.cset;
+import dlex.sparsebitset;
+
+import hurt.conv.conv;
+
+import std.stdio;
 
 class CSimplifyNfa {
 	private int[] ccls; // character class mapping.
@@ -13,11 +18,12 @@ class CSimplifyNfa {
 		computeClasses(m_spec); // initialize fields.
 		
 		// now rewrite the NFA using our character class mapping.
-		for (Enumeration e=m_spec.m_nfa_states.elements(); e.hasMoreElements(); ) {
-			CNfa nfa = e.nextElement();
-			if (nfa.m_edge==CNfa.EMPTY || nfa.m_edge==CNfa.EPSILON)
+		//for(Enumeration!(long) e = m_spec.m_nfa_states.elements(); e.hasMoreElements(); ) {
+		foreach(it;m_spec.m_nfa_states.elements()) {
+			CNfa nfa = it;
+			if(nfa.m_edge == CNfa.EMPTY || nfa.m_edge==CNfa.EPSILON)
 				continue; // no change.
-			if (nfa.m_edge==CNfa.CCL) {
+			if(nfa.m_edge == CNfa.CCL) {
 				CSet ncset = new CSet();
 				ncset.map(nfa.m_set, ccls); // map it.
 				nfa.m_set = ncset;
@@ -42,43 +48,45 @@ class CSimplifyNfa {
 
 		int nextcls = 1;
 		SparseBitSet clsA = new SparseBitSet(), clsB = new SparseBitSet();
-		Hashtable h = new Hashtable();
+		int[int] h;
 		
 		write("Working on character classes.");
-		for (Enumeration e=m_spec.m_nfa_states.elements(); e.hasMoreElements(); ) {
-			CNfa nfa = e.nextElement();
-			if (nfa.m_edge==CNfa.EMPTY || nfa.m_edge==CNfa.EPSILON)
+		//for(Enumeration e=m_spec.m_nfa_states.elements(); e.hasMoreElements(); ) {
+		foreach(it;m_spec.m_nfa_states.elements()) {
+			CNfa nfa = it;
+			if(nfa.m_edge == CNfa.EMPTY || nfa.m_edge==CNfa.EPSILON)
 				continue; // no discriminatory information.
 			clsA.clearAll(); clsB.clearAll();
-			for (int i=0; i<ccls.length; i++)
-				if (nfa.m_edge==i || // edge labeled with a character
-						nfa.m_edge==CNfa.CCL && nfa.m_set.contains(i)) // set of characters
+			for(int i = 0; i < ccls.length; i++)
+				if(nfa.m_edge == i || // edge labeled with a character
+						nfa.m_edge == CNfa.CCL && nfa.m_set.contains(i)) // set of characters
 					clsA.set(ccls[i]);
 				else
 					clsB.set(ccls[i]);
 
 			// now figure out which character classes we need to split.
 			clsA.and(clsB); // split the classes which show up on both sides of edge
-			write(clsA.size()==0?".":":");
-			if (clsA.size()==0) 
+			write(clsA.getSize() == 0 ? "." : ":");
+			if(clsA.getSize() == 0) 
 				continue; // nothing to do.
 			// and split them.
 			h.clear(); // h will map old to new class name
-			for (int i=0; i<ccls.length; i++) {
-				if (clsA.get(ccls[i])) { // a split class
-					if (nfa.m_edge==i || nfa.m_edge==CNfa.CCL && nfa.m_set.contains(i)) { // on A side
+			for(int i = 0; i < ccls.length; i++) {
+				if(clsA.get(ccls[i])) { // a split class
+					if(nfa.m_edge == i || nfa.m_edge == CNfa.CCL && nfa.m_set.contains(i)) { // on A side
 						int split = ccls[i];
-						if (!h.containsKey(split)) {
-							h.put(split, nextcls++); // make new class
+						//if(!h.containsKey(split)) {
+						if(!(split in h)) {
+							h[split] = nextcls++; // make new class
 						}
 
-						ccls[i] = h.get(split);
+						ccls[i] = h[split];
 					}
 				}
 			}
 		}
 		writeln();
-		writeln("NFA has "+nextcls+" distinct character classes.");
+		writeln("NFA has " ~ conv!(int,string)(nextcls) ~ " distinct character classes.");
 		
 		this.mapped_charset_size = nextcls;
 	}

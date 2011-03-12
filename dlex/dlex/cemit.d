@@ -6,6 +6,7 @@ import dlex.cdtrans;
 import dlex.cutility;
 
 import hurt.conv.conv;
+import hurt.string.stringbuffer;
 
 import std.stdio;
 import std.stream;
@@ -79,8 +80,8 @@ class CEmit {
 
 	  if(CUtility.DEBUG)
 	  {
-	  assert(null != m_spec);
-	  assert(null != m_outstream);
+	  assert(null !is m_spec);
+	  assert(null !is m_outstream);
 	  }*/
 
 	/*m_outstream.writeLine("import java.lang.String;");
@@ -212,8 +213,8 @@ class CEmit {
 			m_outstream.writeLine("\tpublic final int YYEOF = -1;");
 
 		/* User specified class code. */
-		if(null != m_spec.m_class_code) {
-			m_outstream.write(m_spec.m_class_code[0..m_spec.m_class_read]);
+		if(null !is m_spec.m_class_code) {
+			m_outstream.writeString(m_spec.m_class_code[0..m_spec.m_class_read]);
 		}
 
 		/* Member Variables */
@@ -239,45 +240,45 @@ class CEmit {
 
 
 		/* Function: first constructor (Reader) */
-		m_outstream.write('\t');
+		m_outstream.writeString("\t");
 		//if(true == m_spec.m_public) {
 		if(m_spec.m_public) {
-			m_outstream.write("public ");
+			m_outstream.writeString("public ");
 		}
-		m_outstream.write(m_spec.m_class_name);
-		m_outstream.write(" (java.io.Reader reader)");
+		m_outstream.writeString(m_spec.m_class_name);
+		m_outstream.writeString(" (java.io.Reader reader)");
 
 		if(null !is m_spec.m_init_throw_code) {
-			m_outstream.writeLine(); 
-			m_outstream.write("\t\tthrows "); 
-			m_outstream.write(m_spec.m_init_throw_code[0..m_spec.m_init_throw_read]);
-			m_outstream.writeLine();
+			m_outstream.writeLine(""); 
+			m_outstream.writeString("\t\tthrows "); 
+			m_outstream.writeString(m_spec.m_init_throw_code[0..m_spec.m_init_throw_read]);
+			m_outstream.writeLine("");
 			m_outstream.writeLine("\t\t{");
 		} else {
 			m_outstream.writeLine(" {");
 		}
 
 		m_outstream.writeLine("\t\tthis ();");		
-		m_outstream.writeLine("\t\tif(null == reader) {");
+		m_outstream.writeLine("\t\tif(null is reader) {");
 		m_outstream.writeLine("\t\t\tthrow (new Error(\"Error: Bad input stream initializer.\"));");
 		m_outstream.writeLine("\t\t}");
 		m_outstream.writeLine("\t\tyy_reader = new java.io.BufferedReader(reader);");
 		m_outstream.writeLine("\t}");
-		m_outstream.writeLine();
+		m_outstream.writeLine("");
 
 
 		/* Function: second constructor (InputStream) */
-		m_outstream.write("\t");
+		m_outstream.writeString("\t");
 		if(true == m_spec.m_public) {
-			m_outstream.write("public ");
+			m_outstream.writeString("public ");
 		}
-		m_outstream.write(new String(m_spec.m_class_name));
-		m_outstream.write(" (java.io.InputStream instream)");
+		m_outstream.writeString(new String(m_spec.m_class_name));
+		m_outstream.writeString(" (java.io.InputStream instream)");
 
-		if(null != m_spec.m_init_throw_code)
+		if(null !is m_spec.m_init_throw_code)
 		{
-			m_outstream.writeLine(); 
-			m_outstream.write("\t\tthrows "); 
+			m_outstream.writeLine(""); 
+			m_outstream.writeString("\t\tthrows "); 
 			m_outstream.writeLine(new String(m_spec.m_init_throw_code,0,
 						m_spec.m_init_throw_read));
 			m_outstream.writeLine("\t\t{");
@@ -288,24 +289,24 @@ class CEmit {
 		}
 
 		m_outstream.writeLine("\t\tthis ();");		
-		m_outstream.writeLine("\t\tif(null == instream) {");
+		m_outstream.writeLine("\t\tif(null is instream) {");
 		m_outstream.writeLine("\t\t\tthrow (new Error(\"Error: Bad input "
 				+ "stream initializer.\"));");
 		m_outstream.writeLine("\t\t}");
 		m_outstream.writeLine("\t\tyy_reader = new java.io.BufferedReader(new java.io.InputStreamReader(instream));");
 		m_outstream.writeLine("\t}");
-		m_outstream.writeLine();
+		m_outstream.writeLine("");
 
 
 		/* Function: third, private constructor - only forinternal use */
-		m_outstream.write("\tprivate ");
-		m_outstream.write(new String(m_spec.m_class_name));
-		m_outstream.write(" ()");
+		m_outstream.writeString("\tprivate ");
+		m_outstream.writeString(new String(m_spec.m_class_name));
+		m_outstream.writeString(" ()");
 
-		if(null != m_spec.m_init_throw_code)
+		if(null !is m_spec.m_init_throw_code)
 		{
-			m_outstream.writeLine(); 
-			m_outstream.write("\t\tthrows "); 
+			m_outstream.writeLine(""); 
+			m_outstream.writeString("\t\tthrows "); 
 			m_outstream.writeLine(new String(m_spec.m_init_throw_code,0,
 						m_spec.m_init_throw_read));
 			m_outstream.writeLine("\t\t{");
@@ -336,14 +337,14 @@ class CEmit {
 		  }*/
 
 		/* User specified constructor code. */
-		if(null != m_spec.m_init_code)
+		if(null !is m_spec.m_init_code)
 		{
-			m_outstream.write(new String(m_spec.m_init_code,0,
+			m_outstream.writeString(new String(m_spec.m_init_code,0,
 						m_spec.m_init_read));
 		}
 
 		m_outstream.writeLine("\t}");
-		m_outstream.writeLine();
+		m_outstream.writeLine("");
 
 	}
 
@@ -363,7 +364,7 @@ including YYINITIAL.
 			state = states.nextElement();
 
 			if(CUtility.DEBUG) {
-				assert(null != state);
+				assert(null !is state);
 			}
 
 			m_outstream.writeLine("\tprivate final int " 
@@ -376,11 +377,11 @@ including YYINITIAL.
 
 		m_outstream.writeLine("\tprivate final int yy_state_dtrans[] = {");
 		for(index = 0; index < m_spec.m_state_dtrans.length; ++index) {
-			m_outstream.write("\t\t" + m_spec.m_state_dtrans[index]);
+			m_outstream.writeString("\t\t" + m_spec.m_state_dtrans[index]);
 			if(index < m_spec.m_state_dtrans.length - 1) {
 				m_outstream.writeLine(",");
 			} else {
-				m_outstream.writeLine();
+				m_outstream.writeLine("");
 			}
 		}
 		m_outstream.writeLine("\t};");
@@ -393,18 +394,18 @@ error handling and input buffering.
 	 **************************************************************/
 	private void emit_helpers() {
 		if(CUtility.DEBUG) {
-			assert(null != m_spec);
-			assert(null != m_outstream);
+			assert(null !is m_spec);
+			assert(null !is m_outstream);
 		}
 
 		/* Function: yy_do_eof */
 		m_outstream.writeLine("\tprivate bool yy_eof_done = false;");
-		if(null != m_spec.m_eof_code) {
-			m_outstream.write("\tprivate void yy_do_eof ()");
+		if(null !is m_spec.m_eof_code) {
+			m_outstream.writeString("\tprivate void yy_do_eof ()");
 
-			if(null != m_spec.m_eof_throw_code) {
-				m_outstream.writeLine(); 
-				m_outstream.write("\t\tthrows "); 
+			if(null !is m_spec.m_eof_throw_code) {
+				m_outstream.writeLine(""); 
+				m_outstream.writeString("\t\tthrows "); 
 				m_outstream.writeLine(new String(m_spec.m_eof_throw_code,0,
 							m_spec.m_eof_throw_read));
 				m_outstream.writeLine("\t\t{");
@@ -413,7 +414,7 @@ error handling and input buffering.
 			}
 
 			m_outstream.writeLine("\t\tif(false == yy_eof_done) {");
-			m_outstream.write(new String(m_spec.m_eof_code,0,
+			m_outstream.writeString(new String(m_spec.m_eof_code,0,
 						m_spec.m_eof_read));
 			m_outstream.writeLine("\t\t}");
 			m_outstream.writeLine("\t\tyy_eof_done = true;");
@@ -439,13 +440,13 @@ error handling and input buffering.
 		m_outstream.writeLine("\t\tint next_read;");
 		m_outstream.writeLine("\t\tint i;");
 		m_outstream.writeLine("\t\tint j;");
-		m_outstream.writeLine();
+		m_outstream.writeLine("");
 
 		m_outstream.writeLine("\t\tif(yy_buffer_index < yy_buffer_read) {");
 		m_outstream.writeLine("\t\t\treturn yy_buffer[yy_buffer_index++];");
 		/*m_outstream.writeLine("\t\t\t++yy_buffer_index;");*/
 		m_outstream.writeLine("\t\t}");
-		m_outstream.writeLine();
+		m_outstream.writeLine("");
 
 		m_outstream.writeLine("\t\tif(0 != yy_buffer_start) {");
 		m_outstream.writeLine("\t\t\ti = yy_buffer_start;");
@@ -467,7 +468,7 @@ error handling and input buffering.
 		m_outstream.writeLine("\t\t\t}");
 		m_outstream.writeLine("\t\t\tyy_buffer_read = yy_buffer_read + next_read;");
 		m_outstream.writeLine("\t\t}");
-		m_outstream.writeLine();
+		m_outstream.writeLine("");
 
 		m_outstream.writeLine("\t\twhile(yy_buffer_index >= yy_buffer_read) {");
 		m_outstream.writeLine("\t\t\tif(yy_buffer_index >= yy_buffer.length) {");
@@ -599,10 +600,10 @@ error handling and input buffering.
 		m_outstream.writeLine("\t\tString lengthString;");
 		m_outstream.writeLine("\t\tint sequenceLength = 0;");
 		m_outstream.writeLine("\t\tint sequenceInteger = 0;");
-		m_outstream.writeLine();
+		m_outstream.writeLine("");
 		m_outstream.writeLine("\t\tint commaIndex;");
 		m_outstream.writeLine("\t\tString workString;");
-		m_outstream.writeLine();
+		m_outstream.writeLine("");
 		m_outstream.writeLine("\t\tint res[][] = new int[size1][size2];");
 		m_outstream.writeLine("\t\tfor(int i= 0; i < size1; i++) {");
 		m_outstream.writeLine("\t\t\tfor(int j= 0; j < size2; j++) {");
@@ -642,21 +643,21 @@ Description: Emits class header.
 	 **************************************************************/
 	private void emit_header() {
 		if(CUtility.DEBUG) {
-			assert(null != m_spec);
-			assert(null != m_outstream);
+			assert(null !is m_spec);
+			assert(null !is m_outstream);
 		}
 
-		m_outstream.writeLine();
-		m_outstream.writeLine();
+		m_outstream.writeLine("");
+		m_outstream.writeLine("");
 		if(true == m_spec.m_public) {
-			m_outstream.write("public ");
+			m_outstream.writeString("public ");
 		}
-		m_outstream.write("class ");
-		m_outstream.write(new String(m_spec.m_class_name,0,
+		m_outstream.writeString("class ");
+		m_outstream.writeString(new String(m_spec.m_class_name,0,
 					m_spec.m_class_name.length));
 		if(m_spec.m_implements_name.length > 0) {
-			m_outstream.write(" implements ");	
-			m_outstream.write(new String(m_spec.m_implements_name,0,
+			m_outstream.writeString(" implements ");	
+			m_outstream.writeString(new String(m_spec.m_implements_name,0,
 						m_spec.m_implements_name.length));
 		}		
 		m_outstream.writeLine(" {");
@@ -677,38 +678,38 @@ Description: Emits transition table.
 
 		if(CUtility.DEBUG)
 		{
-			assert(null != m_spec);
-			assert(null != m_outstream);
+			assert(null !is m_spec);
+			assert(null !is m_outstream);
 		}
 
 		m_outstream.writeLine("\tprivate int yy_acpt[] = {");
-		size = m_spec.m_accept_vector.size();
+		size = m_spec.m_accept_vector.getSize();
 		for(elem = 0; elem < size; ++elem) {
-			accept = m_spec.m_accept_vector.elementAt(elem);
+			accept = m_spec.m_accept_vector.get(elem);
 
-			m_outstream.write("\t\t/* "+elem+" */ ");
-			if(null != accept) {
+			m_outstream.writeString("\t\t/* "+elem+" */ ");
+			if(null !is accept) {
 				is_start = (0 != (m_spec.m_anchor_array[elem] & CSpec.START));
 				is_end = (0 != (m_spec.m_anchor_array[elem] & CSpec.END));
 
 				if(is_start && true == is_end) {
-					m_outstream.write("YY_START | YY_END");
+					m_outstream.writeString("YY_START | YY_END");
 				} else if(is_start) {
-					m_outstream.write("YY_START");
+					m_outstream.writeString("YY_START");
 				} else if(is_end) {
-					m_outstream.write("YY_END");
+					m_outstream.writeString("YY_END");
 				} else {
-					m_outstream.write("YY_NO_ANCHOR");
+					m_outstream.writeString("YY_NO_ANCHOR");
 				}
 			} else {
-				m_outstream.write("YY_NOT_ACCEPT");
+				m_outstream.writeString("YY_NOT_ACCEPT");
 			}
 
 			if(elem < size - 1) {
-				m_outstream.write(",");
+				m_outstream.writeString(",");
 			}
 
-			m_outstream.writeLine();
+			m_outstream.writeLine("");
 		}
 
 		m_outstream.writeLine("\t};");
@@ -717,37 +718,37 @@ Description: Emits transition table.
 		int[] yy_cmap = new int[m_spec.m_ccls_map.length];
 		for(i = 0; i < m_spec.m_ccls_map.length; ++i)
 			yy_cmap[i] = m_spec.m_col_map[m_spec.m_ccls_map[i]];
-		m_outstream.write("\tprivate int yy_cmap[] = unpackFromString(");
+		m_outstream.writeString("\tprivate int yy_cmap[] = unpackFromString(");
 		int[][] tmp = new int[yy_cmap.length][];
 		tmp[0] = yy_cmap;
 		//emit_table_as_string(new int[][] { yy_cmap });
 		emit_table_as_string(tmp);
 		m_outstream.writeLine(")[0];");
-		m_outstream.writeLine();
+		m_outstream.writeLine("");
 
 		// CSA: modified yy_rmap to use string packing 9-Aug-1999
-		m_outstream.write("\tprivate int yy_rmap[] = unpackFromString(");
+		m_outstream.writeString("\tprivate int yy_rmap[] = unpackFromString(");
 		tmp = new int[m_spec.m_row_map][];
 		tmp[0] = m_spec.m_row_map;
 		//emit_table_as_string(new int[][] { m_spec.m_row_map });
 		emit_table_as_string(tmp);
 		m_outstream.writeLine(")[0];");
-		m_outstream.writeLine();
+		m_outstream.writeLine("");
 
 		// 6/24/98 Raimondas Lencevicius
 		// modified to use
 		//		int[][] unpackFromString(int size1, int size2, String st)
-		size = m_spec.m_dtrans_vector.size();
+		size = m_spec.m_dtrans_vector.getSize();
 		int[][] yy_nxt = new int[size][];
 		for(elem=0; elem<size; elem++) {
-			dtrans = m_spec.m_dtrans_vector.elementAt(elem);
+			dtrans = m_spec.m_dtrans_vector.get(elem);
 			assert(dtrans.m_dtrans.length==m_spec.m_dtrans_ncols);
 			yy_nxt[elem] = dtrans.m_dtrans;
 		}
-		m_outstream.write ("\tprivate int yy_nxt[][] = unpackFromString(");
+		m_outstream.writeString("\tprivate int yy_nxt[][] = unpackFromString(");
 		emit_table_as_string(yy_nxt);
 		m_outstream.writeLine(");");
-		m_outstream.writeLine();
+		m_outstream.writeLine("");
 	}
 
 	/***************************************************************
@@ -765,9 +766,9 @@ integer sequences as "value:length" pairs.
 		int previousInt = -20; // RL - Bogus -20 state.
 
 		// RL - Output matrix size
-		m_outstream.write(ia.length);
-		m_outstream.write(",");
-		m_outstream.write(ia.length>0?ia[0].length:0);
+		m_outstream.writeString(ia.length);
+		m_outstream.writeString(",");
+		m_outstream.writeString(ia.length>0?ia[0].length:0);
 		m_outstream.writeLine(",");
 
 		StringBuffer outstr = new StringBuffer();
@@ -821,7 +822,7 @@ integer sequences as "value:length" pairs.
 			m_outstream.writeLine("\""+s.substring(0,75)+"\" +");
 			outstr = new StringBuffer(s.substring(75));
 		}
-		m_outstream.write("\""+outstr+"\"");
+		m_outstream.writeString("\""+outstr+"\"");
 	}
 
 	/***************************************************************
@@ -830,35 +831,35 @@ Description:
 	 **************************************************************/
 	private void emit_driver() {
 		if(CUtility.DEBUG) {
-			assert(null != m_spec);
-			assert(null != m_outstream);
+			assert(null !is m_spec);
+			assert(null !is m_outstream);
 		}
 
 		emit_table();
 
 		if(m_spec.m_integer_type) {
-			m_outstream.write("\tpublic int ");
-			m_outstream.write(new String(m_spec.m_function_name));
+			m_outstream.writeString("\tpublic int ");
+			m_outstream.writeString(new String(m_spec.m_function_name));
 			m_outstream.writeLine(" ()");
 		} else if(m_spec.m_intwrap_type) {
-			m_outstream.write("\tpublic java.lang.Integer ");
-			m_outstream.write(new String(m_spec.m_function_name));
+			m_outstream.writeString("\tpublic java.lang.Integer ");
+			m_outstream.writeString(new String(m_spec.m_function_name));
 			m_outstream.writeLine(" ()");
 		} else {
-			m_outstream.write("\tpublic ");
-			m_outstream.write(new String(m_spec.m_type_name));
-			m_outstream.write(" ");
-			m_outstream.write(new String(m_spec.m_function_name));
+			m_outstream.writeString("\tpublic ");
+			m_outstream.writeString(new String(m_spec.m_type_name));
+			m_outstream.writeString(" ");
+			m_outstream.writeString(new String(m_spec.m_function_name));
 			m_outstream.writeLine(" ()");
 		}
 
 		/*m_outstream.writeLine("\t\tthrows java.io.IOException {");*/
-		m_outstream.write("\t\tthrows java.io.IOException");
-		if(null != m_spec.m_yylex_throw_code) {
-			m_outstream.write(", "); 
-			m_outstream.write(new String(m_spec.m_yylex_throw_code,0,
+		m_outstream.writeString("\t\tthrows java.io.IOException");
+		if(null !is m_spec.m_yylex_throw_code) {
+			m_outstream.writeString(", "); 
+			m_outstream.writeString(new String(m_spec.m_yylex_throw_code,0,
 						m_spec.m_yylex_throw_read));
-			m_outstream.writeLine();
+			m_outstream.writeLine("");
 			m_outstream.writeLine("\t\t{");
 		} else {
 			m_outstream.writeLine(" {");
@@ -875,7 +876,7 @@ Description:
 		m_outstream.writeLine("\t\tint yy_last_accept_state = YY_NO_STATE;");
 		m_outstream.writeLine("\t\tbool yy_initial = true;");
 		m_outstream.writeLine("\t\tint yy_this_accept;");
-		m_outstream.writeLine();
+		m_outstream.writeLine("");
 
 		m_outstream.writeLine("\t\tyy_mark_start();");
 		/*m_outstream.writeLine("\t\tyy_this_accept = yy_accept(yy_state);");*/
@@ -922,13 +923,13 @@ Description:
 		// handle bare EOF.
 		m_outstream.writeLine("\t\t\tif(YY_EOF == yy_lookahead " 
 				+ "&& true == yy_initial) {");
-		if(null != m_spec.m_eof_code) {
+		if(null !is m_spec.m_eof_code) {
 			m_outstream.writeLine("\t\t\t\tyy_do_eof();");
 		}
 		if(true == m_spec.m_integer_type) {
 			m_outstream.writeLine("\t\t\t\treturn YYEOF;");
-		} else if(null != m_spec.m_eof_value_code) {
-			m_outstream.write(new String(m_spec.m_eof_value_code,0,
+		} else if(null !is m_spec.m_eof_value_code) {
+			m_outstream.writeString(new String(m_spec.m_eof_value_code,0,
 						m_spec.m_eof_value_read));
 		} else {
 			m_outstream.writeLine("\t\t\t\treturn null;");
@@ -1030,23 +1031,21 @@ Description:
 		CAccept accept;
 
 		if(CUtility.DEBUG) {
-			assert(m_spec.m_accept_vector.size() 
+			assert(m_spec.m_accept_vector.getSize() 
 					== m_spec.m_anchor_array.length);
 		}
 
 		bogus_index = -2;
-		size = m_spec.m_accept_vector.size();
+		size = m_spec.m_accept_vector.getSize();
 		for(elem = 0; elem < size; ++elem) {
-			accept = m_spec.m_accept_vector.elementAt(elem);
-			if(null != accept) {
-				m_outstream.writeLine(tabs + "case " + elem 
-						+ ":");
-				m_outstream.write(tabs + "\t");
-				m_outstream.write(new String(accept.m_action,0,
-							accept.m_action_read));
-				m_outstream.writeLine();
-				m_outstream.writeLine(tabs + "case " + bogus_index + ":");
-				m_outstream.writeLine(tabs + "\tbreak;");
+			accept = m_spec.m_accept_vector.get(elem);
+			if(null !is accept) {
+				m_outstream.writeLine(tabs ~ "case " ~ conv!(int,string)(elem) ~ ":");
+				m_outstream.writeString(tabs ~ "\t");
+				m_outstream.writeString(accept.m_action[0..accept.m_action_read].idup);
+				m_outstream.writeLine("");
+				m_outstream.writeLine(tabs ~ "case " ~ conv!(int,string)(bogus_index) ~ ":");
+				m_outstream.writeLine(tabs ~ "\tbreak;");
 				--bogus_index;
 			}
 		}
@@ -1058,8 +1057,8 @@ Description:
 	 **************************************************************/
 	private void emit_footer() {
 		if(CUtility.DEBUG) {
-			assert(null != m_spec);
-			assert(null != m_outstream);
+			assert(null !is m_spec);
+			assert(null !is m_outstream);
 		}
 
 		m_outstream.writeLine("}");

@@ -2,11 +2,10 @@ include ../makeconfig.conf
 
 IPATH=-I../../libhurt/ -I../cup/
 
-#OBJS=dlex.caccept.o dlex.cacceptanchor.o dlex.cspec.o dlex.calloc.o dlex.cbunch.o \
+OBJS=dlex.cemit.o dlex.caccept.o dlex.cacceptanchor.o dlex.cspec.o dlex.calloc.o dlex.cbunch.o \
 dlex.cdfa.o dlex.cdtrans.o dlex.cerror.o dlex.cinput.o dlex.clexgen.o dlex.cmakenfa.o dlex.cminimize.o \
-dlex.cnfa.o
-
-OBJS= dlex.cnfa2dfa.o
+dlex.cnfa.o dlex.cnfa2dfa.o dlex.cnfapair.o dlex.cset.o dlex.csimpliynfa.o dlex.cutility.o dlex.enumeration.o \
+dlex.sparsebitset.o dlex.main.o 
 
 all:dlex
 
@@ -60,3 +59,24 @@ dlex.cnfa.o: dlex/cnfa.d Makefile ../makeconfig.conf
 
 dlex.cnfa2dfa.o: dlex/cnfa2dfa.d Makefile ../makeconfig.conf
 	$(DC) $(CFLAGS) $(IPATH) dlex/cnfa2dfa.d -ofdfex.cnfa2dfa.o 
+
+dlex.cnfapair.o: dlex/cnfapair.d Makefile ../makeconfig.conf
+	$(DC) $(CFLAGS) $(IPATH) dlex/cnfapair.d -ofdfex.cnfapair.o 
+
+dlex.cset.o: dlex/cset.d Makefile ../makeconfig.conf
+	$(DC) $(CFLAGS) $(IPATH) dlex/cset.d -ofdfex.cset.o 
+
+dlex.csimpliynfa.o: dlex/csimplifynfa.d Makefile ../makeconfig.conf
+	$(DC) $(CFLAGS) $(IPATH) dlex/csimplifynfa.d -ofdfex.csimplifynfa.o 
+
+dlex.cutility.o: dlex/cutility.d Makefile ../makeconfig.conf
+	$(DC) $(CFLAGS) $(IPATH) dlex/cutility.d -ofdfex.cutility.o 
+
+dlex.enumeration.o: dlex/enumeration.d Makefile ../makeconfig.conf
+	$(DC) $(CFLAGS) $(IPATH) dlex/enumeration.d -ofdfex.enumeration.o 
+
+dlex.sparsebitset.o: dlex/sparsebitset.d Makefile ../makeconfig.conf
+	$(DC) $(CFLAGS) $(IPATH) dlex/sparsebitset.d -ofdfex.sparsebitset.o 
+
+dlex.main.o: dlex/main.d Makefile ../makeconfig.conf
+	$(DC) $(CFLAGS) $(IPATH) dlex/main.d -ofdfex.main.o 

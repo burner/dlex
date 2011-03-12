@@ -1,4 +1,4 @@
-module calloc;
+module dlex.calloc;
 
 import dlex.cdfa;
 import dlex.cnfa;

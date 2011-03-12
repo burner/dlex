@@ -1,4 +1,6 @@
-module cinput;
+module dlex.cinput;
+
+import dlex.cutility;
 
 import std.stream;
 
@@ -58,48 +60,48 @@ class CInput {
 		int elem;
 		
 		/* Has EOF already been reached? */
-		if (m_eof_reached) {
+		if(m_eof_reached) {
 			return EOF;
 		}
 		
 		/* Pushback current line? */
-		if (m_pushback_line) {
+		if(m_pushback_line) {
 			m_pushback_line = false;
 
-			/* Check for empty line. */
-			for (elem = 0; elem < m_line_read; ++elem) {
-				if (false == CUtility.isspace(m_line[elem])) {
+			/* Check forempty line. */
+			for(elem = 0; elem < m_line_read; ++elem) {
+				if(false == CUtility.isspace(m_line[elem])) {
 					break;
 				}
 			}
 
 			/* Nonempty? */
-			if (elem < m_line_read) {
+			if(elem < m_line_read) {
 				m_line_index = 0;
 				return NOT_EOF;
 			}
 		}
 
 		while(true) {
-			if (null == (lineStr = m_input.readLine())) {
+			if(null is (lineStr = m_input.readLine().idup)) {
 				m_eof_reached = true;
 				m_line_index = 0;
 				return EOF;
 			}
-			m_line = (lineStr + "\n").toCharArray();
+			m_line = (lineStr ~ "\n").dup;
 			m_line_read=m_line.length;
 			++m_line_number;
 			
-			/* Check for empty lines and discard them. */
+			/* Check forempty lines and discard them. */
 			elem = 0;
-			while (CUtility.isspace(m_line[elem])) {
+			while(CUtility.isspace(m_line[elem])) {
 				++elem;
-				if (elem == m_line_read) {
+				if(elem == m_line_read) {
 					break;
 				}
 			}
 				
-			if (elem < m_line_read) {
+			if(elem < m_line_read) {
 				break;
 			}
 		}

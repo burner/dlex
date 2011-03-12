@@ -2,6 +2,7 @@ module dlex.cdfa;
 
 import dlex.caccept;
 import dlex.cnfa;
+import dlex.cspec;
 import dlex.sparsebitset;
 
 import hurt.container.vector;

@@ -1,7 +1,8 @@
-module cbunch;
+module dlex.cbunch;
 
 import dlex.caccept;
 import dlex.cnfa;
+import dlex.cspec;
 import dlex.sparsebitset;
 
 import hurt.container.vector;

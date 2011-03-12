@@ -1,5 +1,11 @@
 module calloc;
 
+import dlex.cdfa;
+import dlex.cnfa;
+import dlex.cnfapair;
+import dlex.cspec;
+import dlex.cset;
+
 class CAlloc {
 	/***************************************************************
 		Function: newCDfa
@@ -7,8 +13,8 @@ class CAlloc {
 	static CDfa newCDfa(CSpec spec) {
 		CDfa dfa;
 		
-		dfa = new CDfa(spec.m_dfa_states.size());
-		spec.m_dfa_states.addElement(dfa);
+		dfa = new CDfa(spec.m_dfa_states.getSize());
+		spec.m_dfa_states.append(dfa);
 
 		return dfa;
 	}
@@ -60,11 +66,10 @@ class CAlloc {
 		CNfa p;
 
 		/* UNDONE: Buffer this? */
-
 		p = new CNfa();
 		
 		/*p.m_label = spec.m_nfa_states.size();*/
-		spec.m_nfa_states.addElement(p);
+		spec.m_nfa_states.append(p);
 		p.m_edge = CNfa.EPSILON;
 		
 		return p;

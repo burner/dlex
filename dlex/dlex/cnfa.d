@@ -1,6 +1,7 @@
-module cnfa;
+module dlex.cnfa;
 
 import dlex.caccept;
+import dlex.cspec;
 import dlex.cset;
 import dlex.sparsebitset;
 

@@ -1,12 +1,22 @@
-module cmakenfa;
+module dlex.cmakenfa;
 
+import dlex.caccept;
+import dlex.calloc;
+import dlex.cerror;
 import dlex.cspec;
 import dlex.cinput;
 import dlex.clexgen;
 import dlex.cnfa;
 import dlex.cnfapair;
 import dlex.cset;
+import dlex.cutility;
 import dlex.sparsebitset;
+
+import hurt.container.vector;
+import hurt.conv.conv;
+import hurt.string.stringutil;
+
+import std.stdio;
 
 class CMakeNfa {
 	/***************************************************************
@@ -40,9 +50,9 @@ class CMakeNfa {
 	**************************************************************/
 	private void set(CLexGen lexGen, CSpec spec, CInput input) {
 		if (CUtility.DEBUG) {
-			CUtility.ASSERT(null != input);
-			CUtility.ASSERT(null != lexGen);
-			CUtility.ASSERT(null != spec);
+			assert(null !is input);
+			assert(null !is lexGen);
+			assert(null !is spec);
 		}
 
 		m_input = input;
@@ -57,7 +67,7 @@ class CMakeNfa {
 		input CSpec.
 		**************************************************************/
 	void allocate_BOL_EOF(CSpec spec) {
-		CUtility.ASSERT(CSpec.NUM_PSEUDO==2);
+		assert(CSpec.NUM_PSEUDO==2);
 		spec.BOL = spec.m_dtrans_ncols++;
 		spec.EOF = spec.m_dtrans_ncols++;
 	}
@@ -76,10 +86,10 @@ class CMakeNfa {
 		reset();
 		set(lexGen,spec,input);
 
-		size = m_spec.m_states.size();
-		m_spec.m_state_rules = new Vector[size];
+		size = m_spec.m_states.length;
+		m_spec.m_state_rules = new Vector!(CNfa)[size];
 		for (i = 0; i < size; ++i) {
-			m_spec.m_state_rules[i] = new Vector();
+			m_spec.m_state_rules[i] = new Vector!(CNfa)();
 		}
 
 		/* Initialize current token variable 
@@ -90,9 +100,9 @@ class CMakeNfa {
 		m_spec.m_nfa_start = machine();
 		
 		/* Set labels in created nfa machine. */
-		size = m_spec.m_nfa_states.size();
+		size = m_spec.m_nfa_states.getSize();
 		for (i = 0; i < size; ++i) {
-			elem = m_spec.m_nfa_states.elementAt(i);
+			elem = m_spec.m_nfa_states.get(i);
 			elem.m_label = i;
 		}
 
@@ -103,8 +113,8 @@ class CMakeNfa {
 
 		if (m_spec.m_verbose) {
 			writeln("NFA comprised of " 
-			 + (m_spec.m_nfa_states.size() + 1) 
-			 + " states.");
+			 ~ conv!(int,string)(m_spec.m_nfa_states.getSize() + 1) 
+			 ~ " states.");
 		}
 
 		reset();
@@ -115,7 +125,7 @@ class CMakeNfa {
 		Description: 
 		**************************************************************/
 	private void discardCNfa(CNfa nfa) {
-		m_spec.m_nfa_states.removeElement(nfa);
+		m_spec.m_nfa_states.remove(m_spec.m_nfa_states.indexOf(nfa));
 	}
 
 	/***************************************************************
@@ -126,10 +136,10 @@ class CMakeNfa {
 		int size;
 		int i;
 		
-		size = m_spec.m_states.size();
+		size = m_spec.m_states.length;
 		for (i = 0; i <	size; ++i) {
 			if (states.get(i)) {
-				m_spec.m_state_rules[i].addElement(current);
+				m_spec.m_state_rules[i].append(current);
 			}
 		}
 	}
@@ -184,7 +194,7 @@ class CMakeNfa {
 
 		// CSA: add pseudo-rules for BOL and EOF
 		SparseBitSet all_states = new SparseBitSet();
-		for (int i = 0; i < m_spec.m_states.size(); ++i)
+		for (int i = 0; i < m_spec.m_states.length; ++i)
 			all_states.set(i);
 		p.m_next2 = CAlloc.newCNfa(m_spec);
 		p = p.m_next2;
@@ -253,7 +263,7 @@ class CMakeNfa {
 		}
 
 		/* Check for null rules. Charles Fischer found this bug. [CSA] */
-		if (end==null)
+		if (end is null)
 			CError.parse_error(CError.E_ZERO, m_input.m_line_number);
 
 		/* Handle end of regular expression.	See page 103. */
@@ -284,7 +294,7 @@ class CMakeNfa {
 		}
 
 		if (CUtility.DEBUG) {
-			CUtility.ASSERT(null != pair);
+			assert(null !is pair);
 		}
 
 		e2_pair = CAlloc.newCNfaPair();
@@ -323,7 +333,7 @@ class CMakeNfa {
 		}
 
 		if (CUtility.DEBUG) {
-			CUtility.ASSERT(null != pair);
+			assert(null !is pair);
 		}
 		
 		e2_pair = CAlloc.newCNfaPair();
@@ -452,8 +462,7 @@ class CMakeNfa {
 			start.m_next = CAlloc.newCNfa(m_spec);
 			pair.m_end = start.m_next;
 
-			if (m_lexGen.L == m_spec.m_current_token &&
-					Character.isLetter(m_spec.m_lexeme)) {
+			if (m_lexGen.L == m_spec.m_current_token && isLetter(m_spec.m_lexeme)) {
 				isAlphaL = true;
 			} else {
 				isAlphaL = false;
@@ -534,7 +543,7 @@ class CMakeNfa {
 				for ( ; first <= m_spec.m_lexeme; ++first) {
 					if (m_spec.m_ignorecase) 
 						//set.addncase((char)first); TODO
-						set.addncase(conv!(int,char)(first));
+						set.addncase(cast(char)first);
 					else
 						set.add(first);
 				}

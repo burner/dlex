@@ -1,9 +1,16 @@
-module cminimize;
+module dlex.cminimize;
 
+import dlex.caccept;
 import dlex.cdtrans;
 import dlex.cspec;
+import dlex.cutility;
+import dlex.sparsebitset;
 
 import hurt.container.vector;
+import hurt.conv.conv;
+import hurt.util.array;
+
+import std.stdio;
 
 class CMinimize {
 	/***************************************************************
@@ -36,8 +43,8 @@ class CMinimize {
 		Description: Sets member variables.
 	 **************************************************************/
 	private void set(CSpec spec) {
-		if (CUtility.DEBUG) {
-			assert(null != spec);
+		if(CUtility.DEBUG) {
+			assert(null !is spec);
 		}
 
 		m_spec = spec;
@@ -71,9 +78,9 @@ class CMinimize {
 		int i;
 		CDTrans dtrans;
 
-		n = m_spec.m_dtrans_vector.size();
-		for (i = 0; i < n; ++i) {
-			dtrans = m_spec.m_dtrans_vector.elementAt(i);
+		n = m_spec.m_dtrans_vector.getSize();
+		for(i = 0; i < n; ++i) {
+			dtrans = m_spec.m_dtrans_vector.get(i);
 			dtrans.m_dtrans[dest] = dtrans.m_dtrans[src]; 
 		}
 	}	
@@ -87,12 +94,11 @@ class CMinimize {
 		int i;
 		CDTrans dtrans;
 
-		n = m_spec.m_dtrans_vector.size();
-		for (i = 0; i < n; ++i)
-		{
+		n = m_spec.m_dtrans_vector.getSize();
+		for(i = 0; i < n; ++i) {
 			int[] ndtrans = new int[m_spec.m_dtrans_ncols];
-			dtrans = m_spec.m_dtrans_vector.elementAt(i);
-			System.arraycopy(dtrans.m_dtrans, 0, ndtrans, 0, ndtrans.length);
+			dtrans = m_spec.m_dtrans_vector.get(i);
+			arrayCopy(dtrans.m_dtrans, 0, ndtrans, 0, ndtrans.length);
 			dtrans.m_dtrans = ndtrans;
 		}
 	}
@@ -103,8 +109,8 @@ class CMinimize {
 	private void row_copy(int dest, int src) {
 		CDTrans dtrans;
 
-		dtrans = m_spec.m_dtrans_vector.elementAt(src);
-		m_spec.m_dtrans_vector.setElementAt(dtrans,dest); 
+		dtrans = m_spec.m_dtrans_vector.get(src);
+		m_spec.m_dtrans_vector.insert(dest,dtrans); 
 	}	
 
 	/***************************************************************
@@ -116,11 +122,10 @@ class CMinimize {
 		int i;
 		CDTrans dtrans;
 
-		n = m_spec.m_dtrans_vector.size();
-		for (i = 0; i < n; ++i) {
-			dtrans = m_spec.m_dtrans_vector.elementAt(i);
-			if (dtrans.m_dtrans[col1] != dtrans.m_dtrans[col2]) 
-			{
+		n = m_spec.m_dtrans_vector.getSize();
+		for(i = 0; i < n; ++i) {
+			dtrans = m_spec.m_dtrans_vector.get(i);
+			if(dtrans.m_dtrans[col1] != dtrans.m_dtrans[col2]) {
 				return false;
 			}
 		}
@@ -137,13 +142,11 @@ class CMinimize {
 		CDTrans dtrans1;
 		CDTrans dtrans2;
 
-		dtrans1 = m_spec.m_dtrans_vector.elementAt(row1);
-		dtrans2 = m_spec.m_dtrans_vector.elementAt(row2);
+		dtrans1 = m_spec.m_dtrans_vector.get(row1);
+		dtrans2 = m_spec.m_dtrans_vector.get(row2);
 
-		for (i = 0; i < m_spec.m_dtrans_ncols; ++i)
-		{
-			if (dtrans1.m_dtrans[i] != dtrans2.m_dtrans[i]) 
-			{
+		for(i = 0; i < m_spec.m_dtrans_ncols; ++i) {
+			if(dtrans1.m_dtrans[i] != dtrans2.m_dtrans[i]) {
 				return false;
 			}
 		}
@@ -169,50 +172,41 @@ class CMinimize {
 		set = new SparseBitSet();
 
 		/* Save accept nodes and anchor entries. */
-		size = m_spec.m_dtrans_vector.size();
+		size = m_spec.m_dtrans_vector.getSize();
 		m_spec.m_anchor_array = new int[size];
-		m_spec.m_accept_vector = new Vector();
-		for (i = 0; i < size; ++i)
-		{
-			dtrans = m_spec.m_dtrans_vector.elementAt(i);
-			m_spec.m_accept_vector.addElement(dtrans.m_accept);
+		m_spec.m_accept_vector = new Vector!(CAccept)();
+		for(i = 0; i < size; ++i) {
+			dtrans = m_spec.m_dtrans_vector.get(i);
+			m_spec.m_accept_vector.append(dtrans.m_accept);
 			m_spec.m_anchor_array[i] = dtrans.m_anchor;
 			dtrans.m_accept = null;
 		}
 
 		/* Allocate column map. */
 		m_spec.m_col_map = new int[m_spec.m_dtrans_ncols];
-		for (i = 0; i < m_spec.m_dtrans_ncols; ++i)
-		{
+		for(i = 0; i < m_spec.m_dtrans_ncols; ++i) {
 			m_spec.m_col_map[i] = -1;
 		}
 
 		/* Process columns for reduction. */
-		for (reduced_ncols = 0; ; ++reduced_ncols)
-		{
-			if (CUtility.DEBUG)
-			{
-				for (i = 0; i < reduced_ncols; ++i)
-				{
+		for(reduced_ncols = 0; ; ++reduced_ncols) {
+			if(CUtility.DEBUG) {
+				for(i = 0; i < reduced_ncols; ++i) {
 					assert(-1 != m_spec.m_col_map[i]);
 				}
 			}
 
-			for (i = reduced_ncols; i < m_spec.m_dtrans_ncols; ++i)
-			{
-				if (-1 == m_spec.m_col_map[i])
-				{
+			for(i = reduced_ncols; i < m_spec.m_dtrans_ncols; ++i) {
+				if(-1 == m_spec.m_col_map[i]) {
 					break;
 				}
 			}
 
-			if (i >= m_spec.m_dtrans_ncols)
-			{
+			if(i >= m_spec.m_dtrans_ncols) {
 				break;
 			}
 
-			if (CUtility.DEBUG)
-			{
+			if(CUtility.DEBUG) {
 				assert(false == set.get(i));
 				assert(-1 == m_spec.m_col_map[i]);
 			}
@@ -222,10 +216,8 @@ class CMinimize {
 			m_spec.m_col_map[i] = reduced_ncols;
 
 			/* UNDONE: Optimize by doing all comparisons in one batch. */
-			for (j = i + 1; j < m_spec.m_dtrans_ncols; ++j)
-			{
-				if (-1 == m_spec.m_col_map[j] && true == col_equiv(i,j))
-				{
+			for(j = i + 1; j < m_spec.m_dtrans_ncols; ++j) {
+				if(-1 == m_spec.m_col_map[j] && true == col_equiv(i,j)) {
 					m_spec.m_col_map[j] = reduced_ncols;
 				}
 			}
@@ -233,23 +225,19 @@ class CMinimize {
 
 		/* Reduce columns. */
 		k = 0;
-		for (i = 0; i < m_spec.m_dtrans_ncols; ++i)
-		{
-			if (set.get(i))
-			{
+		for(i = 0; i < m_spec.m_dtrans_ncols; ++i) {
+			if(set.get(i)) {
 				++k;
 
 				set.clear(i);
 
 				j = m_spec.m_col_map[i];
 
-				if (CUtility.DEBUG)
-				{
+				if(CUtility.DEBUG) {
 					assert(j <= i);
 				}
 
-				if (j == i)
-				{
+				if(j == i) {
 					continue;
 				}
 
@@ -260,45 +248,36 @@ class CMinimize {
 		/* truncate m_dtrans at proper length (freeing extra) */
 		trunc_col();
 
-		if (CUtility.DEBUG)
-		{
+		if(CUtility.DEBUG) {
 			assert(k == reduced_ncols);
 		}
 
 		/* Allocate row map. */
-		nrows = m_spec.m_dtrans_vector.size();
+		nrows = m_spec.m_dtrans_vector.getSize();
 		m_spec.m_row_map = new int[nrows];
-		for (i = 0; i < nrows; ++i)
-		{
+		for(i = 0; i < nrows; ++i) {
 			m_spec.m_row_map[i] = -1;
 		}
 
 		/* Process rows to reduce. */
-		for (reduced_nrows = 0; ; ++reduced_nrows)
-		{
-			if (CUtility.DEBUG)
-			{
-				for (i = 0; i < reduced_nrows; ++i)
-				{
+		for(reduced_nrows = 0; ; ++reduced_nrows) {
+			if(CUtility.DEBUG) {
+				for(i = 0; i < reduced_nrows; ++i) {
 					assert(-1 != m_spec.m_row_map[i]);
 				}
 			}
 
-			for (i = reduced_nrows; i < nrows; ++i)
-			{
-				if (-1 == m_spec.m_row_map[i])
-				{
+			for(i = reduced_nrows; i < nrows; ++i) {
+				if(-1 == m_spec.m_row_map[i]) {
 					break;
 				}
 			}
 
-			if (i >= nrows)
-			{
+			if(i >= nrows) {
 				break;
 			}
 
-			if (CUtility.DEBUG)
-			{
+			if(CUtility.DEBUG) {
 				assert(false == set.get(i));
 				assert(-1 == m_spec.m_row_map[i]);
 			}
@@ -308,10 +287,8 @@ class CMinimize {
 			m_spec.m_row_map[i] = reduced_nrows;
 
 			/* UNDONE: Optimize by doing all comparisons in one batch. */
-			for (j = i + 1; j < nrows; ++j)
-			{
-				if (-1 == m_spec.m_row_map[j] && true == row_equiv(i,j))
-				{
+			for(j = i + 1; j < nrows; ++j) {
+				if(-1 == m_spec.m_row_map[j] && true == row_equiv(i,j)) {
 					m_spec.m_row_map[j] = reduced_nrows;
 				}
 			}
@@ -319,23 +296,19 @@ class CMinimize {
 
 		/* Reduce rows. */
 		k = 0;
-		for (i = 0; i < nrows; ++i)
-		{
-			if (set.get(i))
-			{
+		for(i = 0; i < nrows; ++i) {
+			if(set.get(i)) {
 				++k;
 
 				set.clear(i);
 
 				j = m_spec.m_row_map[i];
 
-				if (CUtility.DEBUG)
-				{
+				if(CUtility.DEBUG) {
 					assert(j <= i);
 				}
 
-				if (j == i)
-				{
+				if(j == i) {
 					continue;
 				}
 
@@ -344,8 +317,7 @@ class CMinimize {
 		}
 		m_spec.m_dtrans_vector.setSize(reduced_nrows);
 
-		if (CUtility.DEBUG)
-		{
+		if(CUtility.DEBUG) {
 			/*writeln("k = " + k + "\nreduced_nrows = " + reduced_nrows + "");*/
 			assert(k == reduced_nrows);
 		}
@@ -356,266 +328,224 @@ Function: fix_dtrans
 Description: Updates CDTrans table after minimization 
 using groups, removing redundant transition table states.
 	 **************************************************************/
-	private void fix_dtrans
-		(
-		)
-		{
-			Vector new_vector;
-			int i;
-			int size;
-			Vector dtrans_group;
-			CDTrans first;
-			int c;
+	private void fix_dtrans() {
+		Vector!(CDTrans) new_vector;
+		int i;
+		int size;
+		Vector!(CDTrans) dtrans_group;
+		CDTrans first;
+		int c;
 
-			new_vector = new Vector();
+		new_vector = new Vector!(CDTrans)();
 
-			size = m_spec.m_state_dtrans.length;
-			for (i = 0; i < size; ++i)
-			{
-				if (CDTrans.F != m_spec.m_state_dtrans[i])
-				{
-					m_spec.m_state_dtrans[i] = m_ingroup[m_spec.m_state_dtrans[i]];
-				}
+		size = m_spec.m_state_dtrans.length;
+		for(i = 0; i < size; ++i) {
+			if(CDTrans.F != m_spec.m_state_dtrans[i]) {
+				m_spec.m_state_dtrans[i] = m_ingroup[m_spec.m_state_dtrans[i]];
 			}
-
-			size = m_group.size();
-			for (i = 0; i < size; ++i)
-			{
-				dtrans_group = m_group.elementAt(i);
-				first = dtrans_group.elementAt(0);
-				new_vector.addElement(first);
-
-				for (c = 0; c < m_spec.m_dtrans_ncols; ++c)
-				{
-					if (CDTrans.F != first.m_dtrans[c])
-					{
-						first.m_dtrans[c] = m_ingroup[first.m_dtrans[c]];
-					}
-				}
-			}
-
-			m_group = null;
-			m_spec.m_dtrans_vector = new_vector;
 		}
 
+		size = m_group.getSize();
+		for(i = 0; i < size; ++i) {
+			dtrans_group = m_group.get(i);
+			first = dtrans_group.get(0);
+			new_vector.append(first);
+
+			for(c = 0; c < m_spec.m_dtrans_ncols; ++c) {
+				if(CDTrans.F != first.m_dtrans[c]) {
+					first.m_dtrans[c] = m_ingroup[first.m_dtrans[c]];
+				}
+			}
+		}
+
+		m_group = null;
+		m_spec.m_dtrans_vector = new_vector;
+	}
+
 	/***************************************************************
-Function: minimize
-Description: Removes redundant transition table states.
+		Function: minimize
+		Description: Removes redundant transition table states.
 	 **************************************************************/
-	private void minimize
-		(
-		)
-		{
-			Vector dtrans_group;
-			Vector new_group;
-			int i;
-			int j;
-			int old_group_count;
-			int group_count;
-			CDTrans next;
-			CDTrans first;
-			int goto_first;
-			int goto_next;
-			int c;
-			int group_size;
-			bool added;
+	private void minimize() {
+		Vector!(CDTrans) dtrans_group;
+		Vector!(CDTrans) new_group;
+		int i;
+		int j;
+		int old_group_count;
+		int group_count;
+		CDTrans next;
+		CDTrans first;
+		int goto_first;
+		int goto_next;
+		int c;
+		int group_size;
+		bool added;
 
-			init_groups();
+		init_groups();
 
-			group_count = m_group.size();
-			old_group_count = group_count - 1;
+		group_count = m_group.getSize();
+		old_group_count = group_count - 1;
 
-			while (old_group_count != group_count)
-			{
-				old_group_count = group_count;
+		while(old_group_count != group_count) {
+			old_group_count = group_count;
 
-				if (CUtility.DEBUG)
-				{
-					assert(m_group.size() == group_count);
+			if(CUtility.DEBUG) {
+				assert(m_group.getSize() == group_count);
+			}
+
+			for(i = 0; i < group_count; ++i) {
+				dtrans_group = m_group.get(i);
+
+				group_size = dtrans_group.getSize();
+				if(group_size <= 1) {
+					continue;
 				}
 
-				for (i = 0; i < group_count; ++i)
-				{
-					dtrans_group = m_group.elementAt(i);
+				new_group = new Vector!(CDTrans)();
+				added = false;
 
-					group_size = dtrans_group.size();
-					if (group_size <= 1)
-					{
-						continue;
-					}
+				first = dtrans_group.get(0);
+				for(j = 1; j < group_size; ++j) {
+					next = dtrans_group.get(j);
 
-					new_group = new Vector();
-					added = false;
+					for(c = 0; c < m_spec.m_dtrans_ncols; ++c) {
+						goto_first = first.m_dtrans[c];
+						goto_next = next.m_dtrans[c];
 
-					first = dtrans_group.elementAt(0);
-					for (j = 1; j < group_size; ++j)
-					{
-						next = dtrans_group.elementAt(j);
-
-						for (c = 0; c < m_spec.m_dtrans_ncols; ++c)
-						{
-							goto_first = first.m_dtrans[c];
-							goto_next = next.m_dtrans[c];
-
-							if (goto_first != goto_next
-									&& (goto_first == CDTrans.F
-										|| goto_next == CDTrans.F
-										|| m_ingroup[goto_next] != m_ingroup[goto_first]))
-							{
-								if (CUtility.DEBUG)
+						if(goto_first != goto_next
+								&& (goto_first == CDTrans.F
+									|| goto_next == CDTrans.F
+									|| m_ingroup[goto_next] != m_ingroup[goto_first]))
 								{
-									assert(dtrans_group.elementAt(j) == next);
-								}
-
-								dtrans_group.removeElementAt(j);
-								--j;
-								--group_size;
-								new_group.addElement(next);
-								if (false == added)
-								{
-									added = true;
-									++group_count;
-									m_group.addElement(new_group);
-								}
-								m_ingroup[next.m_label] = m_group.size() - 1;
-
-								if (CUtility.DEBUG)
-								{
-									assert(m_group.contains(new_group)
-											== true);
-									assert(m_group.contains(dtrans_group)
-											== true);
-									assert(dtrans_group.contains(first)
-											== true);
-									assert(dtrans_group.contains(next)
-											== false);
-									assert(new_group.contains(first)
-											== false);
-									assert(new_group.contains(next)
-											== true);
-									assert(dtrans_group.size() == group_size);
-									assert(i == m_ingroup[first.m_label]);
-									assert((m_group.size() - 1) 
-											== m_ingroup[next.m_label]);
-								}
-
-								break;
+							if(CUtility.DEBUG) {
+								assert(dtrans_group.get(j) == next);
 							}
+
+							dtrans_group.remove(j);
+							--j;
+							--group_size;
+							new_group.append(next);
+							//if(false == added) {
+							if(!added) {
+								added = true;
+								++group_count;
+								m_group.append(new_group);
+							}
+							m_ingroup[next.m_label] = m_group.getSize() - 1;
+
+							if(CUtility.DEBUG) {
+								assert(m_group.contains(new_group) == true);
+								assert(m_group.contains(dtrans_group) == true);
+								assert(dtrans_group.contains(first) == true);
+								assert(dtrans_group.contains(next) == false);
+								assert(new_group.contains(first) == false);
+								assert(new_group.contains(next) == true);
+								assert(dtrans_group.getSize() == group_size);
+								assert(i == m_ingroup[first.m_label]);
+								assert((m_group.getSize() - 1) == m_ingroup[next.m_label]);
+							}
+
+							break;
 						}
 					}
 				}
 			}
-
-			writeln(m_group.size() + " states after removal of redundant states.");
-
-			if (m_spec.m_verbose
-					&& true == CUtility.OLD_DUMP_DEBUG)
-			{
-				writeln();
-				writeln("States grouped as follows after minimization");
-				pgroups();
-			}
-
-			fix_dtrans();
 		}
+
+		writeln(conv!(uint,string)(m_group.getSize()) ~ " states after removal of redundant states.");
+
+		if(m_spec.m_verbose && true == CUtility.OLD_DUMP_DEBUG) {
+			writeln();
+			writeln("States grouped as follows after minimization");
+			pgroups();
+		}
+
+		fix_dtrans();
+	}
 
 	/***************************************************************
-Function: init_groups
-Description:
+		Function: init_groups
+		Description:
 	 **************************************************************/
-	private void init_groups
-		(
-		)
-		{
-			int i;
-			int j;
-			int group_count;
-			int size;
-			CAccept accept;
-			CDTrans dtrans;
-			Vector dtrans_group;
-			CDTrans first;
-			bool group_found;
+	private void init_groups() {
+		int i;
+		int j;
+		int group_count;
+		int size;
+		CAccept accept;
+		CDTrans dtrans;
+		Vector!(CDTrans) dtrans_group;
+		CDTrans first;
+		bool group_found;
 
-			m_group = new Vector();
-			group_count = 0;
+		m_group = new Vector!(Vector!(CDTrans))();
+		group_count = 0;
 
-			size = m_spec.m_dtrans_vector.size();
-			m_ingroup = new int[size];
+		size = m_spec.m_dtrans_vector.getSize();
+		m_ingroup = new int[size];
 
-			for (i = 0; i < size; ++i)
-			{
-				group_found = false;
-				dtrans = m_spec.m_dtrans_vector.elementAt(i);
+		for(i = 0; i < size; ++i) {
+			group_found = false;
+			dtrans = m_spec.m_dtrans_vector.get(i);
 
-				if (CUtility.DEBUG)
-				{
-					assert(i == dtrans.m_label);
+			if(CUtility.DEBUG) {
+				assert(i == dtrans.m_label);
+				assert(false == group_found);
+				assert(group_count == m_group.getSize());
+			}
+
+			for(j = 0; j < group_count; ++j) {
+				dtrans_group = m_group.get(j);
+
+				if(CUtility.DEBUG) {
 					assert(false == group_found);
-					assert(group_count == m_group.size());
+					assert(0 < dtrans_group.getSize());
 				}
 
-				for (j = 0; j < group_count; ++j)
-				{
-					dtrans_group = m_group.elementAt(j);
+				first = dtrans_group.get(0);
 
-					if (CUtility.DEBUG)
-					{
-						assert(false == group_found);
-						assert(0 < dtrans_group.size());
-					}
+				if(CUtility.SLOW_DEBUG) {
+					CDTrans check;
+					int k;
+					int s;
 
-					first = dtrans_group.elementAt(0);
+					s = dtrans_group.getSize();
+					assert(0 < s);
 
-					if (CUtility.SLOW_DEBUG)
-					{
-						CDTrans check;
-						int k;
-						int s;
-
-						s = dtrans_group.size();
-						assert(0 < s);
-
-						for (k = 1; k < s; ++k)
-						{
-							check = dtrans_group.elementAt(k);
-							assert(check.m_accept == first.m_accept);
-						}
-					}
-
-					if (first.m_accept == dtrans.m_accept)
-					{
-						dtrans_group.addElement(dtrans);
-						m_ingroup[i] = j;
-						group_found = true;
-
-						if (CUtility.DEBUG)
-						{
-							assert(j == m_ingroup[dtrans.m_label]);
-						}
-
-						break;
+					for(k = 1; k < s; ++k) {
+						check = dtrans_group.get(k);
+						assert(check.m_accept == first.m_accept);
 					}
 				}
 
-				if (false == group_found)
-				{
-					dtrans_group = new Vector();
-					dtrans_group.addElement(dtrans);
-					m_ingroup[i] = m_group.size();
-					m_group.addElement(dtrans_group);
-					++group_count;
+				if(first.m_accept == dtrans.m_accept) {
+					dtrans_group.append(dtrans);
+					m_ingroup[i] = j;
+					group_found = true;
+
+					if(CUtility.DEBUG) {
+						assert(j == m_ingroup[dtrans.m_label]);
+					}
+
+					break;
 				}
 			}
 
-			if (m_spec.m_verbose
-					&& true == CUtility.OLD_DUMP_DEBUG)
-			{
-				writeln("Initial grouping:");
-				pgroups();
-				writeln();
+			if(false == group_found) {
+				dtrans_group = new Vector!(CDTrans)();
+				dtrans_group.append(dtrans);
+				m_ingroup[i] = m_group.getSize();
+				m_group.append(dtrans_group);
+				++group_count;
 			}
 		}
+
+		if(m_spec.m_verbose && true == CUtility.OLD_DUMP_DEBUG) {
+			writeln("Initial grouping:");
+			pgroups();
+			writeln();
+		}
+	}
 
 	/***************************************************************
 		Function: pset
@@ -625,41 +555,35 @@ Description:
 		int size;
 		CDTrans dtrans;
 
-		size = dtrans_group.size();
-		for (i = 0; i < size; ++i)
-		{
-			dtrans = dtrans_group.elementAt(i);
-			write(dtrans.m_label + " ");
+		size = dtrans_group.getSize();
+		for(i = 0; i < size; ++i) {
+			dtrans = dtrans_group.get(i);
+			write(conv!(int,string)(dtrans.m_label) ~ " ");
 		}
 	}
 
 	/***************************************************************
 		Function: pgroups
 	 **************************************************************/
-	private void pgroups
-		(
-		)
-		{
-			int i;
-			int dtrans_size;
-			int group_size;
+	private void pgroups() {
+		int i;
+		int dtrans_size;
+		int group_size;
 
-			group_size = m_group.size();
-			for (i = 0; i < group_size; ++i)
-			{
-				write("\tGroup " + i + " {");
-				pset(m_group.elementAt(i));
-				writeln("}");
-				writeln();
-			}
-
+		group_size = m_group.getSize();
+		for(i = 0; i < group_size; ++i) {
+			write("\tGroup " ~ conv!(int,string)(i) ~ " {");
+			pset(m_group.get(i));
+			writeln("}");
 			writeln();
-			dtrans_size = m_spec.m_dtrans_vector.size();
-			for (i = 0; i < dtrans_size; ++i)
-			{
-				writeln("\tstate " + i 
-						+ " is in group " 
-						+ m_ingroup[i]);
-			}
 		}
+
+		writeln();
+		dtrans_size = m_spec.m_dtrans_vector.getSize();
+		for(i = 0; i < dtrans_size; ++i) {
+			writeln("\tstate " ~ conv!(int,string)(i)
+					~ " is in group " 
+					~ conv!(int,string)(m_ingroup[i]));
+		}
+	}
 }

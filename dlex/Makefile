@@ -2,12 +2,16 @@ include ../makeconfig.conf
 
 IPATH=-I../../libhurt/ -I../cup/
 
-OBJS=dlex.caccept.o dlex.cacceptanchor.o dlex.cspec.o dlex.calloc.o dlex.cbunch.o \
-dlex.cdfa.o dlex.cdtrans.o dlex.cerror.o dlex.cinput.o dlex.clexgen.o
+#OBJS=dlex.caccept.o dlex.cacceptanchor.o dlex.cspec.o dlex.calloc.o dlex.cbunch.o \
+dlex.cdfa.o dlex.cdtrans.o dlex.cerror.o dlex.cinput.o dlex.clexgen.o dlex.cmakenfa.o dlex.cminimize.o \
+dlex.cnfa.o
+
+OBJS= dlex.cnfa2dfa.o
 
 all:dlex
 
 dlex: $(OBJS)
+	ar -r dlex.a *.o
 
 clean:
 	rm *.o
@@ -44,3 +48,15 @@ dlex.cinput.o: dlex/cinput.d Makefile ../makeconfig.conf
 
 dlex.clexgen.o: dlex/clexgen.d Makefile ../makeconfig.conf
 	$(DC) $(CFLAGS) $(IPATH) dlex/clexgen.d -ofdfex.clexgen.o 
+
+dlex.cmakenfa.o: dlex/cmakenfa.d Makefile ../makeconfig.conf
+	$(DC) $(CFLAGS) $(IPATH) dlex/cmakenfa.d -ofdfex.cmakenfa.o 
+
+dlex.cminimize.o: dlex/cminimize.d Makefile ../makeconfig.conf
+	$(DC) $(CFLAGS) $(IPATH) dlex/cminimize.d -ofdfex.cminimize.o 
+
+dlex.cnfa.o: dlex/cnfa.d Makefile ../makeconfig.conf
+	$(DC) $(CFLAGS) $(IPATH) dlex/cnfa.d -ofdfex.cnfa.o 
+
+dlex.cnfa2dfa.o: dlex/cnfa2dfa.d Makefile ../makeconfig.conf
+	$(DC) $(CFLAGS) $(IPATH) dlex/cnfa2dfa.d -ofdfex.cnfa2dfa.o 

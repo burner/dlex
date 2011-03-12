@@ -1,6 +1,7 @@
 module dlex.clexgen;
 
 import dlex.caccept;
+import dlex.cdtrans;
 import dlex.cemit;
 import dlex.cerror;
 import dlex.cinput;
@@ -18,6 +19,7 @@ import dlex.sparsebitset;
 import hurt.container.vector;
 import hurt.conv.conv;
 import hurt.util.array;
+import hurt.string.stringutil;
 
 import std.stream;
 import std.stdio;
@@ -102,7 +104,7 @@ class CLexGen {
 
 		/* Open output stream. */
 		//m_outstream = new java.io.PrintWriter(new java.io.BufferedWriter(
-		m_outstream = new std.stream.File(filename + ".d");
+		m_outstream = new std.stream.File(filename ~ ".d");
 		if(m_outstream is null) {
 			writeln("Error: Unable to open output file " ~ filename ~ ".d");
 			return;
@@ -306,7 +308,7 @@ class CLexGen {
 			CError.parse_error(CError.E_INTERNAL, 0);
 		}
 
-		if(null == prev_code) {
+		if(null is prev_code) {
 			prev_code = new char[BUFFER_SIZE];
 			prev_read = 0;
 		}
@@ -880,13 +882,13 @@ class CLexGen {
 		for(elem = 0; elem < size; ++elem) {
 			nfa = m_spec.m_nfa_states.get(elem);
 
-			write("Nfa state " + plab(nfa) + ": ");
+			write("Nfa state " ~ plab(nfa) ~ ": ");
 
 			if(null is nfa.m_next) {
 				write("(TERMINAL)");
 			} else {
-				write("--> " + plab(nfa.m_next));
-				write("--> " + plab(nfa.m_next2));
+				write("--> " ~ plab(nfa.m_next));
+				write("--> " ~ plab(nfa.m_next2));
 
 				switch (nfa.m_edge) {
 				case CNfa.CCL:
@@ -898,7 +900,7 @@ class CLexGen {
 					break;
 
 				default:
-					write(" " + interp_int(nfa.m_edge));
+					write(" " ~ interp_int(nfa.m_edge));
 					break;
 				}
 			}
@@ -1075,7 +1077,7 @@ class CLexGen {
 		if(null is all_states) {
 			all_states = new SparseBitSet();
 
-			size = m_spec.m_states.size();
+			size = m_spec.m_states.length;
 			for(i = 0; i < size; ++i) {
 				all_states.set(i);
 			}
@@ -1097,18 +1099,18 @@ class CLexGen {
 		int end_macro;
 		int start_name;
 		int count_name;
-		String def;
+		string def;
 		int def_elem;
-		String name;
+		string name;
 		char replace[];
 		int rep_elem;
 
 		if(CUtility.DEBUG) {
-			assert(null != this);
-			assert(null != m_outstream);
-			assert(null != m_input);
-			assert(null != m_tokens);
-			assert(null != m_spec);
+			assert(null !is this);
+			assert(null !is m_outstream);
+			assert(null !is m_input);
+			assert(null !is m_tokens);
+			assert(null !is m_spec);
 		}
 
 		/* Check formacro. */
@@ -1129,8 +1131,7 @@ class CLexGen {
 		while('}' != m_input.m_line[elem]) {
 			++elem;
 			if(elem >= m_input.m_line_read) {
-				CError.impos("Unfinished macro name at line "
-						+ m_input.m_line_number);
+				CError.impos("Unfinished macro name at line " ~ conv!(int,string)(m_input.m_line_number));
 				return ERROR;
 			}
 		}
@@ -1149,9 +1150,11 @@ class CLexGen {
 		}
 
 		/* Retrieve macro definition. */
-		name = new String(m_input.m_line, start_name, count_name);
-		def = m_spec.m_macros.get(name);
-		if(null is def) {
+		name = m_input.m_line[start_name..count_name].idup;
+		if(name in m_spec.m_macros) {
+			def = m_spec.m_macros[name];
+		} else {
+			//if(null is def) {
 			/* CError.impos("Undefined macro \"" + name + "\"."); */
 			writeln("Error: Undefined macro \"" ~ name ~ "\".");
 			CError.parse_error(CError.E_NOMAC, m_input.m_line_number);
@@ -1178,8 +1181,8 @@ class CLexGen {
 		if(rep_elem >= replace.length) {
 			replace = CUtility.doubleSize(replace);
 		}
-		for(def_elem = 0; def_elem < def.length(); ++def_elem) {
-			replace[rep_elem] = def.charAt(def_elem);
+		for(def_elem = 0; def_elem < def.length; ++def_elem) {
+			replace[rep_elem] = def[def_elem];
 
 			++rep_elem;
 			if(rep_elem >= replace.length) {
@@ -1205,8 +1208,7 @@ class CLexGen {
 		m_input.m_line_read = rep_elem;
 
 		if(CUtility.OLD_DEBUG) {
-			writeln(new String(m_input.m_line, 0,
-					m_input.m_line_read));
+			writeln(m_input.m_line[0..m_input.m_line_read]);
 		}
 		return NOT_ERROR;
 	}
@@ -1226,11 +1228,11 @@ class CLexGen {
 		bool in_ccl;
 
 		if(CUtility.DEBUG) {
-			assert(null != this);
-			assert(null != m_outstream);
-			assert(null != m_input);
-			assert(null != m_tokens);
-			assert(null != m_spec);
+			assert(null !is this);
+			assert(null !is m_outstream);
+			assert(null !is m_input);
+			assert(null !is m_tokens);
+			assert(null !is m_spec);
 		}
 
 		/*
@@ -1338,20 +1340,16 @@ class CLexGen {
 		if(CUtility.DEBUG) {
 			assert(0 < count_def);
 			assert(0 < count_name);
-			assert(null != m_spec.m_macros);
+			assert(null !is m_spec.m_macros);
 		}
 
 		if(CUtility.OLD_DEBUG) {
-			writeln("macro name \""
-					+ new String(m_input.m_line, start_name, count_name)
-					+ "\".");
-			writeln("macro definition \""
-					+ new String(m_input.m_line, start_def, count_def) + "\".");
+			writeln("macro name \"" ~ m_input.m_line[start_name..count_name] ~ "\".");
+			writeln("macro definition \"" ~ m_input.m_line[start_def..count_def] ~ "\".");
 		}
 
 		/* Add macro name and definition to table. */
-		m_spec.m_macros.put(new String(m_input.m_line, start_name, count_name),
-				new String(m_input.m_line, start_def, count_def));
+		m_spec.m_macros[m_input.m_line[start_name..count_name].idup] = m_input.m_line[start_def..count_def].idup;
 	}
 
 	/***************************************************************
@@ -1365,11 +1363,11 @@ class CLexGen {
 		int count_state;
 
 		if(CUtility.DEBUG) {
-			assert(null != this);
-			assert(null != m_outstream);
-			assert(null != m_input);
-			assert(null != m_tokens);
-			assert(null != m_spec);
+			assert(null !is this);
+			assert(null !is m_outstream);
+			assert(null !is m_input);
+			assert(null !is m_tokens);
+			assert(null !is m_spec);
 		}
 
 		/* EOF found? */
@@ -1393,8 +1391,8 @@ class CLexGen {
 
 		while(m_input.m_line_index < m_input.m_line_read) {
 			if(CUtility.OLD_DEBUG) {
-				writeln("line read " + m_input.m_line_read
-						+ "\tline index = " + m_input.m_line_index);
+				writeln("line read " ~ conv!(int,string)(m_input.m_line_read) 
+					~ "\tline index = " ~ conv!(int,string)(m_input.m_line_index));
 			}
 
 			/* Skip white space. */
@@ -1421,15 +1419,14 @@ class CLexGen {
 
 			if(CUtility.OLD_DEBUG) {
 				writeln("State name \""
-						+ new String(m_input.m_line, start_state, count_state)
-						+ "\".");
-				writeln("Integer index \"" + m_spec.m_states.size()
-						+ "\".");
+						~ m_input.m_line[start_state..count_state]
+						~ "\".");
+				writeln("Integer index \"" ~ conv!(int,string)(m_spec.m_states.length)
+						~ "\".");
 			}
 
 			/* Enter new state name, along with unique index. */
-			m_spec.m_states.put(new String(m_input.m_line, start_state,
-					count_state), new Integer(m_spec.m_states.size()));
+			m_spec.m_states[m_input.m_line[start_state..count_state].idup] = m_spec.m_states.length;
 
 			/* Skip comma. */
 			if(',' == m_input.m_line[m_input.m_line_index]) {
@@ -1485,11 +1482,11 @@ class CLexGen {
 
 			case '^':
 				++m_input.m_line_index;
-				r = Character.toUpperCase(m_input.m_line[m_input.m_line_index]);
+				r = toUpperCase(m_input.m_line[m_input.m_line_index]);
 				if(r < '@' || r > 'Z') // non-fatal
 					CError.parse_error(CError.E_BADCTRL, m_input.m_line_number);
 				//r = (char) (r - '@');
-				r = r - '@';
+				r = cast(char)(r - '@');
 				++m_input.m_line_index;
 				return r;
 
@@ -1502,7 +1499,7 @@ class CLexGen {
 					if(CUtility.ishexdigit(m_input.m_line[m_input.m_line_index])) {
 						//r = (char) (r << 4);
 						//r = (char) (r | CUtility
-						r = r << 4;
+						r = cast(char)(r << 4);
 						r = r | CUtility.hex2bin(m_input.m_line[m_input.m_line_index]);
 						++m_input.m_line_index;
 					} else
@@ -1519,7 +1516,7 @@ class CLexGen {
 					r = 0;
 					for(int i = 0; i < 3; i++)
 						if(CUtility.isoctdigit(m_input.m_line[m_input.m_line_index])) {
-							r = r << 3;
+							r = cast(char)(r << 3);
 							r = r | CUtility.oct2bin(m_input.m_line[m_input.m_line_index]);
 							++m_input.m_line_index;
 						} else
@@ -1550,11 +1547,11 @@ class CLexGen {
 		action_index = 0;
 
 		if(CUtility.DEBUG) {
-			assert(null != this);
-			assert(null != m_outstream);
-			assert(null != m_input);
-			assert(null != m_tokens);
-			assert(null != m_spec);
+			assert(null !is this);
+			assert(null !is m_outstream);
+			assert(null !is m_input);
+			assert(null !is m_tokens);
+			assert(null !is m_spec);
 		}
 
 		/* Get a new line, ifneeded. */
@@ -1656,13 +1653,12 @@ class CLexGen {
 		accept = new CAccept(action, action_index, m_input.m_line_number);
 
 		if(CUtility.DEBUG) {
-			assert(null != accept);
+			assert(null !is accept);
 		}
 
 		if(CUtility.DESCENT_DEBUG) {
 			write("Accepting action:");
-			writeln(new String(accept.m_action, 0,
-					accept.m_action_read));
+			writeln(accept.m_action[0..accept.m_action_read]);
 		}
 
 		return accept;
@@ -1767,8 +1763,8 @@ class CLexGen {
 		}
 
 		if(m_input.m_line_index > m_input.m_line_read) {
-			writeln("m_input.m_line_index = " ~ m_input.m_line_index);
-			writeln("m_input.m_line_read = " ~ m_input.m_line_read);
+			writeln("m_input.m_line_index = " ~ conv!(int,string)(m_input.m_line_index));
+			writeln("m_input.m_line_read = " ~ conv!(int,string)(m_input.m_line_read));
 			assert(m_input.m_line_index <= m_input.m_line_read);
 		}
 
@@ -1810,27 +1806,35 @@ class CLexGen {
 				++m_input.m_line_index;
 			}
 		}
-
-		code = m_tokens.get(new Character(m_spec.m_lexeme));
+		/*code = m_tokens[m_spec.m_lexeme];
 		if(m_spec.m_in_quote || true == saw_escape) {
 			m_spec.m_current_token = L;
 		} else {
-			if(null == code) {
+			if(null is code) {
 				m_spec.m_current_token = L;
 			} else {
 				m_spec.m_current_token = code.intValue();
 			}
+		}*/
+
+		if(m_spec.m_in_quote || true == saw_escape) {
+			m_spec.m_current_token = L;
+		} else if(!(m_spec.m_lexeme in m_tokens)) {
+			m_spec.m_current_token = L;
+		} else {
+			m_spec.m_current_token = code = m_tokens[m_spec.m_lexeme];
 		}
 
+		
 		if(CCL_START == m_spec.m_current_token)
 			m_spec.m_in_ccl = true;
 		if(CCL_END == m_spec.m_current_token)
 			m_spec.m_in_ccl = false;
 
 		if(CUtility.FOODEBUG) {
-			writeln("Lexeme: " + m_spec.m_lexeme + "\tToken: "
-					+ m_spec.m_current_token + "\tIndex: "
-					+ m_input.m_line_index);
+			writeln("Lexeme: " ~ conv!(int,string)(m_spec.m_lexeme) ~ "\tToken: "
+					~ conv!(int,string)(m_spec.m_current_token) ~ "\tIndex: "
+					~ conv!(int,string)(m_input.m_line_index));
 		}
 
 		return m_spec.m_current_token;
@@ -1840,10 +1844,10 @@ class CLexGen {
 	 * Function: details Description: High level debugging routine.
 	 **************************************************************/
 	private void details() {
-		Enumeration names;
+		string[] names;
 		string name;
 		string def;
-		Enumeration states;
+		string[] states;
 		string state;
 		int index;
 		int elem;
@@ -1852,33 +1856,39 @@ class CLexGen {
 		writeln();
 		writeln("\t** Macros **");
 		names = m_spec.m_macros.keys();
-		while(names.hasMoreElements()) {
-			name = names.nextElement();
-			def = m_spec.m_macros.get(name);
+		//while(names.hasMoreElements()) {
+		foreach(it;names) {
+			name = it;
+			def = m_spec.m_macros[name];
 
 			if(CUtility.DEBUG) {
-				assert(null != name);
-				assert(null != def);
+				assert(null !is name);
+				assert(null !is def);
 			}
 
-			writeln("Macro name \"" + name + "\" has definition \""
-					+ def + "\".");
+			writeln("Macro name \"" ~ name ~ "\" has definition \""
+					~ def ~ "\".");
 		}
 
 		writeln();
 		writeln("\t** States **");
 		states = m_spec.m_states.keys();
-		while(states.hasMoreElements()) {
-			state = states.nextElement();
-			index = m_spec.m_states.get(state);
+		bool stateFound = false;
+		//while(states.hasMoreElements()) {
+		foreach(it;states) {
+			state = it;
+			if(state in m_spec.m_states) {
+				stateFound = true;
+			}
+			index = m_spec.m_states[state];
 
 			if(CUtility.DEBUG) {
-				assert(null != state);
-				assert(null != index);
+				assert(null !is state);
+				//assert(null !is index);
+				assert(!stateFound);
 			}
 
-			writeln("State \"" + state + "\" has identifying index "
-					+ index.toString() + ".");
+			writeln("State \"" ~ state ~ "\" has identifying index " ~ conv!(int,string)(index) ~ ".");
 		}
 
 		writeln();
@@ -1909,40 +1919,37 @@ class CLexGen {
 		writeln("\t** Operating System Specificity **");
 		if(false == m_spec.m_unix) {
 			writeln("Not generating UNIX-specific code.");
-			writeln("(This means that \"\\r\\n\" is a "
-					+ "newline, rather than \"\\n\".)");
+			writeln("(This means that \"\\r\\n\" is a newline, rather than \"\\n\".)");
 		} else {
 			writeln("Generating UNIX-specific code.");
-			writeln("(This means that \"\\n\" is a "
-					+ "newline, rather than \"\\r\\n\".)");
+			writeln("(This means that \"\\n\" is a newline, rather than \"\\r\\n\".)");
 		}
 
 		writeln();
 		writeln("\t** Java CUP Compatibility **");
 		if(false == m_spec.m_cup_compatible) {
 			writeln("Generating CUP compatible code.");
-			writeln("(Scanner implements "
-					+ "java_cup.runtime.Scanner.)");
+			writeln("(Scanner implements java_cup.runtime.Scanner.)");
 		} else {
 			writeln("Not generating CUP compatible code.");
 		}
 
 		if(CUtility.FOODEBUG) {
-			if(null != m_spec.m_nfa_states && null != m_spec.m_nfa_start) {
+			if(null !is m_spec.m_nfa_states && null !is m_spec.m_nfa_start) {
 				writeln();
 				writeln("\t** NFA machine **");
 				print_nfa();
 			}
 		}
 
-		if(null != m_spec.m_dtrans_vector) {
+		if(null !is m_spec.m_dtrans_vector) {
 			writeln();
 			writeln("\t** DFA transition table **");
 			/* print_header(); */
 		}
 
 		/*
-		 * if(null != m_spec.m_accept_vector && null != m_spec.m_anchor_array)
+		 * if(null !is m_spec.m_accept_vector && null != m_spec.m_anchor_array)
 		 * { writeln();
 		 * writeln("\t** Accept States and Anchor Vector **");
 		 * print_accept(); }
@@ -1957,16 +1964,16 @@ class CLexGen {
 		int elem;
 		CNfa nfa;
 
-		size = nfa_set.size();
+		size = nfa_set.getSize();
 
 		if(0 == size) {
 			write("empty ");
 		}
 
 		for(elem = 0; elem < size; ++elem) {
-			nfa = nfa_set.elementAt(elem);
+			nfa = nfa_set.get(elem);
 			/* write(m_spec.m_nfa_states.indexOf(nfa) + " "); */
-			write(nfa.m_label + " ");
+			write(conv!(int,string)(nfa.m_label) ~ " ");
 		}
 	}
 
@@ -1974,82 +1981,81 @@ class CLexGen {
 	 * Function: print_header
 	 **************************************************************/
 	private void print_header() {
-		Enumeration states;
+		string[] states;
 		int i;
 		int j;
 		int chars_printed = 0;
 		CDTrans dtrans;
 		int last_transition;
-		String str;
+		string str;
 		CAccept accept;
-		String state;
+		string state;
 		int index;
 
 		writeln("/*---------------------- DFA -----------------------");
 
 		states = m_spec.m_states.keys();
-		while(states.hasMoreElements()) {
-			state = states.nextElement();
-			index = m_spec.m_states.get(state);
-
-			if(CUtility.DEBUG) {
-				assert(null != state);
-				assert(null != index);
+		//while(states.hasMoreElements()) {
+		foreach(it;states) {
+			state = it;
+			bool stateFound = false;
+			if(state in m_spec.m_states) {
+				stateFound = true;
+				index = m_spec.m_states[state];
 			}
 
-			writeln("State \"" + state + "\" has identifying index "
-					+ index.toString() + ".");
+			if(CUtility.DEBUG) {
+				assert(null !is state);
+				//assert(null !is index);
+				assert(!stateFound);
+			}
 
-			i = index.intValue();
+			writeln("State \"" ~ state ~ "\" has identifying index "
+					~ conv!(int,string)(index) ~ ".");
+
+			i = index;
 			if(CDTrans.F != m_spec.m_state_dtrans[i]) {
 				writeln("\tStart index in transition table: "
-						+ m_spec.m_state_dtrans[i]);
+						~ conv!(int,string)(m_spec.m_state_dtrans[i]));
 			} else {
 				writeln("\tNo associated transition states.");
 			}
 		}
 
-		for(i = 0; i < m_spec.m_dtrans_vector.size(); ++i) {
-			dtrans = m_spec.m_dtrans_vector.elementAt(i);
+		for(i = 0; i < m_spec.m_dtrans_vector.getSize(); ++i) {
+			dtrans = m_spec.m_dtrans_vector.get(i);
 
-			if(null == m_spec.m_accept_vector && null == m_spec.m_anchor_array) {
-				if(null == dtrans.m_accept) {
-					write(" * State " + i + " [nonaccepting]");
+			if(null is m_spec.m_accept_vector && null == m_spec.m_anchor_array) {
+				if(null is dtrans.m_accept) {
+					write(" * State " ~ conv!(int,string)(i) ~ " [nonaccepting]");
 				} else {
 					write(" * State "
-							+ i
-							+ " [accepting, line "
-							+ dtrans.m_accept.m_line_number
-							+ " <"
-							+ (new String(dtrans.m_accept.m_action, 0,
-									dtrans.m_accept.m_action_read)) + ">]");
+							~ conv!(int,string)(i)
+							~ " [accepting, line "
+							~ conv!(int,string)(dtrans.m_accept.m_line_number)
+							~ " <"
+							~ dtrans.m_accept.m_action[0..dtrans.m_accept.m_action_read] ~ ">]");
 					if(CSpec.NONE != dtrans.m_anchor) {
-						write(" Anchor: "
-										+ ((0 != (dtrans.m_anchor & CSpec.START)) ? "start "
-												: "")
-										+ ((0 != (dtrans.m_anchor & CSpec.END)) ? "end "
-												: ""));
+						write(" Anchor: " ~ ((0 != (dtrans.m_anchor & CSpec.START)) ? "start " : "")
+										~ ((0 != (dtrans.m_anchor & CSpec.END)) ? "end " : ""));
 					}
 				}
 			} else {
-				accept = m_spec.m_accept_vector.elementAt(i);
+				accept = m_spec.m_accept_vector.get(i);
 
-				if(null == accept) {
-					write(" * State " + i + " [nonaccepting]");
+				if(null is accept) {
+					write(" * State " ~ conv!(int,string)(i) ~ " [nonaccepting]");
 				} else {
 					write(" * State "
-							+ i
-							+ " [accepting, line "
-							+ accept.m_line_number
-							+ " <"
-							+ (new String(accept.m_action, 0,
-									accept.m_action_read)) + ">]");
+							~ conv!(int,string)(i)
+							~ " [accepting, line "
+							~ conv!(int,string)(accept.m_line_number)
+							~ " <"
+							~ accept.m_action[0..accept.m_action_read] ~ ">]");
 					if(CSpec.NONE != m_spec.m_anchor_array[i]) {
 						write(" Anchor: "
-										+ ((0 != (m_spec.m_anchor_array[i] & CSpec.START)) ? "start "
-												: "")
-										+ ((0 != (m_spec.m_anchor_array[i] & CSpec.END)) ? "end "
-												: ""));
+										~ ((0 != (m_spec.m_anchor_array[i] & CSpec.START)) ? "start " : "")
+										~ ((0 != (m_spec.m_anchor_array[i] & CSpec.END)) ? "end " : ""));
 					}
 				}
 			}
@@ -2059,15 +2065,14 @@ class CLexGen {
 				if(CDTrans.F != dtrans.m_dtrans[j]) {
 					if(last_transition != dtrans.m_dtrans[j]) {
 						writeln();
-						write(" *    goto " + dtrans.m_dtrans[j]
-								+ " on ");
+						write(" *    goto " ~ conv!(int,string)(dtrans.m_dtrans[j]) ~ " on ");
 						chars_printed = 0;
 					}
 
 					str = interp_int(j);
 					write(str);
 
-					chars_printed = chars_printed + str.length();
+					chars_printed = chars_printed + str.length;
 					if(56 < chars_printed) {
 						writeln();
 						write(" *             ");

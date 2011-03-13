@@ -11,7 +11,7 @@ public class Main {
 	public void main(string[] args) {
 		CLexGen lg;
 
-		if (args.length < 1) {
+		if(args.length < 1) {
 			writeln("Usage: JLex.Main <filename>");
 			return;
 		}
@@ -22,7 +22,7 @@ public class Main {
 		try {	
 			lg = new CLexGen(args[0]);
 			lg.generate();
-		} catch (Error e) {
+		} catch(Error e) {
 			writeln(e.toString());
 		}
 	}

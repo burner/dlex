@@ -105,8 +105,7 @@ class CEmit {
 		CAccept accept;
 		bool tr;
 
-		writeln("---------------------- Transition Table " 
-				+ "----------------------");
+		writeln("---------------------- Transition Table ----------------------");
 
 		for(i = 0; i < m_spec.m_row_map.length; ++i) {
 			write("State " ~ conv!(int,string)(i));
@@ -128,7 +127,7 @@ class CEmit {
 			state = dtrans.m_dtrans[m_spec.m_col_map[0]];
 			if(CDTrans.F != state) {
 				tr = true;
-				write("\tgoto " ~ conv!(int,string)(state) ~ " on [" + (conv!(int,string)(0)));
+				write("\tgoto " ~ conv!(int,string)(state) ~ " on [" ~ (conv!(int,string)(0)));
 			}
 			for(j = 1; j < m_spec.m_dtrans_ncols; ++j) {
 				next = dtrans.m_dtrans[m_spec.m_col_map[j]];
@@ -153,8 +152,7 @@ class CEmit {
 			}
 		}
 
-		writeln("---------------------- Transition Table " 
-				+ "----------------------");
+		writeln("---------------------- Transition Table ----------------------");
 	}
 
 	/***************************************************************
@@ -272,26 +270,21 @@ class CEmit {
 		if(true == m_spec.m_public) {
 			m_outstream.writeString("public ");
 		}
-		m_outstream.writeString(new String(m_spec.m_class_name));
-		m_outstream.writeString(" (java.io.InputStream instream)");
+		m_outstream.writeString(m_spec.m_class_name);
+		m_outstream.writeString(" (std.stream.InputStream instream)");
 
-		if(null !is m_spec.m_init_throw_code)
-		{
+		if(null !is m_spec.m_init_throw_code) {
 			m_outstream.writeLine(""); 
 			m_outstream.writeString("\t\tthrows "); 
-			m_outstream.writeLine(new String(m_spec.m_init_throw_code,0,
-						m_spec.m_init_throw_read));
+			m_outstream.writeLine(m_spec.m_init_throw_code[0..m_spec.m_init_throw_read]);
 			m_outstream.writeLine("\t\t{");
-		}
-		else
-		{
+		} else {
 			m_outstream.writeLine(" {");
 		}
 
 		m_outstream.writeLine("\t\tthis ();");		
 		m_outstream.writeLine("\t\tif(null is instream) {");
-		m_outstream.writeLine("\t\t\tthrow (new Error(\"Error: Bad input "
-				+ "stream initializer.\"));");
+		m_outstream.writeLine("\t\t\tthrow (new Error(\"Error: Bad input stream initializer.\"));");
 		m_outstream.writeLine("\t\t}");
 		m_outstream.writeLine("\t\tyy_reader = new java.io.BufferedReader(new java.io.InputStreamReader(instream));");
 		m_outstream.writeLine("\t}");
@@ -300,19 +293,15 @@ class CEmit {
 
 		/* Function: third, private constructor - only forinternal use */
 		m_outstream.writeString("\tprivate ");
-		m_outstream.writeString(new String(m_spec.m_class_name));
+		m_outstream.writeString(m_spec.m_class_name);
 		m_outstream.writeString(" ()");
 
-		if(null !is m_spec.m_init_throw_code)
-		{
+		if(null !is m_spec.m_init_throw_code) {
 			m_outstream.writeLine(""); 
 			m_outstream.writeString("\t\tthrows "); 
-			m_outstream.writeLine(new String(m_spec.m_init_throw_code,0,
-						m_spec.m_init_throw_read));
+			m_outstream.writeLine(m_spec.m_init_throw_code[0..m_spec.m_init_throw_read]);
 			m_outstream.writeLine("\t\t{");
-		}
-		else
-		{
+		} else {
 			m_outstream.writeLine(" {");
 		}
 
@@ -321,12 +310,10 @@ class CEmit {
 		m_outstream.writeLine("\t\tyy_buffer_index = 0;");
 		m_outstream.writeLine("\t\tyy_buffer_start = 0;");
 		m_outstream.writeLine("\t\tyy_buffer_end = 0;");
-		if(m_spec.m_count_chars)
-		{
+		if(m_spec.m_count_chars) {
 			m_outstream.writeLine("\t\tyychar = 0;");
 		}
-		if(m_spec.m_count_lines)
-		{
+		if(m_spec.m_count_lines) {
 			m_outstream.writeLine("\t\tyyline = 0;");
 		}
 		m_outstream.writeLine("\t\tyy_at_bol = true;");
@@ -337,10 +324,8 @@ class CEmit {
 		  }*/
 
 		/* User specified constructor code. */
-		if(null !is m_spec.m_init_code)
-		{
-			m_outstream.writeString(new String(m_spec.m_init_code,0,
-						m_spec.m_init_read));
+		if(null !is m_spec.m_init_code) {
+			m_outstream.writeString(m_spec.m_init_code[0..m_spec.m_init_read]);
 		}
 
 		m_outstream.writeLine("\t}");
@@ -354,30 +339,32 @@ Description: Emits constants that serve as lexical states,
 including YYINITIAL.
 	 **************************************************************/
 	private void emit_states() {
-		Enumeration states;
-		String state;
+		string[] states;
+		string state;
 		int index;
 
 		states = m_spec.m_states.keys();
 		/*index = 0;*/
-		while(states.hasMoreElements()) {
-			state = states.nextElement();
+		//while(states.hasMoreElements()) {
+		foreach(it;states) {
+			//state = states.nextElement(); TODO check if it is really a int array
+			state = conv!(int,string)(m_spec.m_states[it]);
 
 			if(CUtility.DEBUG) {
 				assert(null !is state);
 			}
 
 			m_outstream.writeLine("\tprivate final int " 
-					+ state 
-					+ " = " 
-					+ (m_spec.m_states.get(state)).toString() 
-					+ ";");
+					~ state 
+					~ " = " 
+					~ conv!(int,string)(m_spec.m_states[state])
+					~ ";");
 			/*++index;*/
 		}
 
 		m_outstream.writeLine("\tprivate final int yy_state_dtrans[] = {");
 		for(index = 0; index < m_spec.m_state_dtrans.length; ++index) {
-			m_outstream.writeString("\t\t" + m_spec.m_state_dtrans[index]);
+			m_outstream.writeString("\t\t" ~ conv!(int,string)(m_spec.m_state_dtrans[index]));
 			if(index < m_spec.m_state_dtrans.length - 1) {
 				m_outstream.writeLine(",");
 			} else {
@@ -388,9 +375,9 @@ including YYINITIAL.
 	}
 
 	/***************************************************************
-Function: emit_helpers
-Description: Emits helper functions, particularly 
-error handling and input buffering.
+		Function: emit_helpers
+		Description: Emits helper functions, particularly 
+		error handling and input buffering.
 	 **************************************************************/
 	private void emit_helpers() {
 		if(CUtility.DEBUG) {
@@ -406,16 +393,14 @@ error handling and input buffering.
 			if(null !is m_spec.m_eof_throw_code) {
 				m_outstream.writeLine(""); 
 				m_outstream.writeString("\t\tthrows "); 
-				m_outstream.writeLine(new String(m_spec.m_eof_throw_code,0,
-							m_spec.m_eof_throw_read));
+				m_outstream.writeLine(m_spec.m_eof_throw_code[0..m_spec.m_eof_throw_read]);
 				m_outstream.writeLine("\t\t{");
 			} else {
 				m_outstream.writeLine(" {");
 			}
 
 			m_outstream.writeLine("\t\tif(false == yy_eof_done) {");
-			m_outstream.writeString(new String(m_spec.m_eof_code,0,
-						m_spec.m_eof_read));
+			m_outstream.writeString(m_spec.m_eof_code[0..m_spec.m_eof_read]);
 			m_outstream.writeLine("\t\t}");
 			m_outstream.writeLine("\t\tyy_eof_done = true;");
 			m_outstream.writeLine("\t}");
@@ -502,9 +487,8 @@ error handling and input buffering.
 		if(m_spec.m_count_lines || true == m_spec.m_count_chars) {
 			if(m_spec.m_count_lines) {
 				m_outstream.writeLine("\t\tint i;");
-				m_outstream.writeLine("\t\tfor(i = yy_buffer_start; " 
-						+ "i < yy_buffer_index; ++i) {");
-				m_outstream.writeLine("\t\t\tif('\\n' == yy_buffer[i] && !yy_last_was_cr) {");
+				m_outstream.writeLine("\t\tfor(i = yy_buffer_start; i < yy_buffer_index; ++i) {");
+				m_outstream.writeLine("\t\t\tif(\'\\n\' == yy_buffer[i] && !yy_last_was_cr) {");
 				m_outstream.writeLine("\t\t\t\t++yyline;");
 				m_outstream.writeLine("\t\t\t}");
 				m_outstream.writeLine("\t\t\tif('\\r' == yy_buffer[i]) {");
@@ -529,15 +513,12 @@ error handling and input buffering.
 		/* Function: yy_to_mark */
 		m_outstream.writeLine("\tprivate void yy_to_mark () {");
 		m_outstream.writeLine("\t\tyy_buffer_index = yy_buffer_end;");
-		m_outstream.writeLine("\t\tyy_at_bol = "+
-				"(yy_buffer_end > yy_buffer_start) &&");
-		m_outstream.writeLine("\t\t						"+
-				"('\\r' == yy_buffer[yy_buffer_end-1] ||");
-		m_outstream.writeLine("\t\t						"+
-				" '\\n' == yy_buffer[yy_buffer_end-1] ||");
-		m_outstream.writeLine("\t\t						"+ /* unicode LS */
+		m_outstream.writeLine("\t\tyy_at_bol = (yy_buffer_end > yy_buffer_start) &&");
+		m_outstream.writeLine("\t\t						('\\r' == yy_buffer[yy_buffer_end-1] ||");
+		m_outstream.writeLine("\t\t						 '\\n' == yy_buffer[yy_buffer_end-1] ||");
+		m_outstream.writeLine("\t\t						"~ /* unicode LS */
 				" 2028/*LS*/ == yy_buffer[yy_buffer_end-1] ||");
-		m_outstream.writeLine("\t\t						"+ /* unicode PS */
+		m_outstream.writeLine("\t\t						"~ /* unicode PS */
 				" 2029/*PS*/ == yy_buffer[yy_buffer_end-1]);");
 		m_outstream.writeLine("\t}");
 
@@ -594,8 +575,7 @@ error handling and input buffering.
 		// Added 6/24/98 Raimondas Lencevicius
 		// May be made more efficient by replacing String operations
 		// Assumes correctly formed input String. Performs no error checking
-		m_outstream.writeLine("\tprivate int[][] unpackFromString"+
-				"(int size1, int size2, String st) {");
+		m_outstream.writeLine("\tprivate int[][] unpackFromString(int size1, int size2, String st) {");
 		m_outstream.writeLine("\t\tint colonIndex = -1;");
 		m_outstream.writeLine("\t\tString lengthString;");
 		m_outstream.writeLine("\t\tint sequenceLength = 0;");
@@ -623,12 +603,9 @@ error handling and input buffering.
 		m_outstream.writeLine("\t\t\t\t}");
 		m_outstream.writeLine("\t\t\t\tlengthString =");
 		m_outstream.writeLine("\t\t\t\t\tworkString.substring(colonIndex+1);");
-		m_outstream.writeLine("\t\t\t\tsequenceLength="+
-				"Integer.parseInt(lengthString);");
-		m_outstream.writeLine("\t\t\t\tworkString="+
-				"workString.substring(0,colonIndex);");
-		m_outstream.writeLine("\t\t\t\tsequenceInteger="+
-				"Integer.parseInt(workString);");
+		m_outstream.writeLine("\t\t\t\tsequenceLength=Integer.parseInt(lengthString);");
+		m_outstream.writeLine("\t\t\t\tworkString=workString.substring(0,colonIndex);");
+		m_outstream.writeLine("\t\t\t\tsequenceInteger=Integer.parseInt(workString);");
 		m_outstream.writeLine("\t\t\t\tres[i][j] = sequenceInteger;");
 		m_outstream.writeLine("\t\t\t\tsequenceLength--;");
 		m_outstream.writeLine("\t\t\t}");
@@ -638,8 +615,8 @@ error handling and input buffering.
 	}
 
 	/***************************************************************
-Function: emit_header
-Description: Emits class header.
+		Function: emit_header
+		Description: Emits class header.
 	 **************************************************************/
 	private void emit_header() {
 		if(CUtility.DEBUG) {
@@ -653,19 +630,17 @@ Description: Emits class header.
 			m_outstream.writeString("public ");
 		}
 		m_outstream.writeString("class ");
-		m_outstream.writeString(new String(m_spec.m_class_name,0,
-					m_spec.m_class_name.length));
+		m_outstream.writeString(m_spec.m_class_name[0..m_spec.m_class_name.length]);
 		if(m_spec.m_implements_name.length > 0) {
 			m_outstream.writeString(" implements ");	
-			m_outstream.writeString(new String(m_spec.m_implements_name,0,
-						m_spec.m_implements_name.length));
+			m_outstream.writeString(m_spec.m_implements_name[0..m_spec.m_implements_name.length]);
 		}		
 		m_outstream.writeLine(" {");
 	}
 
 	/***************************************************************
-Function: emit_table
-Description: Emits transition table.
+		Function: emit_table
+		Description: Emits transition table.
 	 **************************************************************/
 	private void emit_table() {
 		int i;
@@ -676,8 +651,7 @@ Description: Emits transition table.
 		bool is_end;
 		CAccept accept;
 
-		if(CUtility.DEBUG)
-		{
+		if(CUtility.DEBUG) {
 			assert(null !is m_spec);
 			assert(null !is m_outstream);
 		}
@@ -687,7 +661,7 @@ Description: Emits transition table.
 		for(elem = 0; elem < size; ++elem) {
 			accept = m_spec.m_accept_vector.get(elem);
 
-			m_outstream.writeString("\t\t/* "+elem+" */ ");
+			m_outstream.writeString("\t\t/* " ~ conv!(int,string)(elem) ~ " */ ");
 			if(null !is accept) {
 				is_start = (0 != (m_spec.m_anchor_array[elem] & CSpec.START));
 				is_end = (0 != (m_spec.m_anchor_array[elem] & CSpec.END));
@@ -719,7 +693,8 @@ Description: Emits transition table.
 		for(i = 0; i < m_spec.m_ccls_map.length; ++i)
 			yy_cmap[i] = m_spec.m_col_map[m_spec.m_ccls_map[i]];
 		m_outstream.writeString("\tprivate int yy_cmap[] = unpackFromString(");
-		int[][] tmp = new int[yy_cmap.length][];
+		//int[][] tmp = new int[yy_cmap.length][]; TODO check this too
+		int[][] tmp = new int[][](yy_cmap.length);
 		tmp[0] = yy_cmap;
 		//emit_table_as_string(new int[][] { yy_cmap });
 		emit_table_as_string(tmp);
@@ -728,7 +703,8 @@ Description: Emits transition table.
 
 		// CSA: modified yy_rmap to use string packing 9-Aug-1999
 		m_outstream.writeString("\tprivate int yy_rmap[] = unpackFromString(");
-		tmp = new int[m_spec.m_row_map][];
+		//tmp = new int[m_spec.m_row_map][]; TODO not sure about this
+		tmp = new int[][](m_spec.m_row_map.length);
 		tmp[0] = m_spec.m_row_map;
 		//emit_table_as_string(new int[][] { m_spec.m_row_map });
 		emit_table_as_string(tmp);
@@ -739,7 +715,8 @@ Description: Emits transition table.
 		// modified to use
 		//		int[][] unpackFromString(int size1, int size2, String st)
 		size = m_spec.m_dtrans_vector.getSize();
-		int[][] yy_nxt = new int[size][];
+		//int[][] yy_nxt = new int[size][]; TODO check if array it is right
+		int[][] yy_nxt = new int[][](size);
 		for(elem=0; elem<size; elem++) {
 			dtrans = m_spec.m_dtrans_vector.get(elem);
 			assert(dtrans.m_dtrans.length==m_spec.m_dtrans_ncols);
@@ -752,13 +729,13 @@ Description: Emits transition table.
 	}
 
 	/***************************************************************
-Function: emit_driver
-Description: Output an integer table as a string.	Written by
-Raimondas Lencevicius 6/24/98; reorganized by CSA 9-Aug-1999.
-From his original comments:
-yy_nxt[][] values are coded into a string
-by printing integers and representing
-integer sequences as "value:length" pairs.
+		Function: emit_driver
+		Description: Output an integer table as a string.	Written by
+		Raimondas Lencevicius 6/24/98; reorganized by CSA 9-Aug-1999.
+		From his original comments:
+		yy_nxt[][] values are coded into a string
+		by printing integers and representing
+		integer sequences as "value:length" pairs.
 	 **************************************************************/
 	private void emit_table_as_string(int[][] ia) {
 		int sequenceLength = 0; // RL - length of the number sequence
@@ -766,12 +743,12 @@ integer sequences as "value:length" pairs.
 		int previousInt = -20; // RL - Bogus -20 state.
 
 		// RL - Output matrix size
-		m_outstream.writeString(ia.length);
+		m_outstream.writeString(conv!(int,string)(ia.length));
 		m_outstream.writeString(",");
-		m_outstream.writeString(ia.length>0?ia[0].length:0);
+		m_outstream.writeString( ia.length > 0 ? conv!(int,string)(ia[0].length) : "0");
 		m_outstream.writeLine(",");
 
-		StringBuffer outstr = new StringBuffer();
+		StringBuffer!(char) outstr = new StringBuffer!(char)();
 
 		//	RL - Output matrix 
 		for(int elem = 0; elem < ia.length; ++elem) {
@@ -782,47 +759,47 @@ integer sequences as "value:length" pairs.
 					if(sequenceStarted) {
 						sequenceLength++;
 					} else {
-						outstr.append(writeInt);
-						outstr.append(":");
+						outstr.pushBack(conv!(int,string)(writeInt));
+						outstr.pushBack(":");
 						sequenceLength = 2;
 						sequenceStarted = true;
 					}
 					// RL - no sequence or end sequence
 				} else {
 					if(sequenceStarted) {
-						outstr.append(sequenceLength);
-						outstr.append(",");
+						outstr.pushBack(conv!(int,string)(sequenceLength));
+						outstr.pushBack(",");
 						sequenceLength = 0;
 						sequenceStarted = false;
 					} else {
 						if(previousInt != -20) {
-							outstr.append(previousInt);
-							outstr.append(",");
+							outstr.pushBack(conv!(int,string)(previousInt));
+							outstr.pushBack(",");
 						}
 					}
 				}
 				previousInt = writeInt;
 				// CSA: output in 75 character chunks.
-				if(outstr.length() > 75) {
-					String s = outstr.toString();
-					m_outstream.writeLine("\""+s.substring(0,75)+"\" +");
-					outstr = new StringBuffer(s.substring(75));
+				if(outstr.getSize() > 75) {
+					string s = outstr.toString();
+					m_outstream.writeLine("\"" ~ s[0..75] ~ "\" ~");
+					outstr = new StringBuffer!(char)(s[75..$]);
 				}
 			}
 		}
 
 		if(sequenceStarted) {
-			outstr.append(sequenceLength);
+			outstr.pushBack(conv!(int,string)(sequenceLength));
 		} else {
-			outstr.append(previousInt);
+			outstr.pushBack(conv!(int,string)(previousInt));
 		}		
 		// CSA: output in 75 character chunks.
-		if(outstr.length() > 75) {
-			String s = outstr.toString();
-			m_outstream.writeLine("\""+s.substring(0,75)+"\" +");
-			outstr = new StringBuffer(s.substring(75));
+		if(outstr.getSize() > 75) {
+			string s = outstr.toString();
+			m_outstream.writeLine("\"" ~ s[0..75] ~ "\" +");
+			outstr = new StringBuffer!(char)(s[75..$]);
 		}
-		m_outstream.writeString("\""+outstr+"\"");
+		m_outstream.writeString("\"" ~ outstr.toString() ~ "\"");
 	}
 
 	/***************************************************************
@@ -839,17 +816,17 @@ Description:
 
 		if(m_spec.m_integer_type) {
 			m_outstream.writeString("\tpublic int ");
-			m_outstream.writeString(new String(m_spec.m_function_name));
+			m_outstream.writeString(m_spec.m_function_name);
 			m_outstream.writeLine(" ()");
 		} else if(m_spec.m_intwrap_type) {
 			m_outstream.writeString("\tpublic java.lang.Integer ");
-			m_outstream.writeString(new String(m_spec.m_function_name));
+			m_outstream.writeString(m_spec.m_function_name);
 			m_outstream.writeLine(" ()");
 		} else {
 			m_outstream.writeString("\tpublic ");
-			m_outstream.writeString(new String(m_spec.m_type_name));
+			m_outstream.writeString(m_spec.m_type_name);
 			m_outstream.writeString(" ");
-			m_outstream.writeString(new String(m_spec.m_function_name));
+			m_outstream.writeString(m_spec.m_function_name);
 			m_outstream.writeLine(" ()");
 		}
 
@@ -857,8 +834,7 @@ Description:
 		m_outstream.writeString("\t\tthrows java.io.IOException");
 		if(null !is m_spec.m_yylex_throw_code) {
 			m_outstream.writeString(", "); 
-			m_outstream.writeString(new String(m_spec.m_yylex_throw_code,0,
-						m_spec.m_yylex_throw_read));
+			m_outstream.writeString(m_spec.m_yylex_throw_code[0..m_spec.m_yylex_throw_read]);
 			m_outstream.writeLine("");
 			m_outstream.writeLine("\t\t{");
 		} else {
@@ -869,8 +845,7 @@ Description:
 		m_outstream.writeLine("\t\tint yy_anchor = YY_NO_ANCHOR;");
 		/*m_outstream.writeLine("\t\tint yy_state "
 		  + "= yy_initial_dtrans(yy_lexical_state);");*/
-		m_outstream.writeLine("\t\tint yy_state " 
-				+ "= yy_state_dtrans[yy_lexical_state];");
+		m_outstream.writeLine("\t\tint yy_state = yy_state_dtrans[yy_lexical_state];");
 		m_outstream.writeLine("\t\tint yy_next_state = YY_NO_STATE;");
 		/*m_outstream.writeLine("\t\tint yy_prev_stave = YY_NO_STATE;");*/
 		m_outstream.writeLine("\t\tint yy_last_accept_state = YY_NO_STATE;");
@@ -892,45 +867,35 @@ Description:
 
 		m_outstream.writeLine("\t\twhile(true) {");
 
-		m_outstream.writeLine("\t\t\tif(yy_initial && yy_at_bol) "+
-				"yy_lookahead = YY_BOL;");
+		m_outstream.writeLine("\t\t\tif(yy_initial && yy_at_bol) yy_lookahead = YY_BOL;");
 		m_outstream.writeLine("\t\t\telse yy_lookahead = yy_advance();");
 		m_outstream.writeLine("\t\t\tyy_next_state = YY_F;");
 		/*m_outstream.writeLine("\t\t\t\tyy_next_state = "
 		  + "yy_next(yy_state,yy_lookahead);");*/
-		m_outstream.writeLine("\t\t\tyy_next_state = "
-				+ "yy_nxt[yy_rmap[yy_state]][yy_cmap[yy_lookahead]];");
+		m_outstream.writeLine("\t\t\tyy_next_state = yy_nxt[yy_rmap[yy_state]][yy_cmap[yy_lookahead]];");
 
 		if(NOT_EDBG) {
-			m_outstream.writeLine("java.lang.writeln(\"Current state: \"" 
-					+ " + yy_state");
+			m_outstream.writeLine("java.lang.writeln(\"Current state: \" + yy_state");
 			m_outstream.writeLine("+ \"\tCurrent input: \""); 
 			m_outstream.writeLine(" + ((char) yy_lookahead));");
 		}
 		if(NOT_EDBG) {
-			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"State = \"" 
-					+ "+ yy_state);");
-			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"Accepting status = \"" 
-					+ "+ yy_this_accept);");
-			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"Last accepting state = \"" 
-					+ "+ yy_last_accept_state);");
-			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"Next state = \"" 
-					+ "+ yy_next_state);");
-			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"Lookahead input = \"" 
-					+ "+ ((char) yy_lookahead));");
+			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"State = \"+ yy_state);");
+			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"Accepting status = \"+ yy_this_accept);");
+			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"Last accepting state = \"+ yy_last_accept_state);");
+			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"Next state = \"+ yy_next_state);");
+			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"Lookahead input = \"+ ((char) yy_lookahead));");
 		}
 
 		// handle bare EOF.
-		m_outstream.writeLine("\t\t\tif(YY_EOF == yy_lookahead " 
-				+ "&& true == yy_initial) {");
+		m_outstream.writeLine("\t\t\tif(YY_EOF == yy_lookahead && true == yy_initial) {");
 		if(null !is m_spec.m_eof_code) {
 			m_outstream.writeLine("\t\t\t\tyy_do_eof();");
 		}
 		if(true == m_spec.m_integer_type) {
 			m_outstream.writeLine("\t\t\t\treturn YYEOF;");
 		} else if(null !is m_spec.m_eof_value_code) {
-			m_outstream.writeString(new String(m_spec.m_eof_value_code,0,
-						m_spec.m_eof_value_read));
+			m_outstream.writeString(m_spec.m_eof_value_code[0..m_spec.m_eof_value_read]);
 		} else {
 			m_outstream.writeLine("\t\t\t\treturn null;");
 		}
@@ -992,8 +957,7 @@ Description:
 		m_outstream.writeLine("\t\t\t\t\t}");
 
 		m_outstream.writeLine("\t\t\t\t\tyy_initial = true;");
-		m_outstream.writeLine("\t\t\t\t\tyy_state "
-				+ "= yy_state_dtrans[yy_lexical_state];");
+		m_outstream.writeLine("\t\t\t\t\tyy_state = yy_state_dtrans[yy_lexical_state];");
 		m_outstream.writeLine("\t\t\t\t\tyy_next_state = YY_NO_STATE;");
 		/*m_outstream.writeLine("\t\t\t\t\tyy_prev_state = YY_NO_STATE;");*/
 		m_outstream.writeLine("\t\t\t\t\tyy_last_accept_state = YY_NO_STATE;");

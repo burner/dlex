@@ -10,7 +10,7 @@ dlex.sparsebitset.o dlex.main.o
 all:dlex
 
 dlex: $(OBJS)
-	ar -r dlex.a *.o
+	dmd -I../../libhurt/ -I../cup/ *.o *.a -ofDlex
 
 clean:
 	rm *.o

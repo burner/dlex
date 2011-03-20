@@ -6,7 +6,7 @@ import dlex.cspec;
 import dlex.cutility;
 import dlex.sparsebitset;
 
-import hurt.container.vector;
+import dlex.vector;
 import hurt.conv.conv;
 import hurt.util.array;
 
@@ -98,7 +98,7 @@ class CMinimize {
 		for(i = 0; i < n; ++i) {
 			int[] ndtrans = new int[m_spec.m_dtrans_ncols];
 			dtrans = m_spec.m_dtrans_vector.get(i);
-			arrayCopy(dtrans.m_dtrans, 0, ndtrans, 0, ndtrans.length);
+			arrayCopy(dtrans.m_dtrans, 0, ndtrans, 0, conv!(ulong,uint)(ndtrans.length));
 			dtrans.m_dtrans = ndtrans;
 		}
 	}

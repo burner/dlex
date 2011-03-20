@@ -16,7 +16,7 @@ import dlex.cutility;
 import dlex.enumeration;
 import dlex.sparsebitset;
 
-import hurt.container.vector;
+import dlex.vector;
 import hurt.conv.conv;
 import hurt.util.array;
 import hurt.string.stringutil;

@@ -8,7 +8,7 @@ import dlex.cdfa;
 import dlex.cutility;
 import dlex.sparsebitset;
 
-import hurt.container.vector;
+import dlex.vector;
 
 class CSpec {
 	//Member Variables

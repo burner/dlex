@@ -5,7 +5,7 @@ IPATH=-I../../libhurt/ -I../cup/
 OBJS=dlex.cemit.o dlex.caccept.o dlex.cacceptanchor.o dlex.cspec.o dlex.calloc.o dlex.cbunch.o \
 dlex.cdfa.o dlex.cdtrans.o dlex.cerror.o dlex.cinput.o dlex.clexgen.o dlex.cmakenfa.o dlex.cminimize.o \
 dlex.cnfa.o dlex.cnfa2dfa.o dlex.cnfapair.o dlex.cset.o dlex.csimpliynfa.o dlex.cutility.o dlex.enumeration.o \
-dlex.sparsebitset.o dlex.main.o 
+dlex.sparsebitset.o dlex.main.o dlex.vector.o dlex.stack.o
 
 all:dlex
 
@@ -80,3 +80,9 @@ dlex.sparsebitset.o: dlex/sparsebitset.d Makefile ../makeconfig.conf
 
 dlex.main.o: dlex/main.d Makefile ../makeconfig.conf
 	$(DC) $(CFLAGS) $(IPATH) dlex/main.d -ofdfex.main.o 
+
+dlex.stack.o: dlex/stack.d Makefile ../makeconfig.conf
+	$(DC) $(CFLAGS) $(IPATH) dlex/stack.d -ofdfex.stack.o 
+
+dlex.vector.o: dlex/vector.d Makefile ../makeconfig.conf
+	$(DC) $(CFLAGS) $(IPATH) dlex/vector.d -ofdfex.vector.o 

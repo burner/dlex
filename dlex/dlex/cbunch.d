@@ -5,7 +5,7 @@ import dlex.cnfa;
 import dlex.cspec;
 import dlex.sparsebitset;
 
-import hurt.container.vector;
+import dlex.vector;
 
 class CBunch {
 	/***************************************************************

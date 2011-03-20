@@ -10,8 +10,8 @@ import dlex.sparsebitset;
 import dlex.cutility;
 import dlex.calloc;
 
-import hurt.container.vector;
-import hurt.container.stack;
+import dlex.vector;
+import dlex.stack;
 import hurt.conv.conv;
 
 import std.stdio;

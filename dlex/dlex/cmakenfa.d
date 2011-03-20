@@ -12,7 +12,7 @@ import dlex.cset;
 import dlex.cutility;
 import dlex.sparsebitset;
 
-import hurt.container.vector;
+import dlex.vector;
 import hurt.conv.conv;
 import hurt.string.stringutil;
 
@@ -80,7 +80,7 @@ class CMakeNfa {
 	void thompson(CLexGen lexGen, CSpec spec, CInput input) {
 		int i;
 		CNfa elem;
-		int size;
+		uint size;
 
 		/* Set member variables. */
 		reset();
@@ -133,7 +133,7 @@ class CMakeNfa {
 		Description:
 		**************************************************************/
 	private void processStates(SparseBitSet states, CNfa current) {
-		int size;
+		ulong size;
 		int i;
 		
 		size = m_spec.m_states.length;

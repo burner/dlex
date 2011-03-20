@@ -1,4 +1,4 @@
-module sparsebitset;
+module dlex.sparsebitset;
 
 import dlex.enumeration;
 

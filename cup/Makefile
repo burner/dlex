@@ -7,7 +7,7 @@ OBJS=complexsymbolfactory.o defaultsymbolfactory.o lrparser.o symbol.o virtualpa
 all:cup.a
 
 cup.a: $(OBJS)
-	ar -r cup.a *.o
+	dmd *.o *.a -ofCup
 
 clean:
 	rm *.o

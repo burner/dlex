@@ -392,12 +392,12 @@ class CEmit {
 		/* Function: yy_do_eof */
 		m_outstream.writeLine("\tprivate bool yy_eof_done = false;");
 		if(null !is m_spec.m_eof_code) {
-			m_outstream.writeString("\tprivate void yy_do_eof ()");
+			m_outstream.writeString("\tprivate void yy_do_eof()");
 
 			if(null !is m_spec.m_eof_throw_code) {
 				m_outstream.writeLine(""); 
-				m_outstream.writeString("\t\tthrows "); 
-				m_outstream.writeLine(m_spec.m_eof_throw_code[0..m_spec.m_eof_throw_read]);
+				//m_outstream.writeString("\t\tthrows "); TODO check
+				//m_outstream.writeLine(m_spec.m_eof_throw_code[0..m_spec.m_eof_throw_read]); TODO check
 				m_outstream.writeLine("\t\t{");
 			} else {
 				m_outstream.writeLine(" {");
@@ -413,7 +413,7 @@ class CEmit {
 		emit_states();
 
 		/* Function: yybegin */
-		m_outstream.writeLine("\tprivate void yybegin (int state) {");
+		m_outstream.writeLine("\tprivate void yybegin(int state) {");
 		m_outstream.writeLine("\t\tyy_lexical_state = state;");
 		m_outstream.writeLine("\t}");
 
@@ -423,8 +423,8 @@ class CEmit {
 		  m_outstream.writeLine("\t}");*/
 
 		/* Function: yy_advance */
-		m_outstream.writeLine("\tprivate int yy_advance ()");
-		m_outstream.writeLine("\t\tthrows java.io.IOException {");
+		m_outstream.writeLine("\tprivate int yy_advance()");
+		//m_outstream.writeLine("\t\tthrows java.io.IOException {"); TODO check
 		/*m_outstream.writeLine("\t\t{");*/
 		m_outstream.writeLine("\t\tint next_read;");
 		m_outstream.writeLine("\t\tint i;");
@@ -476,7 +476,7 @@ class CEmit {
 		m_outstream.writeLine("\t}");
 
 		/* Function: yy_move_end */
-		m_outstream.writeLine("\tprivate void yy_move_end () {");
+		m_outstream.writeLine("\tprivate void yy_move_end() {");
 		m_outstream.writeLine("\t\tif(yy_buffer_end > yy_buffer_start &&");
 		m_outstream.writeLine("\t\t		'\\n' == yy_buffer[yy_buffer_end-1])");
 		m_outstream.writeLine("\t\t\tyy_buffer_end--;");
@@ -510,12 +510,12 @@ class CEmit {
 		m_outstream.writeLine("\t}");
 
 		/* Function: yy_mark_end */
-		m_outstream.writeLine("\tprivate void yy_mark_end () {");
+		m_outstream.writeLine("\tprivate void yy_mark_end() {");
 		m_outstream.writeLine("\t\tyy_buffer_end = yy_buffer_index;");
 		m_outstream.writeLine("\t}");
 
 		/* Function: yy_to_mark */
-		m_outstream.writeLine("\tprivate void yy_to_mark () {");
+		m_outstream.writeLine("\tprivate void yy_to_mark() {");
 		m_outstream.writeLine("\t\tyy_buffer_index = yy_buffer_end;");
 		m_outstream.writeLine("\t\tyy_at_bol = (yy_buffer_end > yy_buffer_start) &&");
 		m_outstream.writeLine("\t\t						('\\r' == yy_buffer[yy_buffer_end-1] ||");
@@ -527,21 +527,22 @@ class CEmit {
 		m_outstream.writeLine("\t}");
 
 		/* Function: yytext */
-		m_outstream.writeLine("\tprivate java.lang.String yytext () {");
-		m_outstream.writeLine("\t\treturn (new java.lang.String(yy_buffer,");
+		m_outstream.writeLine("\tprivate string yytext() {");
+		//m_outstream.writeLine("\t\treturn (new java.lang.String(yy_buffer,"); TODO check
+		m_outstream.writeLine("\t\treturn yy_buffer.idup,");
 		m_outstream.writeLine("\t\t\tyy_buffer_start,");
-		m_outstream.writeLine("\t\t\tyy_buffer_end - yy_buffer_start));");
+		m_outstream.writeLine("\t\t\tyy_buffer_end - yy_buffer_start);");
 		m_outstream.writeLine("\t}");
 
 		/* Function: yylength */
-		m_outstream.writeLine("\tprivate int yylength () {");
+		m_outstream.writeLine("\tprivate int yylength() {");
 		m_outstream.writeLine("\t\treturn yy_buffer_end - yy_buffer_start;");
 		m_outstream.writeLine("\t}");
 
 		/* Function: yy_double */
-		m_outstream.writeLine("\tprivate char[] yy_double (char buf[]) {");
+		m_outstream.writeLine("\tprivate char[] yy_double(char buf[]) {");
 		m_outstream.writeLine("\t\tint i;");
-		m_outstream.writeLine("\t\tchar newbuf[];");
+		m_outstream.writeLine("\t\tchar[] newbuf;");
 		m_outstream.writeLine("\t\tnewbuf = new char[2*buf.length];");
 		m_outstream.writeLine("\t\tfor(i = 0; i < buf.length; ++i) {");
 		m_outstream.writeLine("\t\t\tnewbuf[i] = buf[i];");
@@ -552,11 +553,11 @@ class CEmit {
 		/* Function: yy_error */
 		m_outstream.writeLine("\tprivate final int YY_E_INTERNAL = 0;");
 		m_outstream.writeLine("\tprivate final int YY_E_MATCH = 1;");
-		m_outstream.writeLine("\tprivate java.lang.String yy_error_string[] = {");
+		m_outstream.writeLine("\tprivate string[] yy_error_string = [");
 		m_outstream.writeLine("\t\t\"Error: Internal error.\\n\",");
 		m_outstream.writeLine("\t\t\"Error: Unmatched input.\\n\"");
-		m_outstream.writeLine("\t};");
-		m_outstream.writeLine("\tprivate void yy_error (int code,bool fatal) {");
+		m_outstream.writeLine("\t];");
+		m_outstream.writeLine("\tprivate void yy_error(int code, bool fatal) {");
 		m_outstream.writeLine("\t\tjava.lang.write(yy_error_string[code]);");
 		m_outstream.writeLine("\t\tjava.lang.System.out.flush();");
 		m_outstream.writeLine("\t\tif(fatal) {");
@@ -581,12 +582,12 @@ class CEmit {
 		// Assumes correctly formed input String. Performs no error checking
 		m_outstream.writeLine("\tprivate int[][] unpackFromString(int size1, int size2, String st) {");
 		m_outstream.writeLine("\t\tint colonIndex = -1;");
-		m_outstream.writeLine("\t\tString lengthString;");
+		m_outstream.writeLine("\t\tstring lengthString;");
 		m_outstream.writeLine("\t\tint sequenceLength = 0;");
 		m_outstream.writeLine("\t\tint sequenceInteger = 0;");
 		m_outstream.writeLine("");
 		m_outstream.writeLine("\t\tint commaIndex;");
-		m_outstream.writeLine("\t\tString workString;");
+		m_outstream.writeLine("\t\tstring workString;");
 		m_outstream.writeLine("");
 		m_outstream.writeLine("\t\tint res[][] = new int[size1][size2];");
 		m_outstream.writeLine("\t\tfor(int i= 0; i < size1; i++) {");
@@ -602,14 +603,14 @@ class CEmit {
 		m_outstream.writeLine("\t\t\t\tst = st.substring(commaIndex+1);");	
 		m_outstream.writeLine("\t\t\t\tcolonIndex = workString.indexOf(':');");
 		m_outstream.writeLine("\t\t\t\tif(colonIndex == -1) {");
-		m_outstream.writeLine("\t\t\t\t\tres[i][j]=Integer.parseInt(workString);");
+		m_outstream.writeLine("\t\t\t\t\tres[i][j] = conv!(string,int)(workString);");
 		m_outstream.writeLine("\t\t\t\t\tcontinue;");
 		m_outstream.writeLine("\t\t\t\t}");
 		m_outstream.writeLine("\t\t\t\tlengthString =");
 		m_outstream.writeLine("\t\t\t\t\tworkString.substring(colonIndex+1);");
-		m_outstream.writeLine("\t\t\t\tsequenceLength=Integer.parseInt(lengthString);");
-		m_outstream.writeLine("\t\t\t\tworkString=workString.substring(0,colonIndex);");
-		m_outstream.writeLine("\t\t\t\tsequenceInteger=Integer.parseInt(workString);");
+		m_outstream.writeLine("\t\t\t\tsequenceLength=conv!(string,int)(lengthString);");
+		m_outstream.writeLine("\t\t\t\tworkString=workString[0..colonIndex];");
+		m_outstream.writeLine("\t\t\t\tsequenceInteger=conv!(string,int)(workString);");
 		m_outstream.writeLine("\t\t\t\tres[i][j] = sequenceInteger;");
 		m_outstream.writeLine("\t\t\t\tsequenceLength--;");
 		m_outstream.writeLine("\t\t\t}");
@@ -636,7 +637,7 @@ class CEmit {
 		m_outstream.writeString("class ");
 		m_outstream.writeString(m_spec.m_class_name[0..m_spec.m_class_name.length]);
 		if(m_spec.m_implements_name.length > 0) {
-			m_outstream.writeString(" implements ");	
+			m_outstream.writeString(" : ");	// former implements
 			m_outstream.writeString(m_spec.m_implements_name[0..m_spec.m_implements_name.length]);
 		}		
 		m_outstream.writeLine(" {");
@@ -660,7 +661,7 @@ class CEmit {
 			assert(null !is m_outstream);
 		}
 
-		m_outstream.writeLine("\tprivate int yy_acpt[] = {");
+		m_outstream.writeLine("\tprivate int[] yy_acpt = [");
 		size = m_spec.m_accept_vector.getSize();
 		for(elem = 0; elem < size; ++elem) {
 			accept = m_spec.m_accept_vector.get(elem);
@@ -690,13 +691,13 @@ class CEmit {
 			m_outstream.writeLine("");
 		}
 
-		m_outstream.writeLine("\t};");
+		m_outstream.writeLine("\t];");
 
 		// CSA: modified yy_cmap to use string packing 9-Aug-1999
 		int[] yy_cmap = new int[m_spec.m_ccls_map.length];
 		for(i = 0; i < m_spec.m_ccls_map.length; ++i)
 			yy_cmap[i] = m_spec.m_col_map[m_spec.m_ccls_map[i]];
-		m_outstream.writeString("\tprivate int yy_cmap[] = unpackFromString(");
+		m_outstream.writeString("\tprivate int[] yy_cmap = unpackFromString(");
 		//int[][] tmp = new int[yy_cmap.length][]; TODO check this too
 		int[][] tmp = new int[][](yy_cmap.length);
 		tmp[0] = yy_cmap;
@@ -706,7 +707,7 @@ class CEmit {
 		m_outstream.writeLine("");
 
 		// CSA: modified yy_rmap to use string packing 9-Aug-1999
-		m_outstream.writeString("\tprivate int yy_rmap[] = unpackFromString(");
+		m_outstream.writeString("\tprivate int[] yy_rmap = unpackFromString(");
 		//tmp = new int[m_spec.m_row_map][]; TODO not sure about this
 		tmp = new int[][](m_spec.m_row_map.length);
 		tmp[0] = m_spec.m_row_map;
@@ -726,7 +727,7 @@ class CEmit {
 			assert(dtrans.m_dtrans.length==m_spec.m_dtrans_ncols);
 			yy_nxt[elem] = dtrans.m_dtrans;
 		}
-		m_outstream.writeString("\tprivate int yy_nxt[][] = unpackFromString(");
+		m_outstream.writeString("\tprivate int[][] yy_nxt = unpackFromString(");
 		emit_table_as_string(yy_nxt);
 		m_outstream.writeLine(");");
 		m_outstream.writeLine("");
@@ -807,8 +808,8 @@ class CEmit {
 	}
 
 	/***************************************************************
-Function: emit_driver
-Description: 
+		Function: emit_driver
+		Description: 
 	 **************************************************************/
 	private void emit_driver() {
 		if(CUtility.DEBUG) {
@@ -821,17 +822,17 @@ Description:
 		if(m_spec.m_integer_type) {
 			m_outstream.writeString("\tpublic int ");
 			m_outstream.writeString(m_spec.m_function_name);
-			m_outstream.writeLine(" ()");
+			m_outstream.writeLine("()");
 		} else if(m_spec.m_intwrap_type) {
 			m_outstream.writeString("\tpublic java.lang.Integer ");
 			m_outstream.writeString(m_spec.m_function_name);
-			m_outstream.writeLine(" ()");
+			m_outstream.writeLine("()");
 		} else {
 			m_outstream.writeString("\tpublic ");
 			m_outstream.writeString(m_spec.m_type_name);
 			m_outstream.writeString(" ");
 			m_outstream.writeString(m_spec.m_function_name);
-			m_outstream.writeLine(" ()");
+			m_outstream.writeLine("()");
 		}
 
 		/*m_outstream.writeLine("\t\tthrows java.io.IOException {");*/
@@ -879,16 +880,16 @@ Description:
 		m_outstream.writeLine("\t\t\tyy_next_state = yy_nxt[yy_rmap[yy_state]][yy_cmap[yy_lookahead]];");
 
 		if(NOT_EDBG) {
-			m_outstream.writeLine("java.lang.writeln(\"Current state: \" + yy_state");
-			m_outstream.writeLine("+ \"\tCurrent input: \""); 
-			m_outstream.writeLine(" + ((char) yy_lookahead));");
+			m_outstream.writeLine("java.lang.writeln(\"Current state: \" ~ yy_state");
+			m_outstream.writeLine("~ \"\tCurrent input: \""); 
+			m_outstream.writeLine(" ~ ((char) yy_lookahead));");
 		}
 		if(NOT_EDBG) {
-			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"State = \"+ yy_state);");
-			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"Accepting status = \"+ yy_this_accept);");
-			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"Last accepting state = \"+ yy_last_accept_state);");
-			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"Next state = \"+ yy_next_state);");
-			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"Lookahead input = \"+ ((char) yy_lookahead));");
+			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"State = \"~ yy_state);");
+			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"Accepting status = \"~ yy_this_accept);");
+			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"Last accepting state = \"~ yy_last_accept_state);");
+			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"Next state = \"~ yy_next_state);");
+			m_outstream.writeLine("\t\t\tjava.lang.writeln(\"Lookahead input = \"~ ((char) yy_lookahead));");
 		}
 
 		// handle bare EOF.

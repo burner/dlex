@@ -104,7 +104,7 @@ class CLexGen {
 
 		/* Open output stream. */
 		//m_outstream = new java.io.PrintWriter(new java.io.BufferedWriter(
-		m_outstream = new std.stream.File(filename ~ ".d");
+		m_outstream = new std.stream.File(filename ~ ".d", FileMode.OutNew);
 		if(m_outstream is null) {
 			writeln("Error: Unable to open output file " ~ filename ~ ".d");
 			return;

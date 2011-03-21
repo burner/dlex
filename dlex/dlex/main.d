@@ -20,7 +20,7 @@ import std.stdio;
 		   block and permit the Exception to propagate to the top level. 
 		   This gives more information. */
 		try {	
-			lg = new CLexGen(args[0]);
+			lg = new CLexGen(args[1]);
 			lg.generate();
 		} catch(Error e) {
 			writeln(e.toString());

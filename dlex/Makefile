@@ -10,7 +10,7 @@ dlex.sparsebitset.o dlex.main.o dlex.vector.o dlex.stack.o
 all:dlex
 
 crude:
-	dmd -m32 -I../../libhurt/ -I../cup -m32 -gc `find . -name \*.d` libhurt.a -ofDlex
+	dmd -I../../libhurt/ -I../cup -m32 -gc `find . -name \*.d` libhurt.a -ofDlex
 
 dlex: $(OBJS)
 	dmd dlex/vector.d dlex/stack.d -I../../libhurt/ *.o *.a -ofDlex -m32

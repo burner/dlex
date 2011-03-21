@@ -193,22 +193,22 @@ class CEmit {
 		}
 
 		/* Constants */
-		m_outstream.writeLine("\tprivate final int YY_BUFFER_SIZE = 512;");
+		m_outstream.writeLine("\tprivate immutable int YY_BUFFER_SIZE = 512;");
 
-		m_outstream.writeLine("\tprivate final int YY_F = -1;");
-		m_outstream.writeLine("\tprivate final int YY_NO_STATE = -1;");
+		m_outstream.writeLine("\tprivate immutable int YY_F = -1;");
+		m_outstream.writeLine("\tprivate immutable int YY_NO_STATE = -1;");
 
-		m_outstream.writeLine("\tprivate final int YY_NOT_ACCEPT = 0;");
-		m_outstream.writeLine("\tprivate final int YY_START = 1;");
-		m_outstream.writeLine("\tprivate final int YY_END = 2;");
-		m_outstream.writeLine("\tprivate final int YY_NO_ANCHOR = 4;");
+		m_outstream.writeLine("\tprivate immutable int YY_NOT_ACCEPT = 0;");
+		m_outstream.writeLine("\tprivate immutable int YY_START = 1;");
+		m_outstream.writeLine("\tprivate immutable int YY_END = 2;");
+		m_outstream.writeLine("\tprivate immutable int YY_NO_ANCHOR = 4;");
 
 		// internal
-		m_outstream.writeLine("\tprivate final int YY_BOL = "~conv!(int,string)(m_spec.BOL)~";");
-		m_outstream.writeLine("\tprivate final int YY_EOF = "~conv!(int,string)(m_spec.EOF)~";");
+		m_outstream.writeLine("\tprivate immutable int YY_BOL = "~conv!(int,string)(m_spec.BOL)~";");
+		m_outstream.writeLine("\tprivate immutable int YY_EOF = "~conv!(int,string)(m_spec.EOF)~";");
 		// external
 		if(m_spec.m_integer_type || true == m_spec.m_yyeof)
-			m_outstream.writeLine("\tpublic final int YYEOF = -1;");
+			m_outstream.writeLine("\tpublic immutable int YYEOF = -1;");
 
 		/* User specified class code. */
 		if(null !is m_spec.m_class_code) {
@@ -216,7 +216,8 @@ class CEmit {
 		}
 
 		/* Member Variables */
-		m_outstream.writeLine("\tprivate java.io.BufferedReader yy_reader;");
+		//m_outstream.writeLine("\tprivate java.io.BufferedReader yy_reader;");
+		m_outstream.writeLine("\tprivate std.stream.InputStream yy_reader;");
 		m_outstream.writeLine("\tprivate int yy_buffer_index;");
 		m_outstream.writeLine("\tprivate int yy_buffer_read;");
 		m_outstream.writeLine("\tprivate int yy_buffer_start;");
@@ -244,12 +245,13 @@ class CEmit {
 			m_outstream.writeString("public ");
 		}
 		m_outstream.writeString(m_spec.m_class_name);
-		m_outstream.writeString(" (java.io.Reader reader)");
+		//m_outstream.writeString(" (java.io.Reader reader)");
+		m_outstream.writeString(" (std.stream.InputStream reader)");
 
 		if(null !is m_spec.m_init_throw_code) {
 			m_outstream.writeLine(""); 
-			m_outstream.writeString("\t\tthrows "); 
-			m_outstream.writeString(m_spec.m_init_throw_code[0..m_spec.m_init_throw_read]);
+			//m_outstream.writeString("\t\tthrows ");  TODO check
+			//m_outstream.writeString(m_spec.m_init_throw_code[0..m_spec.m_init_throw_read]); TODO check
 			m_outstream.writeLine("");
 			m_outstream.writeLine("\t\t{");
 		} else {
@@ -260,7 +262,8 @@ class CEmit {
 		m_outstream.writeLine("\t\tif(null is reader) {");
 		m_outstream.writeLine("\t\t\tthrow (new Error(\"Error: Bad input stream initializer.\"));");
 		m_outstream.writeLine("\t\t}");
-		m_outstream.writeLine("\t\tyy_reader = new java.io.BufferedReader(reader);");
+		//m_outstream.writeLine("\t\tyy_reader = new java.io.BufferedReader(reader);");
+		m_outstream.writeLine("\t\tyy_reader = new std.stream.InputStream(reader);");
 		m_outstream.writeLine("\t}");
 		m_outstream.writeLine("");
 
@@ -275,8 +278,8 @@ class CEmit {
 
 		if(null !is m_spec.m_init_throw_code) {
 			m_outstream.writeLine(""); 
-			m_outstream.writeString("\t\tthrows "); 
-			m_outstream.writeLine(m_spec.m_init_throw_code[0..m_spec.m_init_throw_read]);
+			//m_outstream.writeString("\t\tthrows "); TODO check
+			//m_outstream.writeLine(m_spec.m_init_throw_code[0..m_spec.m_init_throw_read]); TODO check
 			m_outstream.writeLine("\t\t{");
 		} else {
 			m_outstream.writeLine(" {");
@@ -286,7 +289,8 @@ class CEmit {
 		m_outstream.writeLine("\t\tif(null is instream) {");
 		m_outstream.writeLine("\t\t\tthrow (new Error(\"Error: Bad input stream initializer.\"));");
 		m_outstream.writeLine("\t\t}");
-		m_outstream.writeLine("\t\tyy_reader = new java.io.BufferedReader(new java.io.InputStreamReader(instream));");
+		//m_outstream.writeLine("\t\tyy_reader = new java.io.BufferedReader(new java.io.InputStreamReader(instream));");
+		m_outstream.writeLine("\t\tyy_reader = new std.stream.InputStream(new std.stream.InputStream(instream));");
 		m_outstream.writeLine("\t}");
 		m_outstream.writeLine("");
 
@@ -298,8 +302,8 @@ class CEmit {
 
 		if(null !is m_spec.m_init_throw_code) {
 			m_outstream.writeLine(""); 
-			m_outstream.writeString("\t\tthrows "); 
-			m_outstream.writeLine(m_spec.m_init_throw_code[0..m_spec.m_init_throw_read]);
+			//m_outstream.writeString("\t\tthrows "); TODO check
+			//m_outstream.writeLine(m_spec.m_init_throw_code[0..m_spec.m_init_throw_read]); TODO check
 			m_outstream.writeLine("\t\t{");
 		} else {
 			m_outstream.writeLine(" {");
@@ -334,9 +338,9 @@ class CEmit {
 	}
 
 	/***************************************************************
-Function: emit_states
-Description: Emits constants that serve as lexical states,
-including YYINITIAL.
+		Function: emit_states
+		Description: Emits constants that serve as lexical states,
+		including YYINITIAL.
 	 **************************************************************/
 	private void emit_states() {
 		string[] states;
@@ -354,7 +358,7 @@ including YYINITIAL.
 				assert(null !is state);
 			}
 
-			m_outstream.writeLine("\tprivate final int " 
+			m_outstream.writeLine("\tprivate immutable int " 
 					~ state 
 					~ " = " 
 					~ conv!(int,string)(m_spec.m_states[state])
@@ -362,7 +366,7 @@ including YYINITIAL.
 			/*++index;*/
 		}
 
-		m_outstream.writeLine("\tprivate final int yy_state_dtrans[] = {");
+		m_outstream.writeLine("\tprivate immutable int[] yy_state_dtrans = [");
 		for(index = 0; index < m_spec.m_state_dtrans.length; ++index) {
 			m_outstream.writeString("\t\t" ~ conv!(int,string)(m_spec.m_state_dtrans[index]));
 			if(index < m_spec.m_state_dtrans.length - 1) {
@@ -371,7 +375,7 @@ including YYINITIAL.
 				m_outstream.writeLine("");
 			}
 		}
-		m_outstream.writeLine("\t};");
+		m_outstream.writeLine("\t];");
 	}
 
 	/***************************************************************

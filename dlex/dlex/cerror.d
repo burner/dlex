@@ -9,7 +9,7 @@ class CError {
 	 * Function: impos Description:
 	 *******************************************************/
 	static void impos(string message) {
-		writeln("JLex Error: " ~ message);
+		writeln("Dlex Error: " ~ message);
 	}
 
 	/********************************************************

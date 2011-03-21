@@ -13,7 +13,7 @@ class CInput {
 	bool m_eof_reached; /* Whether EOF has been encountered. */
 	bool m_pushback_line; 
 
-	char m_line[]; /* Line buffer. */
+	char[] m_line; /* Line buffer. */
 	int m_line_read; /* Number of bytes read into line buffer. */
 	int m_line_index; /* Current index into line buffer. */
 
@@ -30,7 +30,7 @@ class CInput {
 		Description: 
 	**************************************************************/
 	this(std.stream.InputStream input) {
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is input);
 		}
 

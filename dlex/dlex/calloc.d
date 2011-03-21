@@ -9,7 +9,7 @@ import dlex.cset;
 class CAlloc {
 	/***************************************************************
 		Function: newCDfa
-		**************************************************************/
+	**************************************************************/
 	static CDfa newCDfa(CSpec spec) {
 		CDfa dfa;
 		
@@ -37,7 +37,7 @@ class CAlloc {
 	**************************************************************/
 	static CNfaPair newNLPair(CSpec spec) {
 		CNfaPair pair = newCNfaPair();
-		pair.m_end=newCNfa(spec); // newline accepting state
+		pair.m_end = newCNfa(spec); // newline accepting state
 		pair.m_start=newCNfa(spec); // new state with two epsilon edges
 		pair.m_start.m_next = newCNfa(spec);
 		pair.m_start.m_next.m_edge = CNfa.CCL;

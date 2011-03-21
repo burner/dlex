@@ -55,7 +55,7 @@ class CEmit {
 	 **************************************************************/
 	//private void set(CSpec spec, java.io.PrintWriter outstream) {
 	private void set(CSpec spec, std.stream.OutputStream outstream) {
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is spec);
 			assert(null !is outstream);
 		}
@@ -78,7 +78,7 @@ class CEmit {
 	  {
 	  set(spec,outstream);
 
-	  if(CUtility.DEBUG)
+	  debug(debugversion)
 	  {
 	  assert(null !is m_spec);
 	  assert(null !is m_outstream);
@@ -163,7 +163,7 @@ class CEmit {
 	void emit(CSpec spec, std.stream.OutputStream outstream) {
 		set(spec,outstream);
 
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is m_spec);
 			assert(null !is m_outstream);
 		}
@@ -187,7 +187,7 @@ class CEmit {
 		and constants.
 	 **************************************************************/
 	private void emit_construct() {
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is m_spec);
 			assert(null !is m_outstream);
 		}
@@ -354,7 +354,7 @@ class CEmit {
 			//state = states.nextElement(); TODO check if it is really a int array
 			state = conv!(int,string)(m_spec.m_states[it]);
 
-			if(CUtility.DEBUG) {
+			debug(debugversion) {
 				assert(null !is state);
 			}
 
@@ -384,7 +384,7 @@ class CEmit {
 		error handling and input buffering.
 	 **************************************************************/
 	private void emit_helpers() {
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is m_spec);
 			assert(null !is m_outstream);
 		}
@@ -624,7 +624,7 @@ class CEmit {
 		Description: Emits class header.
 	 **************************************************************/
 	private void emit_header() {
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is m_spec);
 			assert(null !is m_outstream);
 		}
@@ -656,7 +656,7 @@ class CEmit {
 		bool is_end;
 		CAccept accept;
 
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is m_spec);
 			assert(null !is m_outstream);
 		}
@@ -812,7 +812,7 @@ class CEmit {
 		Description: 
 	 **************************************************************/
 	private void emit_driver() {
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is m_spec);
 			assert(null !is m_outstream);
 		}
@@ -999,7 +999,7 @@ Description:
 		int bogus_index;
 		CAccept accept;
 
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(m_spec.m_accept_vector.getSize() 
 					== m_spec.m_anchor_array.length);
 		}
@@ -1025,7 +1025,7 @@ Function: emit_footer
 Description:		 
 	 **************************************************************/
 	private void emit_footer() {
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is m_spec);
 			assert(null !is m_outstream);
 		}

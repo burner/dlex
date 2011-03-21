@@ -153,7 +153,7 @@ class CLexGen {
 			CError.parse_error(CError.E_INIT, 0);
 		}
 
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is this);
 			assert(null !is m_outstream);
 			assert(null !is m_input);
@@ -211,7 +211,7 @@ class CLexGen {
 			CError.parse_error(CError.E_INIT, 0);
 		}
 
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is this);
 			assert(null !is m_outstream);
 			assert(null !is m_input);
@@ -295,7 +295,7 @@ class CLexGen {
 	 **************************************************************/
 	private char[] packCode(char start_dir[], char end_dir[], char prev_code[],
 			int prev_read, int specified) {
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(INIT_CODE == specified || CLASS_CODE == specified
 					|| EOF_CODE == specified || EOF_VALUE_CODE == specified
 					|| INIT_THROW_CODE == specified
@@ -463,7 +463,7 @@ class CLexGen {
 	private void userDeclare() {
 		int elem;
 
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is this);
 			assert(null !is m_outstream);
 			assert(null !is m_input);
@@ -766,7 +766,7 @@ class CLexGen {
 			CError.parse_error(CError.E_INIT, 0);
 		}
 
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is this);
 			assert(null !is m_outstream);
 			assert(null !is m_input);
@@ -786,7 +786,7 @@ class CLexGen {
 
 		/* print_nfa(); */
 
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(END_OF_INPUT == m_spec.m_current_token);
 		}
 
@@ -929,7 +929,7 @@ class CLexGen {
 				index = -1;
 			}
 
-			if(CUtility.DEBUG) {
+			debug(debugversion) {
 				assert(null !is state);
 				assert(index != -1);
 			}
@@ -971,7 +971,7 @@ class CLexGen {
 		int i;
 		int size;
 
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is this);
 			assert(null !is m_outstream);
 			assert(null !is m_input);
@@ -1105,7 +1105,7 @@ class CLexGen {
 		char replace[];
 		int rep_elem;
 
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is this);
 			assert(null !is m_outstream);
 			assert(null !is m_input);
@@ -1145,7 +1145,7 @@ class CLexGen {
 		}
 
 		/* Debug checks. */
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(0 < count_name);
 		}
 
@@ -1172,7 +1172,7 @@ class CLexGen {
 		for(rep_elem = 0; rep_elem < start_macro; ++rep_elem) {
 			replace[rep_elem] = m_input.m_line[rep_elem];
 
-			if(CUtility.DEBUG) {
+			debug(debugversion) {
 				assert(rep_elem < replace.length);
 			}
 		}
@@ -1227,7 +1227,7 @@ class CLexGen {
 		bool in_quote;
 		bool in_ccl;
 
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is this);
 			assert(null !is m_outstream);
 			assert(null !is m_input);
@@ -1337,7 +1337,7 @@ class CLexGen {
 		}
 
 		/* Debug checks. */
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(0 < count_def);
 			assert(0 < count_name);
 			assert(null !is m_spec.m_macros);
@@ -1362,7 +1362,7 @@ class CLexGen {
 		int start_state;
 		int count_state;
 
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is this);
 			assert(null !is m_outstream);
 			assert(null !is m_input);
@@ -1376,7 +1376,7 @@ class CLexGen {
 		}
 
 		/* Debug checks. */
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert('%' == m_input.m_line[0]);
 			assert('s' == m_input.m_line[1]);
 			assert(m_input.m_line_index <= m_input.m_line_read);
@@ -1447,7 +1447,7 @@ class CLexGen {
 		char r;
 
 		/* Debug checks. */
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(m_input.m_line_index < m_input.m_line_read);
 			assert(0 < m_input.m_line_read);
 			assert(0 <= m_input.m_line_index);
@@ -1546,7 +1546,7 @@ class CLexGen {
 		action = new char[BUFFER_SIZE];
 		action_index = 0;
 
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is this);
 			assert(null !is m_outstream);
 			assert(null !is m_input);
@@ -1652,7 +1652,7 @@ class CLexGen {
 
 		accept = new CAccept(action, action_index, m_input.m_line_number);
 
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is accept);
 		}
 
@@ -1732,7 +1732,7 @@ class CLexGen {
 			}
 		}
 
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(m_input.m_line_index <= m_input.m_line_read);
 		}
 
@@ -1861,7 +1861,7 @@ class CLexGen {
 			name = it;
 			def = m_spec.m_macros[name];
 
-			if(CUtility.DEBUG) {
+			debug(debugversion) {
 				assert(null !is name);
 				assert(null !is def);
 			}
@@ -1882,7 +1882,7 @@ class CLexGen {
 			}
 			index = m_spec.m_states[state];
 
-			if(CUtility.DEBUG) {
+			debug(debugversion) {
 				assert(null !is state);
 				//assert(null !is index);
 				assert(!stateFound);
@@ -1896,7 +1896,7 @@ class CLexGen {
 		if(false == m_spec.m_count_chars) {
 			writeln("Character counting is off.");
 		} else {
-			if(CUtility.DEBUG) {
+			debug(debugversion) {
 				assert(m_spec.m_count_lines);
 			}
 
@@ -1908,7 +1908,7 @@ class CLexGen {
 		if(false == m_spec.m_count_lines) {
 			writeln("Line counting is off.");
 		} else {
-			if(CUtility.DEBUG) {
+			debug(debugversion) {
 				assert(m_spec.m_count_lines);
 			}
 
@@ -2004,7 +2004,7 @@ class CLexGen {
 				index = m_spec.m_states[state];
 			}
 
-			if(CUtility.DEBUG) {
+			debug(debugversion) {
 				assert(null !is state);
 				//assert(null !is index);
 				assert(!stateFound);

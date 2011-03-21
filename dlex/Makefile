@@ -10,13 +10,14 @@ dlex.sparsebitset.o dlex.main.o dlex.vector.o dlex.stack.o
 all:dlex
 
 crude:
-	dmd -I../../libhurt/ -I../cup -m32 -gc `find . -name \*.d` libhurt.a -ofDlex
+	dmd -I../../libhurt/ -I../cup -m32 -gc `find dlex -name \*.d` libhurt.a -ofDlex -debug=debugversion
 
 dlex: $(OBJS)
 	dmd dlex/vector.d dlex/stack.d -I../../libhurt/ *.o *.a -ofDlex -m32
 
 clean:
 	rm *.o
+	rm Dlex
 
 dlex.caccept.o: dlex/caccept.d Makefile ../makeconfig.conf
 	$(DC) $(CFLAGS) $(IPATH) dlex/caccept.d -ofdlex.caccept.o 

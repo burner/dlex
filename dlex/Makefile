@@ -7,10 +7,10 @@ dlex.cdfa.o dlex.cdtrans.o dlex.cerror.o dlex.cinput.o dlex.clexgen.o dlex.cmake
 dlex.cnfa.o dlex.cnfa2dfa.o dlex.cnfapair.o dlex.cset.o dlex.csimpliynfa.o dlex.cutility.o dlex.enumeration.o \
 dlex.sparsebitset.o dlex.main.o dlex.vector.o dlex.stack.o
 
-all:dlex
+all:crude
 
 crude:
-	dmd -I../../libhurt/ -I../cup -m32 -gc `find dlex -name \*.d` libhurt.a -ofDlex -debug=debugversion
+	dmd -I../../libhurt/ -I../cup -m32 -gc `find dlex -name \*.d` libhurt.a -ofDlex -debug=debugversion -debug
 
 dlex: $(OBJS)
 	dmd dlex/vector.d dlex/stack.d -I../../libhurt/ *.o *.a -ofDlex -m32

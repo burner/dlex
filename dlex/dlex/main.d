@@ -2,6 +2,8 @@ module dlex.main;
 
 import dlex.clexgen;
 
+import hurt.util.stacktrace;
+
 import std.stdio;
 
 //public class Main {
@@ -9,6 +11,9 @@ import std.stdio;
 		Function: main
 	**************************************************************/
 	public void main(string[] args) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"main");
+			
 		CLexGen lg;
 
 		if(args.length < 2) {

@@ -1,6 +1,7 @@
 module dlex.cerror;
 
 import hurt.conv.conv;
+import hurt.util.stacktrace;
 
 import std.stdio;
 
@@ -67,6 +68,13 @@ class CError {
 	 * Function: parse_error Description:
 	 *******************************************************/
 	static void parse_error(int error_code, int line_number) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"parse_error");
+		debug st.putArgs("int", "error_code", error_code, 
+			"int", "line_number", line_number);
+
+		debug StackTrace.printTrace();
+
 		writeln("Error: Parse error at line " ~ conv!(int,string)(line_number) ~ ".");
 		writeln("Description: " ~ errmsg[error_code]);
 		throw new Error("Parse error.");

@@ -2,7 +2,10 @@ module dlex.cinput;
 
 import dlex.cutility;
 
+import hurt.util.stacktrace;
+
 import std.stream;
+import std.stdio;
 
 class CInput {
 	/***************************************************************
@@ -30,6 +33,9 @@ class CInput {
 		Description: 
 	**************************************************************/
 	this(std.stream.InputStream input) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"	this");
+			
 		debug(debugversion) {
 			assert(null !is input);
 		}
@@ -56,7 +62,9 @@ class CInput {
 		of zero length.
 	**************************************************************/
 	bool getLine() {
-		string lineStr;
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"getLine");
+		char[] lineStr;
 		int elem;
 		
 		/* Has EOF already been reached? */
@@ -83,13 +91,16 @@ class CInput {
 		}
 
 		while(true) {
-			if(null is (lineStr = m_input.readLine().idup)) {
+			if(m_input.eof()) {
 				m_eof_reached = true;
 				m_line_index = 0;
 				return EOF;
 			}
-			m_line = (lineStr ~ "\n").dup;
-			m_line_read=m_line.length;
+			lineStr = m_input.readLine();
+			debug writeln(__FILE__,":",__LINE__, " lineStr.length ", lineStr.length);
+			m_line = (lineStr ~ "\n").dup; //TODO linefeed not needed ?
+			//m_line = lineStr.dup;
+			m_line_read = m_line.length;
 			++m_line_number;
 			
 			/* Check forempty lines and discard them. */
@@ -107,6 +118,7 @@ class CInput {
 		}
 
 		m_line_index = 0;
+		debug writeln(__FILE__,":",__LINE__," ",m_line);
 		return NOT_EOF;
 	}
 }

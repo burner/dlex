@@ -19,6 +19,7 @@ import dlex.sparsebitset;
 import dlex.vector;
 import hurt.conv.conv;
 import hurt.util.array;
+import hurt.util.stacktrace;
 import hurt.string.stringutil;
 
 import std.stream;
@@ -91,6 +92,10 @@ class CLexGen {
 	 * Function: CLexGen
 	 **************************************************************/
 	this(string filename) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"clexgen.this");
+		debug st.putArgs("string", "filename", filename);
+			
 		/* Successful initialization flag. */
 		m_init_flag = false;
 
@@ -149,6 +154,8 @@ class CLexGen {
 	 * Function: generate Description:
 	 **************************************************************/
 	void generate() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"generate");
 		if(false == m_init_flag) {
 			CError.parse_error(CError.E_INIT, 0);
 		}
@@ -171,6 +178,7 @@ class CLexGen {
 		if(m_input.m_eof_reached) {
 			CError.parse_error(CError.E_EOF, m_input.m_line_number);
 		}
+		debug writeln("User Code done");
 
 		if(m_spec.m_verbose) {
 			writeln("Processing second section -- " ~ "JLex declarations.");
@@ -179,6 +187,7 @@ class CLexGen {
 		if(m_input.m_eof_reached) {
 			CError.parse_error(CError.E_EOF, m_input.m_line_number);
 		}
+		debug writeln("User Declare done");
 
 		if(m_spec.m_verbose) {
 			writeln("Processing third section -- lexical rules.");
@@ -187,11 +196,13 @@ class CLexGen {
 		if(CUtility.DO_DEBUG) {
 			print_header();
 		}
+		debug writeln("User Rules done");
 
 		if(m_spec.m_verbose) {
 			writeln("Outputting lexical analyzer code.");
 		}
 		m_emit.emit(m_spec, m_outstream);
+		debug writeln("emit done");
 
 		if(m_spec.m_verbose && true == CUtility.OLD_DUMP_DEBUG) {
 			details();
@@ -205,6 +216,8 @@ class CLexGen {
 	 * echoing it into output file.
 	 **************************************************************/
 	private void userCode() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"userCode");
 		int count = 0;
 
 		if(false == m_init_flag) {
@@ -220,13 +233,14 @@ class CLexGen {
 		}
 
 		if(m_input.m_eof_reached) {
-			CError.parse_error(CError.E_EOF, 0);
+			CError.parse_error(CError.E_EOF, m_input.m_line_number);
 		}
 
 		while(true) {
 			if(m_input.getLine()) {
 				/* Eof reached. */
-				CError.parse_error(CError.E_EOF, 0);
+				StackTrace.printTrace();
+				CError.parse_error(CError.E_EOF, m_input.m_line_number);
 			}
 
 			if(2 <= m_input.m_line_read && '%' == m_input.m_line[0]
@@ -244,6 +258,8 @@ class CLexGen {
 	 * Function: getName
 	 **************************************************************/
 	private char[] getName() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"getName");
 		char buffer[];
 		int elem;
 
@@ -295,6 +311,9 @@ class CLexGen {
 	 **************************************************************/
 	private char[] packCode(char start_dir[], char end_dir[], char prev_code[],
 			int prev_read, int specified) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"packCode");
+			
 		debug(debugversion) {
 			assert(INIT_CODE == specified || CLASS_CODE == specified
 					|| EOF_CODE == specified || EOF_VALUE_CODE == specified
@@ -461,6 +480,8 @@ class CLexGen {
 	 * Function: userDeclare Description:
 	 **************************************************************/
 	private void userDeclare() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"userDeclare");
 		int elem;
 
 		debug(debugversion) {
@@ -760,9 +781,12 @@ class CLexGen {
 	 * specification and creates minimized transition table.
 	 **************************************************************/
 	private void userRules() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"userRules");
 		int code;
 
 		if(false == m_init_flag) {
+			StackTrace.printTrace();
 			CError.parse_error(CError.E_INIT, 0);
 		}
 
@@ -810,6 +834,9 @@ class CLexGen {
 	 * form of character class.
 	 **************************************************************/
 	private void printccl(CSet set) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"printccl");
+			
 		int i;
 
 		write(" [");
@@ -825,6 +852,9 @@ class CLexGen {
 	 * Function: plab Description:
 	 **************************************************************/
 	private string plab(CNfa state) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"plab");
+			
 		if(null is state) {
 			return "--";
 		}
@@ -838,6 +868,10 @@ class CLexGen {
 	 * Function: interp_int Description:
 	 **************************************************************/
 	private string interp_int(int i) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"interp_int");
+		debug st.putArgs("int", "i", i);
+			
 		switch (i) {
 			case cast(int)('\b'):
 				return "\\b";
@@ -866,6 +900,9 @@ class CLexGen {
 	 * Function: print_nfa Description:
 	 **************************************************************/
 	void print_nfa() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"print_nfa");
+
 		int elem;
 		CNfa nfa;
 		int size;
@@ -963,6 +1000,8 @@ class CLexGen {
 	private SparseBitSet all_states = null;
 
 	SparseBitSet getStates() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"getStates");
 		int start_state;
 		int count_state;
 		SparseBitSet states;
@@ -1094,6 +1133,8 @@ class CLexGen {
 	 * otherwise.
 	 *******************************************************/
 	private bool expandMacro() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"expandMacro");
 		int elem;
 		int start_macro;
 		int end_macro;
@@ -1218,6 +1259,8 @@ class CLexGen {
 	 * macro_name = macro_definition
 	 **************************************************************/
 	private void saveMacro() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"saveMacro");
 		int elem;
 		int start_name;
 		int count_name;
@@ -1359,6 +1402,8 @@ class CLexGen {
 	 * actually optional as long as there is white space in between them.)
 	 **************************************************************/
 	private void saveStates() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"saveStates");
 		int start_state;
 		int count_state;
 
@@ -1444,6 +1489,8 @@ class CLexGen {
 	 * corresponding character code.
 	 *******************************************************/
 	private char expandEscape() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"expandEscape");
 		char r;
 
 		/* Debug checks. */
@@ -1532,6 +1579,8 @@ class CLexGen {
 	 * next in input stream.
 	 *******************************************************/
 	CAccept packAccept() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"packAccept");
 		CAccept accept;
 		char action[];
 		int action_index;
@@ -1670,6 +1719,8 @@ class CLexGen {
 	private bool m_advance_stop = false;
 
 	int advance() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"advance");
 		bool saw_escape = false;
 		int code;
 
@@ -1844,6 +1895,8 @@ class CLexGen {
 	 * Function: details Description: High level debugging routine.
 	 **************************************************************/
 	private void details() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"details");
 		string[] names;
 		string name;
 		string def;
@@ -1960,6 +2013,9 @@ class CLexGen {
 	 * function: print_set
 	 **************************************************************/
 	void print_set(Vector!(CNfa) nfa_set) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"print_set");
+			
 		int size;
 		int elem;
 		CNfa nfa;
@@ -1981,6 +2037,8 @@ class CLexGen {
 	 * Function: print_header
 	 **************************************************************/
 	private void print_header() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"print_header");
 		string[] states;
 		int i;
 		int j;

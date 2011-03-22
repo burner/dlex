@@ -6,6 +6,7 @@ import dlex.cset;
 import dlex.sparsebitset;
 
 import hurt.conv.conv;
+import hurt.util.stacktrace;
 
 import std.stdio;
 
@@ -15,6 +16,10 @@ class CSimplifyNfa {
 	private int mapped_charset_size; // reduced charset size
 
 	void simplify(CSpec m_spec) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"simplify");
+		debug st.putArgs("string", "m_spec", m_spec.toString());
+			
 		computeClasses(m_spec); // initialize fields.
 		
 		// now rewrite the NFA using our character class mapping.
@@ -43,12 +48,16 @@ class CSimplifyNfa {
 	 *	as we see edges that require discrimination between characters in
 	 *	the class. [CSA, 25-Jul-1999] */
 	private void computeClasses(CSpec m_spec) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"computeClasses");
+		debug st.putArgs("string", "m_spec", m_spec.toString());
+			
 		this.original_charset_size = m_spec.m_dtrans_ncols;
 		this.ccls = new int[original_charset_size]; // initially all zero.
 
 		int nextcls = 1;
 		SparseBitSet clsA = new SparseBitSet(), clsB = new SparseBitSet();
-		int[int] h;
+		int[string] h;
 		
 		write("Working on character classes.");
 		//for(Enumeration e=m_spec.m_nfa_states.elements(); e.hasMoreElements(); ) {
@@ -70,17 +79,17 @@ class CSimplifyNfa {
 			if(clsA.getSize() == 0) 
 				continue; // nothing to do.
 			// and split them.
-			h.clear(); // h will map old to new class name
+			//h.clear(); // h will map old to new class name
 			for(int i = 0; i < ccls.length; i++) {
 				if(clsA.get(ccls[i])) { // a split class
 					if(nfa.m_edge == i || nfa.m_edge == CNfa.CCL && nfa.m_set.contains(i)) { // on A side
 						int split = ccls[i];
 						//if(!h.containsKey(split)) {
-						if(!(split in h)) {
-							h[split] = nextcls++; // make new class
+						if(conv!(int,string)(split) !in h) {
+							h[conv!(int,string)(split)] = nextcls++; // make new class
 						}
 
-						ccls[i] = h[split];
+						ccls[i] = h[conv!(int,string)(split)];
 					}
 				}
 			}

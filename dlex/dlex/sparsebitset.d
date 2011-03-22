@@ -4,6 +4,7 @@ import dlex.enumeration;
 
 import hurt.conv.conv;
 import hurt.util.array;
+import hurt.util.stacktrace;
 import hurt.string.stringbuffer;
 
 //final class SparseBitSet implements Cloneable {
@@ -27,12 +28,14 @@ final class SparseBitSet {
 		SparseBitSet.XOR = new BinXor();
 	}*/
 
-	private BinOp AND;
-	private BinOp OR;
-	private BinOp XOR;
+	//private BinOp AND;
+	//private BinOp OR;
+	//private BinOp XOR;
 
 	/** Creates an empty set.  */
 	public this() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"this");
 		bits = new long[4];
 		offs = new int[4];
 		size = 0;
@@ -47,6 +50,10 @@ final class SparseBitSet {
 	 *            the size of the set
 	 */
 	public this(int nbits) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"this");
+		debug st.putArgs("int", "nbits", nbits);
+			
 		this();
 	}
 
@@ -54,16 +61,29 @@ final class SparseBitSet {
 	 * Creates an empty set with the same size as the given set.
 	 */
 	public this(SparseBitSet set) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"this");
+		debug st.putArgs("string", "set", set.toString());
+			
 		bits = new long[set.size];
 		offs = new int[set.size];
 		size = 0;
 	}
 
 	private void new_block(int bnum) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"new_block");
+		debug st.putArgs("int", "bnum", bnum);
+			
 		new_block(bsearch(bnum), bnum);
 	}
 
 	private void new_block(int idx, int bnum) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"new_block");
+		debug st.putArgs("int", "idx", idx, 
+			"int", "bnum", bnum);
+
 		if(size == bits.length) { // resize
 			long[] nbits = new long[size * 3];
 			int[] noffs = new int[size * 3];
@@ -77,6 +97,11 @@ final class SparseBitSet {
 	}
 
 	private void insert_block(int idx, int bnum) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"insert_block");
+		debug st.putArgs("int", "idx", idx, 
+			"int", "bnum", bnum);
+
 		assert(idx <= size);
 		assert(idx == size || offs[idx] != bnum);
 		arrayCopy(bits, idx, bits, idx + 1, size - idx);
@@ -87,6 +112,10 @@ final class SparseBitSet {
 	}
 
 	private int bsearch(int bnum) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"bsearch");
+		debug st.putArgs("int", "bnum", bnum);
+			
 		int l = 0, r = size; // search interval is [l, r)
 		while(l < r) {
 			int p = (l + r) / 2;
@@ -108,6 +137,10 @@ final class SparseBitSet {
 	 *            the bit to be set
 	 */
 	public void set(int bit) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"set");
+		debug st.putArgs("int", "bit", bit);
+			
 		int bnum = bit >> LG_BITS;
 		int idx = bsearch(bnum);
 		if(idx >= size || offs[idx] != bnum)
@@ -122,6 +155,10 @@ final class SparseBitSet {
 	 *            the bit to be cleared
 	 */
 	public void clear(int bit) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"clear");
+		debug st.putArgs("int", "bit", bit);
+			
 		int bnum = bit >> LG_BITS;
 		int idx = bsearch(bnum);
 		if(idx >= size || offs[idx] != bnum)
@@ -133,6 +170,8 @@ final class SparseBitSet {
 	 * Clears all bits.
 	 */
 	public void clearAll() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"clearAll");
 		size = 0;
 	}
 
@@ -143,6 +182,10 @@ final class SparseBitSet {
 	 *            the bit to be gotten
 	 */
 	public bool get(int bit) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"get");
+		debug st.putArgs("int", "bit", bit);
+			
 		int bnum = bit >> LG_BITS;
 		int idx = bsearch(bnum);
 		if(idx >= size || offs[idx] != bnum)
@@ -157,7 +200,11 @@ final class SparseBitSet {
 	 *            the bit set to be ANDed with
 	 */
 	public void and(SparseBitSet set) {
-		binop(this, set, AND);
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"and");
+		debug st.putArgs("string", "set", set.toString());
+			
+		binop(this, set, function(long a, long b) { return a & b; });
 	}
 
 	/**
@@ -167,7 +214,11 @@ final class SparseBitSet {
 	 *            the bit set to be ORed with
 	 */
 	public void or(SparseBitSet set) {
-		binop(this, set, OR);
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"or");
+		debug st.putArgs("string", "set", set.toString());
+			
+		binop(this, set, function(long a, long b) { return a | b; });
 	}
 
 	/**
@@ -177,33 +228,65 @@ final class SparseBitSet {
 	 *            the bit set to be XORed with
 	 */
 	public void xor(SparseBitSet set) {
-		binop(this, set, XOR);
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"xor");
+		debug st.putArgs("string", "set", set.toString());
+			
+		binop(this, set, function(long a, long b) { return a ^ b; });
 	}
 
 	// BINARY OPERATION MACHINERY
 	private interface BinOp {
 		public long op(long a, long b);
 	}
+/*
+	private static long and(long a, long b) {
+		return a & b;
+	}
+
+	private static long or(long a, long b) {
+		return a | b;
+	}
+
+	private static long or(long a, long b) {
+		return a ^ b;
+	}
 
 	class BinAnd : BinOp {
 		public final long op(long a, long b) {
+			debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+				"op");
+			debug st.putArgs("long", "a", a, 
+				"long", "b", b);
 			return a & b;
 		}
 	}
 
-	class BinOr() {
+	class BinOr : BinOp {
 		public final long op(long a, long b) {
+			debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+				"op");
+			debug st.putArgs("long", "a", a, 
+				"long", "b", b);
 			return a | b;
 		}
 	}
 
-	class BinXor() {
+	class BinXor : BinOp {
 		public final long op(long a, long b) {
+			debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+				"op");
+			debug st.putArgs("long", "a", a, 
+				"long", "b", b);
 			return a ^ b;
 		}
-	}
+	}*/
 
-	private static final void binop(SparseBitSet a, SparseBitSet b, BinOp op) {
+	//private static final void binop(SparseBitSet a, SparseBitSet b, BinOp op) {
+	private static final void binop(SparseBitSet a, SparseBitSet b, long function(long a, long b) op ) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"binop");
+			
 		int nsize = a.size + b.size;
 		long[] nbits;
 		int[] noffs;
@@ -228,15 +311,15 @@ final class SparseBitSet {
 			long nb;
 			int no;
 			if(i < a_size && (j >= b.size || a.offs[i] < b.offs[j])) {
-				nb = op.op(a.bits[i], 0);
+				nb = op(a.bits[i], 0);
 				no = a.offs[i];
 				i++;
 			} else if(j < b.size && (i >= a_size || a.offs[i] > b.offs[j])) {
-				nb = op.op(0, b.bits[j]);
+				nb = op(0, b.bits[j]);
 				no = b.offs[j];
 				j++;
 			} else { // equal keys; merge.
-				nb = op.op(a.bits[i], b.bits[j]);
+				nb = op(a.bits[i], b.bits[j]);
 				no = a.offs[i];
 				i++;
 				j++;

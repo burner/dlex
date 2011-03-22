@@ -9,10 +9,11 @@ import dlex.cnfa;
 import dlex.sparsebitset;
 import dlex.cutility;
 import dlex.calloc;
-
 import dlex.vector;
 import dlex.stack;
+
 import hurt.conv.conv;
+import hurt.util.stacktrace;
 
 import std.stdio;
 
@@ -33,6 +34,8 @@ class CNfa2Dfa {
 		Function: CNfa2Dfa
 	**************************************************************/
 	this() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"	CNfa2Dfa.this");
 		reset();
 	}
 
@@ -41,6 +44,11 @@ class CNfa2Dfa {
 		Description: 
 		**************************************************************/
 	private void set(CLexGen lexGen, CSpec spec) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"set");
+		debug st.putArgs("string", "lexGen", lexGen.toString(), 
+			"string", "spec", spec.toString());
+
 		m_lexGen = lexGen;
 		m_spec = spec;
 		m_unmarked_dfa = 0;
@@ -51,6 +59,8 @@ class CNfa2Dfa {
 		Description: 
 	**************************************************************/
 	private void reset() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"reset");
 		m_lexGen = null;
 		m_spec = null;
 		m_unmarked_dfa = 0;
@@ -61,6 +71,10 @@ class CNfa2Dfa {
 		Description: High-level access function to module.
 	**************************************************************/
 	void make_dfa(CLexGen lexGen, CSpec spec) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"make_dfa");
+		debug st.putArgs("string", "lexGen", lexGen.toString(), 
+			"string", "spec", spec.toString());
 		int i;
 
 		reset();
@@ -77,11 +91,26 @@ class CNfa2Dfa {
 		free_dfa_states();
 	}		 
 
+	private void sortCheck(Vector!(CNfa) vec, string message) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"sortCheck");
+		debug st.putArgs("string", "vec", vec.toString(), 
+			"string", "message", message);
+
+		for(uint idx = 0; idx < vec.getSize(); idx++) {
+			if(vec[idx] is null) 
+				StackTrace.printTrace();
+			assert(vec[idx] !is null, message ~ " sort null");
+		}
+	}
+
 	 /***************************************************************
 		Function: make_dtrans
 		Description: Creates uncompressed CDTrans transition table.
 	**************************************************************/
 	private void make_dtrans() /* throws java.lang.CloneNotSupportedException*/ {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"make_dtrans");
 		CDfa next;
 		CDfa dfa;
 		CBunch bunch;
@@ -117,7 +146,9 @@ class CNfa2Dfa {
 		
 			/* Create start state and initialize fields. */
 			bunch.m_nfa_set = m_spec.m_state_rules[istate].clone();
+			sortCheck(bunch.m_nfa_set, "before");
 			sortStates(bunch.m_nfa_set);
+			sortCheck(bunch.m_nfa_set, "after");
 			
 			bunch.m_nfa_bit = new SparseBitSet();
 			
@@ -142,7 +173,7 @@ class CNfa2Dfa {
 				write(".");
 				writeln();
 			
-				if(CUtility.DEBUG) {
+				debug(debugversion) {
 					assert(false == dfa.m_mark);
 				}
 
@@ -156,7 +187,7 @@ class CNfa2Dfa {
 				
 				/* Set CDTrans array for each character transition. */
 				for(i = 0; i < m_spec.m_dtrans_ncols; ++i) {
-					if(CUtility.DEBUG) {
+					debug(debugversion) {
 						assert(0 <= i);
 						assert(m_spec.m_dtrans_ncols > i);
 					}
@@ -167,7 +198,7 @@ class CNfa2Dfa {
 						e_closure(bunch);
 					}
 					
-					if(CUtility.DEBUG) {
+					debug(debugversion) {
 						assert((null is bunch.m_nfa_set && null is bunch.m_nfa_bit)
 						|| (null !is bunch.m_nfa_set && null !is bunch.m_nfa_bit));
 					}
@@ -183,14 +214,14 @@ class CNfa2Dfa {
 						}
 					}
 					
-					if(CUtility.DEBUG) {
+					debug(debugversion) {
 						assert(nextstate < m_spec.m_dfa_states.getSize());
 					}
 					
 					dtrans.m_dtrans[i] = nextstate;
 				}
 			
-				if(CUtility.DEBUG) {
+				debug(debugversion) {
 					assert(m_spec.m_dtrans_vector.getSize() == dfa.m_label);
 				}
 			
@@ -205,6 +236,8 @@ class CNfa2Dfa {
 		Function: free_dfa_states
 	**************************************************************/	
 	private void free_dfa_states() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"free_dfa_states");
 		m_spec.m_dfa_states = null;
 		m_spec.m_dfa_sets = null;
 	}
@@ -213,6 +246,8 @@ class CNfa2Dfa {
 		Function: free_nfa_states
 	**************************************************************/	
 	private void free_nfa_states() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"free_nfa_states");
 		/* UNDONE: Remove references to nfas from within dfas. */
 		/* UNDONE: Don't free CAccepts. */
 
@@ -226,13 +261,17 @@ class CNfa2Dfa {
 		Description: Alters and returns input set.
 	**************************************************************/
 	private void e_closure(CBunch bunch) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"e_closure");
+		debug st.putArgs("string", "bunch", bunch.toString());
+			
 		Stack!(CNfa) nfa_stack;
 		int size;
 		int i;
 		CNfa state;
 
 		/* Debug checks. */
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is bunch);
 			assert(null !is bunch.m_nfa_set);
 			assert(null !is bunch.m_nfa_bit);
@@ -248,8 +287,11 @@ class CNfa2Dfa {
 		for(i = 0; i < size; ++i) {
 			state = bunch.m_nfa_set.get(i);
 			
-			if(CUtility.DEBUG) {
-				assert(bunch.m_nfa_bit.get(state.m_label));
+			debug(debugversion) {
+				//assert(bunch.m_nfa_bit.get(state.m_label)); TODO make this assertion useful again
+				assert(state !is null, "bunch.m_nfa_set.getSize() = " 
+					~ conv!(int,string)(bunch.m_nfa_set.getSize()) 
+					~ " i is " ~ conv!(int,string)(i));
 			}
 
 			nfa_stack.push(state);
@@ -267,6 +309,10 @@ class CNfa2Dfa {
 						~ ">");
 				}
 			}
+			
+			debug(debugversion) {
+				writeln("state is null, the stack size is ",nfa_stack.getSize());
+			}
 
 			if(null !is state.m_accept && state.m_label < bunch.m_accept_index) {
 				bunch.m_accept_index = state.m_label;
@@ -280,7 +326,7 @@ class CNfa2Dfa {
 						 ~ ">");
 				}
 
-				if(CUtility.DEBUG) {
+				debug(debugversion) {
 						assert(null !is bunch.m_accept);
 						assert(CSpec.NONE == bunch.m_anchor
 								|| 0 != (bunch.m_anchor & CSpec.END)
@@ -291,19 +337,22 @@ class CNfa2Dfa {
 			if(CNfa.EPSILON == state.m_edge) {
 				if(null !is state.m_next) {
 					if(false == bunch.m_nfa_set.contains(state.m_next)) {
-						if(CUtility.DEBUG) {
+						debug(debugversion) {
 							assert(false == bunch.m_nfa_bit.get(state.m_next.m_label));
 						}
 				
 						bunch.m_nfa_bit.set(state.m_next.m_label);
 						bunch.m_nfa_set.append(state.m_next);
+						debug(debugversion) {
+							assert(state.m_next !is null);
+						}
 						nfa_stack.push(state.m_next);
 					}
 				}
 
 				if(null !is state.m_next2) {
 					if(false == bunch.m_nfa_set.contains(state.m_next2)) {
-						if(CUtility.DEBUG) {
+						debug(debugversion) {
 							assert(false == bunch.m_nfa_bit.get(state.m_next2.m_label));
 						}
 				
@@ -316,7 +365,9 @@ class CNfa2Dfa {
 		}
 
 		if(null !is bunch.m_nfa_set) {
+			sortCheck(bunch.m_nfa_set, "before");
 			sortStates(bunch.m_nfa_set);
+			sortCheck(bunch.m_nfa_set, "after");
 		}
 
 		return;
@@ -327,6 +378,11 @@ class CNfa2Dfa {
 		Description: Returns null if resulting NFA set is empty.
 	**************************************************************/
 	void move(Vector!(CNfa) nfa_set, SparseBitSet nfa_bit, int b, CBunch bunch) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"move");
+		debug st.putArgs("string", "nfa_set", nfa_set.toString(), 
+			"string", "nfa_bit", nfa_bit.toString(), "int", "b", b, 
+			"string", "bunch", bunch.toString());
 		int size;
 		int index;
 		CNfa state;
@@ -340,7 +396,7 @@ class CNfa2Dfa {
 				
 			if(b == state.m_edge || (CNfa.CCL == state.m_edge && true == state.m_set.contains(b))) {
 				if(null is bunch.m_nfa_set) {
-					if(CUtility.DEBUG) {
+					debug(debugversion) {
 						assert(null is bunch.m_nfa_bit);
 					}
 					
@@ -359,11 +415,13 @@ class CNfa2Dfa {
 		}
 		
 		if(null !is bunch.m_nfa_set) {
-			if(CUtility.DEBUG) {
+			debug(debugversion) {
 				assert(null !is bunch.m_nfa_bit);
 			}
 				
+			sortCheck(bunch.m_nfa_set, "before");
 			sortStates(bunch.m_nfa_set);
+			sortCheck(bunch.m_nfa_set, "after");
 		}
 
 		return;
@@ -373,6 +431,10 @@ class CNfa2Dfa {
 		Function: sortStates
 	**************************************************************/
 	private void sortStates(Vector!(CNfa) nfa_set) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"sortStates");
+		debug st.putArgs("string", "nfa_set", nfa_set.toString());
+			
 		CNfa elem;
 		int begin;
 		int size;
@@ -422,6 +484,8 @@ class CNfa2Dfa {
 		Description: Returns next unmarked DFA state.
 	**************************************************************/
 	private CDfa get_unmarked() {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"get_unmarked");
 		int size;
 		CDfa dfa;
 
@@ -464,9 +528,13 @@ class CNfa2Dfa {
 		3) Returns index of new dfa.
 	**************************************************************/
 	private int add_to_dstates(CBunch bunch) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"add_to_dstates");
+		debug st.putArgs("string", "bunch", bunch.toString());
+			
 		CDfa dfa;
 		
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is bunch.m_nfa_set);
 			assert(null !is bunch.m_nfa_bit);
 			assert(null !is bunch.m_accept || CSpec.NONE == bunch.m_anchor);
@@ -499,6 +567,10 @@ class CNfa2Dfa {
 		Function: in_dstates
 	**************************************************************/
 	private int in_dstates(CBunch bunch) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"in_dstates");
+		debug st.putArgs("string", "bunch", bunch.toString());
+			
 		CDfa dfa;
 		
 		if(CUtility.OLD_DEBUG) {

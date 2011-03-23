@@ -215,7 +215,8 @@ class CNfa2Dfa {
 					}
 					
 					debug(debugversion) {
-						assert(nextstate < m_spec.m_dfa_states.getSize());
+						//assert(nextstate < m_spec.m_dfa_states.getSize());
+						StackTrace.printTrace();
 					}
 					
 					dtrans.m_dtrans[i] = nextstate;
@@ -311,7 +312,7 @@ class CNfa2Dfa {
 			}
 			
 			debug(debugversion) {
-				writeln("state is null, the stack size is ",nfa_stack.getSize());
+				//writeln("state is null, the stack size is ",nfa_stack.getSize());
 			}
 
 			if(null !is state.m_accept && state.m_label < bunch.m_accept_index) {
@@ -446,6 +447,7 @@ class CNfa2Dfa {
 
 		size = nfa_set.getSize();
 		for(begin = 0; begin < size; ++begin) {
+			sortCheck(nfa_set, "before");
 			elem = nfa_set.get(begin);
 			smallest_value = elem.m_label;
 			smallest_index = begin;
@@ -464,6 +466,8 @@ class CNfa2Dfa {
 			elem = nfa_set.get(smallest_index);
 			nfa_set.insert(begin,elem);
 			nfa_set.insert(smallest_index,begin_elem);
+			sortCheck(nfa_set, "after begin " ~ conv!(int,string)(begin) 
+				~ ": smallest_index " ~ conv!(int,string)(smallest_index));
 		}
 
 		if(CUtility.OLD_DEBUG) {
@@ -578,8 +582,16 @@ class CNfa2Dfa {
 			m_lexGen.print_set(bunch.m_nfa_set);
 		}
 
-		dfa = m_spec.m_dfa_sets[bunch.m_nfa_bit];
-
+		try { //TODO fix this
+			dfa = m_spec.m_dfa_sets[bunch.m_nfa_bit];
+		} catch(Error e) {
+			StackTrace.printTrace();
+			foreach(it; m_spec.m_dfa_sets.keys()) {
+				write(it, " ");
+				writeln();
+			}
+		}
+		
 		if(null !is dfa) {
 			if(CUtility.OLD_DUMP_DEBUG) {
 				writeln(" FOUND!");

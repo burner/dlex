@@ -338,11 +338,67 @@ final class SparseBitSet {
 	/**
 	 * Gets the hashcode.
 	 */
-	public int hashCode() {
+	public hash_t toHash() {
 		long h = 1234;
 		for(int i = 0; i < size; i++)
 			h ^= bits[i] * offs[i];
 		return conv!(long,int)((h >> 32) ^ h);
+	}
+
+	bool opEquals(Object t) {
+		/*if(is(o == CSpec)) {
+			SparseBitSet f = cast(SparseBitSet)o;
+
+			// test the members
+			if(f.offs.length != this.offs.length) 
+				return false;
+			if(f.bits.length != this.bits.length) 
+				return false;
+			if(f.size != this.size)
+				return false;
+
+			foreach(idx, it; offs) {
+				if(it != offs[idx])
+					return false;
+			}
+			foreach(idx, it; bits) {
+				if(it != bits[idx])
+					return false;
+			}
+			
+		} else {
+			return false;
+		}*/
+		if(!is(t == SparseBitSet)) {
+			return false;
+		}
+		SparseBitSet o = cast(SparseBitSet)t;
+
+		for(int i = 0, j = 0; i < this.size || j < o.size;) {
+			if(i < this.size && (j >= o.size || this.offs[i] < o.offs[j])) {
+				if(this.bits[i++] != 0)
+					return false;
+			} else if(j < o.size && (i >= this.size || this.offs[i] > o.offs[j])) {
+				if(o.bits[j++] != 0)
+					return false;
+			} else { // equal keys
+				if(this.bits[i++] != o.bits[j++])
+					return false;
+			}
+		}
+		return true;
+	}
+
+	int opCmp(Object o) {
+		SparseBitSet f = cast(SparseBitSet)o;
+		if(!f) {
+			return -1;
+		}
+		if(f == this) {
+			return 0;
+		} else {
+			return 1;
+		}
 	}
 
 	/**

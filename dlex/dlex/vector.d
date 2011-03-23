@@ -19,12 +19,7 @@ class Vector(T) {
 
 	public this(Vector!(T) old) {
 		this.data = new T[old.getSize()];
-		T tmp;
 		for(uint i = 0; i < old.getSize(); i++) {
-			tmp = old.get(i);
-			debug {
-				assert(tmp !is null, "copying null element");	
-			}
 			this.append(old.get(i));
 		}
 	}
@@ -55,13 +50,13 @@ class Vector(T) {
 		if(this.data.length <= this.index) {
 			this.data.length = this.data.length * 2;
 		}
-		uint upIdx = this.index;
-		uint lowIdx = this.index-1;
-		do {
-			this.data[upIdx] = this.data[lowIdx];
+		long upIdx = this.index;
+		long lowIdx = this.index-1;
+		while(lowIdx >= idx) {
+			this.data[conv!(long,uint)(upIdx)] = this.data[conv!(long,uint)(lowIdx)];
 			upIdx--;
 			lowIdx--;
-		} while(lowIdx > idx);
+		}
 		this.data[idx] = toAdd;
 		return this;
 	}

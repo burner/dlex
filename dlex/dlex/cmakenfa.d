@@ -501,13 +501,7 @@ class CMakeNfa {
 					if (false == (m_lexGen.CCL_END == m_spec.m_current_token)) {
 						dodash(start.m_set);
 					}
-							/*else
-								{
-						for (c = 0; c <= ' '; ++c)
-							{
-								start.m_set.add((byte) c);
-							}
-								}*/
+							/*else { for (c = 0; c <= ' '; ++c) { start.m_set.add((byte) c); } }*/
 				}
 				m_lexGen.advance();
 			}

@@ -260,7 +260,7 @@ class CLexGen {
 	private char[] getName() {
 		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
 			"getName");
-		char buffer[];
+		char[] buffer;
 		int elem;
 
 		/* Skip white space. */
@@ -1052,15 +1052,13 @@ class CLexGen {
 
 				while(true) {
 					/* Skip white space. */
-					while(CUtility
-							.isspace(m_input.m_line[m_input.m_line_index])) {
+					while(CUtility.isspace(m_input.m_line[m_input.m_line_index])) {
 						++m_input.m_line_index;
 
 						while(m_input.m_line_index >= m_input.m_line_read) {
 							if(m_input.getLine()) {
 								/* EOF found. */
-								CError.parse_error(CError.E_EOF,
-										m_input.m_line_number);
+								CError.parse_error(CError.E_EOF, m_input.m_line_number);
 								return states;
 							}
 						}
@@ -1083,8 +1081,7 @@ class CLexGen {
 
 				/* Read in state name. */
 				start_state = m_input.m_line_index;
-				while(false == CUtility
-						.isspace(m_input.m_line[m_input.m_line_index])
+				while(false == CUtility.isspace(m_input.m_line[m_input.m_line_index])
 						&& ',' != m_input.m_line[m_input.m_line_index]
 						&& '>' != m_input.m_line[m_input.m_line_index]) {
 					++m_input.m_line_index;
@@ -1102,9 +1099,6 @@ class CLexGen {
 				if(name in m_spec.m_states) {
 					index = m_spec.m_states[name];
 				} else {
-					index = -1;
-				}
-				if(index == -1) {
 					/* Uninitialized state. */
 					writeln("Uninitialized State Name: " ~ name);
 					CError.parse_error(CError.E_STATE, m_input.m_line_number);
@@ -1140,7 +1134,7 @@ class CLexGen {
 		int end_macro;
 		int start_name;
 		int count_name;
-		string def;
+		string def = null;
 		int def_elem;
 		string name;
 		char replace[];
@@ -1746,9 +1740,8 @@ class CLexGen {
 		 */
 		if(EOS == m_spec.m_current_token
 		/* ADDED */
-		|| m_input.m_line_index >= m_input.m_line_read)
+		|| m_input.m_line_index >= m_input.m_line_read) {
 		/* ADDED */
-		{
 			if(m_spec.m_in_quote) {
 				CError.parse_error(CError.E_SYNTAX, m_input.m_line_number);
 			}
@@ -1857,16 +1850,18 @@ class CLexGen {
 				++m_input.m_line_index;
 			}
 		}
-		/*code = m_tokens[m_spec.m_lexeme];
+		//code = m_tokens[m_spec.m_lexeme]; TODO check if this works
 		if(m_spec.m_in_quote || true == saw_escape) {
 			m_spec.m_current_token = L;
 		} else {
-			if(null is code) {
+			//if(null is code) {
+			if(!(m_spec.m_lexeme in m_tokens)) {
 				m_spec.m_current_token = L;
 			} else {
-				m_spec.m_current_token = code.intValue();
+				//m_spec.m_current_token = code.intValue();
+				m_spec.m_current_token = m_tokens[m_spec.m_lexeme];
 			}
-		}*/
+		}
 
 		if(m_spec.m_in_quote || true == saw_escape) {
 			m_spec.m_current_token = L;
@@ -2060,6 +2055,8 @@ class CLexGen {
 			if(state in m_spec.m_states) {
 				stateFound = true;
 				index = m_spec.m_states[state];
+			} else {
+				assert(0, "this.should not have happend");
 			}
 
 			debug(debugversion) {
@@ -2087,11 +2084,8 @@ class CLexGen {
 				if(null is dtrans.m_accept) {
 					write(" * State " ~ conv!(int,string)(i) ~ " [nonaccepting]");
 				} else {
-					write(" * State "
-							~ conv!(int,string)(i)
-							~ " [accepting, line "
-							~ conv!(int,string)(dtrans.m_accept.m_line_number)
-							~ " <"
+					write(" * State " ~ conv!(int,string)(i) ~ " [accepting, line "
+							~ conv!(int,string)(dtrans.m_accept.m_line_number) ~ " <"
 							~ dtrans.m_accept.m_action[0..dtrans.m_accept.m_action_read] ~ ">]");
 					if(CSpec.NONE != dtrans.m_anchor) {
 						write(" Anchor: " ~ ((0 != (dtrans.m_anchor & CSpec.START)) ? "start " : "")
@@ -2104,16 +2098,12 @@ class CLexGen {
 				if(null is accept) {
 					write(" * State " ~ conv!(int,string)(i) ~ " [nonaccepting]");
 				} else {
-					write(" * State "
-							~ conv!(int,string)(i)
-							~ " [accepting, line "
-							~ conv!(int,string)(accept.m_line_number)
-							~ " <"
+					write(" * State " ~ conv!(int,string)(i) ~ " [accepting, line "
+							~ conv!(int,string)(accept.m_line_number) ~ " <"
 							~ accept.m_action[0..accept.m_action_read] ~ ">]");
 					if(CSpec.NONE != m_spec.m_anchor_array[i]) {
-						write(" Anchor: "
-										~ ((0 != (m_spec.m_anchor_array[i] & CSpec.START)) ? "start " : "")
-										~ ((0 != (m_spec.m_anchor_array[i] & CSpec.END)) ? "end " : ""));
+						write(" Anchor: " ~ ((0 != (m_spec.m_anchor_array[i] & CSpec.START)) ? "start " : "")
+									~ ((0 != (m_spec.m_anchor_array[i] & CSpec.END)) ? "end " : ""));
 					}
 				}
 			}

@@ -79,7 +79,14 @@ class CSimplifyNfa {
 			if(clsA.getSize() == 0) 
 				continue; // nothing to do.
 			// and split them.
+
 			//h.clear(); // h will map old to new class name
+			// this should clear the associated array TODO find a better solution
+			foreach(hit; h.keys()) {
+				h.remove(hit);
+			}
+			debug assert(h.length == 0, "clearing the associated array failed");
+
 			for(int i = 0; i < ccls.length; i++) {
 				if(clsA.get(ccls[i])) { // a split class
 					if(nfa.m_edge == i || nfa.m_edge == CNfa.CCL && nfa.m_set.contains(i)) { // on A side

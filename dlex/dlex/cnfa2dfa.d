@@ -13,6 +13,7 @@ import dlex.vector;
 import dlex.stack;
 
 import hurt.conv.conv;
+import hurt.container.pairlist;
 import hurt.util.stacktrace;
 
 import std.stdio;
@@ -94,8 +95,6 @@ class CNfa2Dfa {
 	private void sortCheck(Vector!(CNfa) vec, string message) {
 		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
 			"sortCheck");
-		debug st.putArgs("string", "vec", vec.toString(), 
-			"string", "message", message);
 
 		for(uint idx = 0; idx < vec.getSize(); idx++) {
 			if(vec[idx] is null) 
@@ -134,15 +133,14 @@ class CNfa2Dfa {
 
 		for(istate = 0; nstates > istate; ++istate) {
 			/* CSA bugfix: if we skip all zero size rules, then
-				 an specification with no rules produces an illegal
-				 lexer (0 states) instead of a lexer that rejects
-				 everything (1 nonaccepting state). [27-Jul-1999]
-			if(0 == m_spec.m_state_rules[istate].size())
-				{
-		m_spec.m_state_dtrans[istate] = CDTrans.F;
-		continue;
-				}
-			*/
+			 * an specification with no rules produces an illegal
+			 * lexer (0 states) instead of a lexer that rejects
+			 * everything (1 nonaccepting state). [27-Jul-1999]
+			 * if(0 == m_spec.m_state_rules[istate].size()) {
+			 * 	m_spec.m_state_dtrans[istate] = CDTrans.F;
+			 * 	continue;
+			 * }
+			 */
 		
 			/* Create start state and initialize fields. */
 			bunch.m_nfa_set = m_spec.m_state_rules[istate].clone();
@@ -216,7 +214,7 @@ class CNfa2Dfa {
 					
 					debug(debugversion) {
 						//assert(nextstate < m_spec.m_dfa_states.getSize());
-						StackTrace.printTrace();
+						//StackTrace.printTrace();
 					}
 					
 					dtrans.m_dtrans[i] = nextstate;
@@ -240,7 +238,8 @@ class CNfa2Dfa {
 		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
 			"free_dfa_states");
 		m_spec.m_dfa_states = null;
-		m_spec.m_dfa_sets = null;
+		//m_spec.m_dfa_sets = null;
+		m_spec.m_dfa_sets = new PairList!(SparseBitSet,CDfa)();
 	}
 
 	/***************************************************************
@@ -302,7 +301,7 @@ class CNfa2Dfa {
 		while(false == nfa_stack.empty()) {
 			state = nfa_stack.pop();
 				
-			if(CUtility.OLD_DUMP_DEBUG) {
+			debug(debugversion) {
 				if(null !is state.m_accept) {
 					writeln("Looking at accepting state " ~ conv!(int,string)(state.m_label)
 						~ " with <"
@@ -320,7 +319,7 @@ class CNfa2Dfa {
 				bunch.m_accept = state.m_accept;
 				bunch.m_anchor = state.m_anchor;
 
-				if(CUtility.OLD_DUMP_DEBUG) {
+				debug(debugversion) {
 					writeln("Found accepting state " ~ conv!(int,string)(state.m_label)
 						 ~ " with <"
 						 ~ state.m_accept.m_action[0..state.m_accept.m_action_read]
@@ -470,7 +469,7 @@ class CNfa2Dfa {
 				~ ": smallest_index " ~ conv!(int,string)(smallest_index));
 		}
 
-		if(CUtility.OLD_DEBUG) {
+		debug(debugversion) {
 			write("NFA vector indices: ");	
 				
 			for(index = 0; index < size; ++index) {
@@ -494,11 +493,12 @@ class CNfa2Dfa {
 		CDfa dfa;
 
 		size = m_spec.m_dfa_states.getSize();
+		debug writeln(__FILE__,":",__LINE__, " size = ", size, " m_unmarked_dfa = ", m_unmarked_dfa);
 		while(m_unmarked_dfa < size) {
 			dfa = m_spec.m_dfa_states.get(m_unmarked_dfa);
 
 			if(false == dfa.m_mark) {
-				if(CUtility.OLD_DUMP_DEBUG) {
+				debug(debugversion) {
 					write("*");
 					writeln();
 				}
@@ -555,10 +555,11 @@ class CNfa2Dfa {
 		dfa.m_mark = false;
 		
 		/* Register dfa state using BitSet in CSpec Hashtable. */
-		m_spec.m_dfa_sets[dfa.m_nfa_bit] = dfa;
+		//m_spec.m_dfa_sets[dfa.m_nfa_bit] = dfa;
+		m_spec.m_dfa_sets.insert(new Pair!(SparseBitSet,CDfa)(dfa.m_nfa_bit, dfa));
 		/*registerCDfa(dfa);*/
 
-		if(CUtility.OLD_DUMP_DEBUG) {
+		debug(debugversion) {
 			write("Registering set : ");
 			m_lexGen.print_set(dfa.m_nfa_set);
 			writeln();
@@ -575,32 +576,28 @@ class CNfa2Dfa {
 			"in_dstates");
 		debug st.putArgs("string", "bunch", bunch.toString());
 			
-		CDfa dfa;
+		CDfa dfa = null;
 		
-		if(CUtility.OLD_DEBUG) {
+		debug(debugversion) {
 			write("Looking for set : ");
 			m_lexGen.print_set(bunch.m_nfa_set);
 		}
 
-		try { //TODO fix this
-			dfa = m_spec.m_dfa_sets[bunch.m_nfa_bit];
-		} catch(Error e) {
-			StackTrace.printTrace();
-			foreach(it; m_spec.m_dfa_sets.keys()) {
-				write(it, " ");
-				writeln();
-			}
+		//dfa = m_spec.m_dfa_sets[bunch.m_nfa_bit];
+		Pair!(SparseBitSet, CDfa) found = m_spec.m_dfa_sets.find!(SparseBitSet)(bunch.m_nfa_bit);
+		if(found !is null) {
+			dfa = found.get!(CDfa)();
 		}
 		
-		if(null !is dfa) {
-			if(CUtility.OLD_DUMP_DEBUG) {
+		if(dfa !is null) {
+			debug(debugversion) {
 				writeln(" FOUND!");
 			}
 				
 			return dfa.m_label;
 		}
 
-		if(CUtility.OLD_DUMP_DEBUG) {
+		debug(debugversion) {
 			writeln(" NOT FOUND!");
 		}
 		return NOT_IN_DSTATES;

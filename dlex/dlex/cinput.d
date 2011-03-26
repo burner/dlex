@@ -34,7 +34,7 @@ class CInput {
 	**************************************************************/
 	this(std.stream.InputStream input) {
 		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
-			"	this");
+			"cinput.this");
 			
 		debug(debugversion) {
 			assert(null !is input);

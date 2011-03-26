@@ -43,7 +43,7 @@ class CMinimize {
 		Description: Sets member variables.
 	 **************************************************************/
 	private void set(CSpec spec) {
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(null !is spec);
 		}
 
@@ -190,7 +190,7 @@ class CMinimize {
 
 		/* Process columns for reduction. */
 		for(reduced_ncols = 0; ; ++reduced_ncols) {
-			if(CUtility.DEBUG) {
+			debug(debugversion) {
 				for(i = 0; i < reduced_ncols; ++i) {
 					assert(-1 != m_spec.m_col_map[i]);
 				}
@@ -206,7 +206,7 @@ class CMinimize {
 				break;
 			}
 
-			if(CUtility.DEBUG) {
+			debug(debugversion) {
 				assert(false == set.get(i));
 				assert(-1 == m_spec.m_col_map[i]);
 			}
@@ -233,7 +233,7 @@ class CMinimize {
 
 				j = m_spec.m_col_map[i];
 
-				if(CUtility.DEBUG) {
+				debug(debugversion) {
 					assert(j <= i);
 				}
 
@@ -248,7 +248,7 @@ class CMinimize {
 		/* truncate m_dtrans at proper length (freeing extra) */
 		trunc_col();
 
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			assert(k == reduced_ncols);
 		}
 
@@ -261,7 +261,7 @@ class CMinimize {
 
 		/* Process rows to reduce. */
 		for(reduced_nrows = 0; ; ++reduced_nrows) {
-			if(CUtility.DEBUG) {
+			debug(debugversion) {
 				for(i = 0; i < reduced_nrows; ++i) {
 					assert(-1 != m_spec.m_row_map[i]);
 				}
@@ -277,7 +277,7 @@ class CMinimize {
 				break;
 			}
 
-			if(CUtility.DEBUG) {
+			debug(debugversion) {
 				assert(false == set.get(i));
 				assert(-1 == m_spec.m_row_map[i]);
 			}
@@ -304,7 +304,7 @@ class CMinimize {
 
 				j = m_spec.m_row_map[i];
 
-				if(CUtility.DEBUG) {
+				debug(debugversion) {
 					assert(j <= i);
 				}
 
@@ -317,7 +317,7 @@ class CMinimize {
 		}
 		m_spec.m_dtrans_vector.setSize(reduced_nrows);
 
-		if(CUtility.DEBUG) {
+		debug(debugversion) {
 			/*writeln("k = " + k + "\nreduced_nrows = " + reduced_nrows + "");*/
 			assert(k == reduced_nrows);
 		}
@@ -389,7 +389,7 @@ using groups, removing redundant transition table states.
 		while(old_group_count != group_count) {
 			old_group_count = group_count;
 
-			if(CUtility.DEBUG) {
+			debug(debugversion) {
 				assert(m_group.getSize() == group_count);
 			}
 
@@ -417,7 +417,7 @@ using groups, removing redundant transition table states.
 									|| goto_next == CDTrans.F
 									|| m_ingroup[goto_next] != m_ingroup[goto_first]))
 								{
-							if(CUtility.DEBUG) {
+							debug(debugversion) {
 								assert(dtrans_group.get(j) == next);
 							}
 
@@ -425,15 +425,14 @@ using groups, removing redundant transition table states.
 							--j;
 							--group_size;
 							new_group.append(next);
-							//if(false == added) {
-							if(!added) {
+							if(false == added) {
 								added = true;
 								++group_count;
 								m_group.append(new_group);
 							}
 							m_ingroup[next.m_label] = m_group.getSize() - 1;
 
-							if(CUtility.DEBUG) {
+							debug(debugversion) {
 								assert(m_group.contains(new_group) == true);
 								assert(m_group.contains(dtrans_group) == true);
 								assert(dtrans_group.contains(first) == true);
@@ -488,7 +487,7 @@ using groups, removing redundant transition table states.
 			group_found = false;
 			dtrans = m_spec.m_dtrans_vector.get(i);
 
-			if(CUtility.DEBUG) {
+			debug(debugversion) {
 				assert(i == dtrans.m_label);
 				assert(false == group_found);
 				assert(group_count == m_group.getSize());
@@ -497,7 +496,7 @@ using groups, removing redundant transition table states.
 			for(j = 0; j < group_count; ++j) {
 				dtrans_group = m_group.get(j);
 
-				if(CUtility.DEBUG) {
+				debug(debugversion) {
 					assert(false == group_found);
 					assert(0 < dtrans_group.getSize());
 				}
@@ -523,7 +522,7 @@ using groups, removing redundant transition table states.
 					m_ingroup[i] = j;
 					group_found = true;
 
-					if(CUtility.DEBUG) {
+					debug(debugversion) {
 						assert(j == m_ingroup[dtrans.m_label]);
 					}
 

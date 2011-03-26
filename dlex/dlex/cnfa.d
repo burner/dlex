@@ -79,7 +79,7 @@ class CNfa {
 		m_accept = nfa.m_accept;
 		m_anchor = nfa.m_anchor;
 
-		if(nfa.m_states is null ) {
+		if(nfa.m_states !is null ) {
 			m_states = nfa.m_states.clone();
 		} else {
 			m_states = null;

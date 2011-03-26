@@ -10,6 +10,8 @@ import dlex.sparsebitset;
 
 import dlex.vector;
 
+import hurt.container.pairlist;
+
 class CSpec {
 	//Member Variables
 		
@@ -27,7 +29,7 @@ class CSpec {
 	Vector!(CNfa) m_nfa_states; /* Vector of states, with index
 				 corresponding to label. */
 	
-	Vector!(CNfa) m_state_rules[]; /* An array of Vectors of Integers.
+	Vector!(CNfa)[] m_state_rules; /* An array of Vectors of Integers.
 						The ith Vector represents the lexical state
 						with index i.	The contents of the ith 
 						Vector are the indices of the NFA start
@@ -40,19 +42,22 @@ class CSpec {
 	/* DFA Machine. */
 	Vector!(CDfa) m_dfa_states; /* Vector of states, with index
 				 corresponding to label. */
-	CDfa[SparseBitSet] m_dfa_sets; /* Hashtable taking set of NFA states
+	/*
+	CDfa[SparseBitSet] m_dfa_sets; Hashtable taking set of NFA states
 					to corresponding DFA state, 
 					if the latter exists. */
+
+	PairList!(SparseBitSet,CDfa) m_dfa_sets;
 	
 	/* Accept States and Corresponding Anchors. */
 	Vector!(CAccept) m_accept_vector;
-	int m_anchor_array[];
+	int[] m_anchor_array;
 
 	/* Transition Table. */
 	Vector!(CDTrans) m_dtrans_vector;
 	int m_dtrans_ncols;
-	int m_row_map[];
-	int m_col_map[];
+	int[] m_row_map;
+	int[] m_col_map;
 
 	/* Special pseudo-characters for beginning-of-line and end-of-file. */
 	static immutable int NUM_PSEUDO=2;
@@ -60,7 +65,7 @@ class CSpec {
 	int EOF; // end-of-line
 
 	/** NFA character class minimization map. */
-	int m_ccls_map[];
+	int[] m_ccls_map;
 
 	/* Regular expression token variables. */
 	int m_current_token;
@@ -104,20 +109,10 @@ class CSpec {
 	int m_yylex_throw_read;
 
 	/* Class, function, type names. */
-	char m_class_name[] = [					
-		'Y', 'y', 'l', 
-		'e', 'x' 
-		];
+	char m_class_name[] = [	'Y', 'y', 'l', 'e', 'x' ];
 	char m_implements_name[] = [];
-	char m_function_name[] = [
-		'y', 'y', 'l', 
-		'e', 'x' 
-		];
-	char m_type_name[] = [
-		'Y', 'y', 't', 
-		'o', 'k', 'e',
-		'n'
-		];
+	char m_function_name[] = [ 'y', 'y', 'l', 'e', 'x' ];
+	char m_type_name[] = [ 'Y', 'y', 't', 'o', 'k', 'e', 'n' ];
 
 	/* Lexical Generator. */
 	private CLexGen m_lexGen;
@@ -150,7 +145,7 @@ class CSpec {
 		m_count_chars = false;
 		m_cup_compatible = false;
 		m_unix = true;
-					m_public = false;
+		m_public = false;
 		m_yyeof = false;
 		m_ignorecase = false;
 
@@ -162,6 +157,7 @@ class CSpec {
 		
 		m_dfa_states = new Vector!(CDfa)();
 		//m_dfa_sets = new Hashtable();
+		m_dfa_sets = new PairList!(SparseBitSet,CDfa)();
 
 		m_dtrans_vector = new Vector!(CDTrans)();
 		m_dtrans_ncols = CUtility.MAX_SEVEN_BIT + 1;

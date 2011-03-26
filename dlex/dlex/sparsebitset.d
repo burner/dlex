@@ -22,16 +22,6 @@ final class SparseBitSet {
 	/** BITS-1, using the identity: x % BITS == x & (BITS-1) */
 	static private immutable BITS_M1 = BITS - 1;
 
-	/*public static this() {
-		SparseBitSet.AND = new BinAnd();
-		SparseBitSet.OR = new BinOr();
-		SparseBitSet.XOR = new BinXor();
-	}*/
-
-	//private BinOp AND;
-	//private BinOp OR;
-	//private BinOp XOR;
-
 	/** Creates an empty set.  */
 	public this() {
 		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
@@ -39,9 +29,6 @@ final class SparseBitSet {
 		bits = new long[4];
 		offs = new int[4];
 		size = 0;
-		//this.AND = new BinAnd();
-		//this.OR = new BinOr();
-		//this.XOR = new BinXor();
 	}
 
 	/** Creates an empty set with the specified size.
@@ -390,6 +377,7 @@ final class SparseBitSet {
 	}
 
 	int opCmp(Object o) {
+		assert(0, "This should never been has called");
 		SparseBitSet f = cast(SparseBitSet)o;
 		if(!f) {
 			return -1;

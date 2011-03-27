@@ -404,9 +404,27 @@ final class SparseBitSet {
 	 * @return true if the objects are the same; false otherwise.
 	 */
 	public bool equals(Object obj) {
-		if((obj !is null) && is(obj == SparseBitSet))
-			return equals(this, cast(SparseBitSet) obj);
-		return false;
+		//if((obj !is null) && is(obj == SparseBitSet))
+		//	return equals(this, cast(SparseBitSet) obj);
+		//return false;
+		if((obj !is null) && is(obj == SparseBitSet)) {
+			SparseBitSet tmp = cast(SparseBitSet)obj;
+			if(tmp is this) 
+				return true;
+
+			if(this.size != tmp.size)
+				return false;
+		
+			foreach(idx,it;this.offs) {
+				if(it != tmp.offs[idx])
+					return false;
+			}
+			foreach(idx,it;this.bits) {
+				if(it != tmp.bits[idx])
+					return false;
+			}
+		}
+		return true;
 	}
 
 	/**

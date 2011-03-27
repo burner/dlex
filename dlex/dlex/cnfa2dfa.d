@@ -298,7 +298,10 @@ class CNfa2Dfa {
 		}
 
 		debug(debugversion) {
-			assert(bunch.m_nfa_set.getSize() == nfa_stack.getSize(), "the size needs to be the save :: bunch.m_nfa_set.getSize() == " ~ conv!(uint,string)(bunch.m_nfa_set.getSize()) ~ " nfa_stack.getSize() == " ~ conv!(uint,string)(nfa_stack.getSize()));
+			assert(bunch.m_nfa_set.getSize() == nfa_stack.getSize(), 
+				"the size needs to be the save :: bunch.m_nfa_set.getSize() == " 
+				~ conv!(uint,string)(bunch.m_nfa_set.getSize()) 
+				~ " nfa_stack.getSize() == " ~ conv!(uint,string)(nfa_stack.getSize()));
 		}
 
 		/* Main loop. */
@@ -560,7 +563,10 @@ class CNfa2Dfa {
 		
 		/* Register dfa state using BitSet in CSpec Hashtable. */
 		//m_spec.m_dfa_sets[dfa.m_nfa_bit] = dfa;
+		uint oldSize = m_spec.m_dfa_sets.getSize();
 		m_spec.m_dfa_sets.insert(new Pair!(SparseBitSet,CDfa)(dfa.m_nfa_bit, dfa));
+		assert(oldSize+1 == m_spec.m_dfa_sets.getSize(), "insert into PairList failed");
+		assert(null !is m_spec.m_dfa_sets.find!(SparseBitSet)(dfa.m_nfa_bit), "cound not find new entry in pairlist");
 		//registerCDfa(dfa);// TODO check why this was commented out
 
 		debug(debugversion) {
@@ -602,7 +608,8 @@ class CNfa2Dfa {
 		}
 
 		debug(debugversion) {
-			writeln(" NOT FOUND!");
+			writeln(" NOT FOUND! m_spec.m_dfa_sets.getSize() == " 
+				~ conv!(uint,string)(m_spec.m_dfa_sets.getSize()));
 		}
 		return NOT_IN_DSTATES;
 	}

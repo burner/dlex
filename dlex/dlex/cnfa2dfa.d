@@ -297,6 +297,10 @@ class CNfa2Dfa {
 			nfa_stack.push(state);
 		}
 
+		debug(debugversion) {
+			assert(bunch.m_nfa_set.getSize() == nfa_stack.getSize(), "the size needs to be the save :: bunch.m_nfa_set.getSize() == " ~ conv!(uint,string)(bunch.m_nfa_set.getSize()) ~ " nfa_stack.getSize() == " ~ conv!(uint,string)(nfa_stack.getSize()));
+		}
+
 		/* Main loop. */
 		while(false == nfa_stack.empty()) {
 			state = nfa_stack.pop();
@@ -557,7 +561,7 @@ class CNfa2Dfa {
 		/* Register dfa state using BitSet in CSpec Hashtable. */
 		//m_spec.m_dfa_sets[dfa.m_nfa_bit] = dfa;
 		m_spec.m_dfa_sets.insert(new Pair!(SparseBitSet,CDfa)(dfa.m_nfa_bit, dfa));
-		/*registerCDfa(dfa);*/
+		//registerCDfa(dfa);// TODO check why this was commented out
 
 		debug(debugversion) {
 			write("Registering set : ");

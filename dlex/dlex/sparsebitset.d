@@ -75,6 +75,8 @@ final class SparseBitSet {
 		debug st.putArgs("int", "idx", idx, 
 			"int", "bnum", bnum);
 
+		writeln("new_block idx == ", idx, " bnum == ", bnum, " size == bits.length = ", size == bits.length);
+
 		if(size == bits.length) { // resize
 			long[] nbits = new long[size * 3];
 			int[] noffs = new int[size * 3];
@@ -95,8 +97,12 @@ final class SparseBitSet {
 
 		assert(idx <= size);
 		assert(idx == size || offs[idx] != bnum);
-		arrayCopy(bits, idx, bits, idx + 1, size - idx);
-		arrayCopy(offs, idx, offs, idx + 1, size - idx);
+		int[] offsT = offs.dup;
+		long[] bitsT = bits.dup;
+		arrayCopy(bits, idx, bitsT, idx + 1, size - idx);
+		arrayCopy(offs, idx, offsT, idx + 1, size - idx);
+		offs = offsT;
+		bits = bitsT;
 		offs[idx] = bnum;
 		bits[idx] = 0; // clear them bits.
 		size++;
@@ -110,14 +116,24 @@ final class SparseBitSet {
 		int l = 0, r = size; // search interval is [l, r)
 		while(l < r) {
 			int p = (l + r) / 2;
+			writeln("bsearch l = ",l," r = ", r, " p = ", p, " size = ", size);
 			if(bnum < offs[p])
 				r = p;
 			else if(bnum > offs[p])
 				l = p + 1;
-			else
+			else {
+				write("offs = ");
+				for(int i = 0; i < size; i++) 
+					write(conv!(int,string)(offs[i]) ~ " ");
+				writeln("FOUND bnum ", bnum, " at ",p);
 				return p;
+			}
 		}
 		assert(l == r);
+		write("offs = ");
+		for(int i = 0; i < size; i++) 
+			write(conv!(int,string)(offs[i]) ~ " ");
+		writeln("FOUND bnum ", bnum, " at ",l);
 		return l; // index at which the bnum *should* be, if it's not.
 	}
 
@@ -133,9 +149,13 @@ final class SparseBitSet {
 		debug st.putArgs("int", "bit", bitnew);
 			
 		int bnum = bitnew >> LG_BITS;
+		writeln("set bnum == ", bnum);
 		int idx = bsearch(bnum);
-		if(idx >= size || offs[idx] != bnum)
+		writeln("set idx == ", idx);
+		if(idx >= size || offs[idx] != bnum) {
+			writeln("set new_block");
 			new_block(idx, bnum);
+		}
 		bits[idx] |= (1L << (bitnew & BITS_M1));
 	}
 
@@ -145,16 +165,16 @@ final class SparseBitSet {
 	 * @param bit
 	 *            the bit to be cleared
 	 */
-	public void clear(int bit) {
+	public void clear(int bitnew) {
 		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
 			"clear");
-		debug st.putArgs("int", "bit", bit);
+		debug st.putArgs("int", "bit", bitnew);
 			
-		int bnum = bit >> LG_BITS;
+		int bnum = bitnew >> LG_BITS;
 		int idx = bsearch(bnum);
 		if(idx >= size || offs[idx] != bnum)
 			new_block(idx, bnum);
-		bits[idx] &= ~(1L << (bit & BITS_M1));
+		bits[idx] &= ~(1L << (bitnew & BITS_M1));
 	}
 
 	/**
@@ -172,16 +192,17 @@ final class SparseBitSet {
 	 * @param bit
 	 *            the bit to be gotten
 	 */
-	public bool get(int bit) {
+	public bool get(int bitnew) {
 		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
 			"get");
-		debug st.putArgs("int", "bit", bit);
+		debug st.putArgs("int", "bitnew", bitnew);
 			
-		int bnum = bit >> LG_BITS;
+		int bnum = bitnew >> LG_BITS;
 		int idx = bsearch(bnum);
+		writeln("get ", bnum, " idx ", idx);
 		if(idx >= size || offs[idx] != bnum)
 			return false;
-		return 0 != (bits[idx] & (1L << (bit & BITS_M1)));
+		return 0 != (bits[idx] & (1L << (bitnew & BITS_M1)));
 	}
 
 	/**
@@ -289,47 +310,7 @@ final class SparseBitSet {
 	}
 
 	bool opEquals(Object t) {
-		/*if(is(o == CSpec)) {
-			SparseBitSet f = cast(SparseBitSet)o;
-
-			// test the members
-			if(f.offs.length != this.offs.length) 
-				return false;
-			if(f.bits.length != this.bits.length) 
-				return false;
-			if(f.size != this.size)
-				return false;
-
-			foreach(idx, it; offs) {
-				if(it != offs[idx])
-					return false;
-			}
-			foreach(idx, it; bits) {
-				if(it != bits[idx])
-					return false;
-			}
-			
-		} else {
-			return false;
-		}*/
-		if(!is(t == SparseBitSet)) {
-			return false;
-		}
-		SparseBitSet o = cast(SparseBitSet)t;
-
-		for(int i = 0, j = 0; i < this.size || j < o.size;) {
-			if(i < this.size && (j >= o.size || this.offs[i] < o.offs[j])) {
-				if(this.bits[i++] != 0)
-					return false;
-			} else if(j < o.size && (i >= this.size || this.offs[i] > o.offs[j])) {
-				if(o.bits[j++] != 0)
-					return false;
-			} else { // equal keys
-				if(this.bits[i++] != o.bits[j++])
-					return false;
-			}
-		}
-		return true;
+		return this.equals(t);
 	}
 
 	int opCmp(Object o) {
@@ -358,29 +339,11 @@ final class SparseBitSet {
 	 * @param obj
 	 *            the object to commpare with
 	 * @return true if the objects are the same; false otherwise.
-	 */
+	 */ 
 	public bool equals(Object obj) {
-		//if((obj !is null) && is(obj == SparseBitSet))
-		//	return equals(this, cast(SparseBitSet) obj);
-		//return false;
-		if((obj !is null) && is(obj == SparseBitSet)) {
-			SparseBitSet tmp = cast(SparseBitSet)obj;
-			if(tmp is this) 
-				return true;
-
-			if(this.size != tmp.size)
-				return false;
-		
-			foreach(idx,it;this.offs) {
-				if(it != tmp.offs[idx])
-					return false;
-			}
-			foreach(idx,it;this.bits) {
-				if(it != tmp.bits[idx])
-					return false;
-			}
-		}
-		return true;
+		writeln("bool equals(Object obj)");
+		//if((obj !is null) && is(obj : SparseBitSet))
+		return equals(this, cast(SparseBitSet)obj);
 	}
 
 	/**
@@ -389,6 +352,7 @@ final class SparseBitSet {
 	 * @return true if the objects are the same; false otherwise.
 	 */
 	public static bool equals(SparseBitSet a, SparseBitSet b) {
+		writeln("bool equals(SparseBitSet a, SparseBitSet b)");
 		for(int i = 0, j = 0; i < a.size || j < b.size;) {
 			if(i < a.size && (j >= b.size || a.offs[i] < b.offs[j])) {
 				if(a.bits[i++] != 0)
@@ -412,6 +376,9 @@ final class SparseBitSet {
 		set.bits = this.bits.dup;
 		set.offs = this.offs.dup;
 		set.size = this.size;
+		writeln("clone clone clone clone clone");
+		assert(equals(this,set));
+		writeln("clone passed");
 		return set;
 	}
 
@@ -453,7 +420,7 @@ final class SparseBitSet {
 	}
 
 unittest {
-		immutable int ITER = 500;
+		immutable int ITER = 20;
 		immutable int RANGE = 65536;
 		SparseBitSet a = new SparseBitSet();
 		assert(!a.get(0) && !a.get(1));
@@ -466,33 +433,47 @@ unittest {
 		assert(!a.get(0) && !a.get(1));
 		Mt19937 r;
 		Vector!(int) v = new Vector!(int)();
-		writeln("after init");
+		int[] tmp = [ 45, 435, 123, 56456, 65345, 
+					1232, 43, 9212, 332, 34234,
+					4334, 341, 2312, 3434, 43434,
+					12,35345,5776,3123, 4129 ];
+
 		for(int n = 0; n < ITER; n++) {
-			int rr = ((r.front >>> 1) % RANGE) << 1;
-			write(rr, " \n");
+			//int rr = ((r.front >>> 1) % RANGE) << 1;
+			int rr = ((tmp[n] >>> 1) % RANGE) << 1;
+			writeln("rr ", rr);
 			r.popFront();
 			a.set(rr);
 			v.append(rr);
 			// check that all the numbers are there.
-			assert(a.get(rr) && !a.get(rr + 1) && !a.get(rr - 1));
-			for(int i = 0; i < v.getSize(); i++)
-				assert(a.get(v.get(i)), "tryed to get " 
-					~ conv!(int,string)(v.get(i)) ~ " with i == "
-					~ conv!(int,string)(i));
+			assert(n+1 == v.getSize(), "vector insert failed");
+			assert(a.get(rr), "first get");
+			assert(!a.get(rr + 1), "second get");
+			assert(!a.get(rr - 1), "third get");
+			int tmpGet;
+			for(int i = 0; i < v.getSize(); i++) {
+				tmpGet = v.get(i);
+				//assert(a.get(v.get(i)));
+				assert(a.get(tmpGet), "tryed to get " 
+					~ conv!(int,string)(a.get(tmpGet)) ~ " with i == "
+					~ conv!(int,string)(i) ~ " tmp was " 
+					~ conv!(int,string)(tmpGet));
+			}
 		}
-		writeln("\nnafter it");
 		SparseBitSet b = a.clone();
 		assert(a.equals(b) && b.equals(a));
+		writeln("before remove ITER/2 = ",ITER/2);
 		for(int n = 0; n < ITER / 2; n++) {
-			int rr = (r.front >>> 1) % v.getSize();
+			//int rr = (r.front >>> 1) % v.getSize();
+			int rr = (tmp[n] >>> 1) % v.getSize();
 			r.popFront();
 			int m = v.get(rr);
 			b.clear(m);
+			writeln("remove at ",rr, " v.getSize() ", v.getSize());
 			v.remove(rr);
 			// check that numbers are removed properly.
 			assert(!b.get(m));
 		}
-		writeln("after it/2");
 		assert(!a.equals(b));
 		SparseBitSet c = a.clone();
 		SparseBitSet d = a.clone();

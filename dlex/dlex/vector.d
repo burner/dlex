@@ -1,6 +1,7 @@
 module dlex.vector;
 
 import hurt.conv.conv;
+import hurt.util.stacktrace;
 
 import std.stdio;
 
@@ -39,6 +40,10 @@ class Vector(T) {
 	}
 
 	public T get(uint idx) {
+		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
+			"get");
+		debug st.putArgs("uint", "idx", idx);
+			
 		assert(idx <= this.index, "given index is out of bound. index == " 
 			~ conv!(uint,string)(idx));	
 		return this.data[idx];
@@ -72,7 +77,7 @@ class Vector(T) {
 		T ret = this.data[idx];
 		uint upIdx = idx + 1;
 		uint lowIdx = idx;
-		while(lowIdx != this.index) {
+		while(lowIdx < this.index-1) {
 			this.data[lowIdx] = this.data[upIdx];
 			upIdx++;
 			lowIdx++;

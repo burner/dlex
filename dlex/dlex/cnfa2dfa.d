@@ -191,7 +191,7 @@ class CNfa2Dfa {
 					}
 					
 					/* Create new dfa set by attempting character transition. */
-					move(dfa.m_nfa_set,dfa.m_nfa_bit,i,bunch);
+					move(dfa.m_nfa_set, dfa.m_nfa_bit, i, bunch);
 					if(null !is bunch.m_nfa_set) {
 						e_closure(bunch);
 					}
@@ -334,10 +334,10 @@ class CNfa2Dfa {
 				}
 
 				debug(debugversion) {
-						assert(null !is bunch.m_accept);
-						assert(CSpec.NONE == bunch.m_anchor
-								|| 0 != (bunch.m_anchor & CSpec.END)
-								|| 0 != (bunch.m_anchor & CSpec.START));
+					assert(null !is bunch.m_accept);
+					assert(CSpec.NONE == bunch.m_anchor
+							|| 0 != (bunch.m_anchor & CSpec.END)
+							|| 0 != (bunch.m_anchor & CSpec.START));
 				}
 			}
 
@@ -450,6 +450,9 @@ class CNfa2Dfa {
 		int smallest_index;
 		int smallest_value;
 		CNfa begin_elem;
+		debug(debugversion) {
+			CNfa[] tmpArray = nfa_set.elements();
+		}
 
 		size = nfa_set.getSize();
 		for(begin = 0; begin < size; ++begin) {
@@ -474,6 +477,12 @@ class CNfa2Dfa {
 			nfa_set.insert(smallest_index,begin_elem);
 			sortCheck(nfa_set, "after begin " ~ conv!(int,string)(begin) 
 				~ ": smallest_index " ~ conv!(int,string)(smallest_index));
+		}
+
+		debug(debugversion) {
+			foreach(it; tmpArray) {
+				assert(nfa_set.contains(it), "sortStates mixes things up");
+			}
 		}
 
 		debug(debugversion) {

@@ -1,11 +1,15 @@
 module dlex.sparsebitset;
 
 import dlex.enumeration;
+import dlex.vector;
 
 import hurt.conv.conv;
 import hurt.util.array;
 import hurt.util.stacktrace;
 import hurt.string.stringbuffer;
+
+import std.random;
+import std.stdio;
 
 //final class SparseBitSet implements Cloneable {
 final class SparseBitSet {
@@ -16,11 +20,11 @@ final class SparseBitSet {
 	/** Number of blocks currently in use. */
 	int size;
 	/** log base 2 of BITS, for the identity: x/BITS == x >> LG_BITS */
-	static private immutable LG_BITS = 6;
+	static private immutable int LG_BITS = 6;
 	/** Number of bits in a block. */
-	static private immutable BITS = 1 << LG_BITS;
+	static private immutable int BITS = 1 << LG_BITS;
 	/** BITS-1, using the identity: x % BITS == x & (BITS-1) */
-	static private immutable BITS_M1 = BITS - 1;
+	static private immutable int BITS_M1 = BITS - 1;
 
 	/** Creates an empty set.  */
 	public this() {
@@ -123,16 +127,16 @@ final class SparseBitSet {
 	 * @param bit
 	 *            the bit to be set
 	 */
-	public void set(int bit) {
+	public void set(int bitnew) {
 		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
 			"set");
-		debug st.putArgs("int", "bit", bit);
+		debug st.putArgs("int", "bit", bitnew);
 			
-		int bnum = bit >> LG_BITS;
+		int bnum = bitnew >> LG_BITS;
 		int idx = bsearch(bnum);
 		if(idx >= size || offs[idx] != bnum)
 			new_block(idx, bnum);
-		bits[idx] |= (1L << (bit & BITS_M1));
+		bits[idx] |= (1L << (bitnew & BITS_M1));
 	}
 
 	/**
@@ -222,54 +226,6 @@ final class SparseBitSet {
 		binop(this, set, function(long a, long b) { return a ^ b; });
 	}
 
-	// BINARY OPERATION MACHINERY
-	private interface BinOp {
-		public long op(long a, long b);
-	}
-/*
-	private static long and(long a, long b) {
-		return a & b;
-	}
-
-	private static long or(long a, long b) {
-		return a | b;
-	}
-
-	private static long or(long a, long b) {
-		return a ^ b;
-	}
-
-	class BinAnd : BinOp {
-		public final long op(long a, long b) {
-			debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
-				"op");
-			debug st.putArgs("long", "a", a, 
-				"long", "b", b);
-			return a & b;
-		}
-	}
-
-	class BinOr : BinOp {
-		public final long op(long a, long b) {
-			debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
-				"op");
-			debug st.putArgs("long", "a", a, 
-				"long", "b", b);
-			return a | b;
-		}
-	}
-
-	class BinXor : BinOp {
-		public final long op(long a, long b) {
-			debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
-				"op");
-			debug st.putArgs("long", "a", a, 
-				"long", "b", b);
-			return a ^ b;
-		}
-	}*/
-
-	//private static final void binop(SparseBitSet a, SparseBitSet b, BinOp op) {
 	private static final void binop(SparseBitSet a, SparseBitSet b, long function(long a, long b) op ) {
 		debug scope StackTrace st = new StackTrace(__FILE__, __LINE__,
 			"binop");
@@ -496,10 +452,9 @@ final class SparseBitSet {
 		return true;
 	}
 
-	/** Self-test.
-	public static void main(String[] args) {
-		final int ITER = 500;
-		final int RANGE = 65536;
+unittest {
+		immutable int ITER = 500;
+		immutable int RANGE = 65536;
 		SparseBitSet a = new SparseBitSet();
 		assert(!a.get(0) && !a.get(1));
 		assert(!a.get(123329));
@@ -509,34 +464,42 @@ final class SparseBitSet {
 		assert(a.get(0) && a.get(1));
 		a.clearAll();
 		assert(!a.get(0) && !a.get(1));
-		java.util.Random r = new java.util.Random();
-		java.util.Vector v = new java.util.Vector();
+		Mt19937 r;
+		Vector!(int) v = new Vector!(int)();
+		writeln("after init");
 		for(int n = 0; n < ITER; n++) {
-			int rr = ((r.nextInt() >>> 1) % RANGE) << 1;
+			int rr = ((r.front >>> 1) % RANGE) << 1;
+			write(rr, " \n");
+			r.popFront();
 			a.set(rr);
-			v.addElement(new Integer(rr));
+			v.append(rr);
 			// check that all the numbers are there.
 			assert(a.get(rr) && !a.get(rr + 1) && !a.get(rr - 1));
-			for(int i = 0; i < v.size(); i++)
-				assert(a.get(((Integer) v.elementAt(i)).intValue()));
+			for(int i = 0; i < v.getSize(); i++)
+				assert(a.get(v.get(i)), "tryed to get " 
+					~ conv!(int,string)(v.get(i)) ~ " with i == "
+					~ conv!(int,string)(i));
 		}
-		SparseBitSet b = (SparseBitSet) a.clone();
+		writeln("\nnafter it");
+		SparseBitSet b = a.clone();
 		assert(a.equals(b) && b.equals(a));
 		for(int n = 0; n < ITER / 2; n++) {
-			int rr = (r.nextInt() >>> 1) % v.size();
-			int m = ((Integer) v.elementAt(rr)).intValue();
+			int rr = (r.front >>> 1) % v.getSize();
+			r.popFront();
+			int m = v.get(rr);
 			b.clear(m);
-			v.removeElementAt(rr);
+			v.remove(rr);
 			// check that numbers are removed properly.
 			assert(!b.get(m));
 		}
+		writeln("after it/2");
 		assert(!a.equals(b));
-		SparseBitSet c = (SparseBitSet) a.clone();
-		SparseBitSet d = (SparseBitSet) a.clone();
+		SparseBitSet c = a.clone();
+		SparseBitSet d = a.clone();
 		c.and(a);
 		assert(c.equals(a) && a.equals(c));
 		c.xor(a);
-		assert(!c.equals(a) && c.size() == 0);
+		assert(!c.equals(a) && (c.size == 0));
 		d.or(b);
 		assert(d.equals(a) && !b.equals(d));
 		d.and(b);
@@ -546,9 +509,7 @@ final class SparseBitSet {
 		c.or(d);
 		c.or(b);
 		assert(c.equals(a) && a.equals(c));
-		c = (SparseBitSet) d.clone();
-		c.and(b);
-		assert(c.size() == 0);
-		System.out.println("Success.");
-	} */
+		c = d.clone();
+		writeln("Success.");
+	}
 }

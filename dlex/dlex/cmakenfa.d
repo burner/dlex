@@ -92,10 +92,8 @@ class CMakeNfa {
 			m_spec.m_state_rules[i] = new Vector!(CNfa)();
 		}
 
-		/* Initialize current token variable 
-			 and create nfa. */
-		/*m_spec.m_current_token = m_lexGen.EOS;
-		m_lexGen.advance();*/
+		/* Initialize current token variable and create nfa. */
+		/*m_spec.m_current_token = m_lexGen.EOS; m_lexGen.advance();*/
 
 		m_spec.m_nfa_start = machine();
 		

@@ -97,7 +97,7 @@ class CInput {
 				return EOF;
 			}
 			lineStr = m_input.readLine();
-			debug writeln(__FILE__,":",__LINE__, " lineStr.length ", lineStr.length);
+			//debug writeln(__FILE__,":",__LINE__, " lineStr.length ", lineStr.length);
 			m_line = (lineStr ~ "\n").dup; //TODO linefeed not needed ?
 			//m_line = lineStr.dup;
 			m_line_read = m_line.length;
@@ -118,7 +118,7 @@ class CInput {
 		}
 
 		m_line_index = 0;
-		debug writeln(__FILE__,":",__LINE__," ",m_line);
+		//debug writeln(__FILE__,":",__LINE__," ",m_line);
 		return NOT_EOF;
 	}
 }

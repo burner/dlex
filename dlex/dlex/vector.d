@@ -29,6 +29,7 @@ class Vector(T) {
 			this.data.length = this.data.length * 2;
 		}
 		this.data[this.index++] = toAdd;
+		assert(this.contains(toAdd), "append failed");
 		return this;
 	}
 
@@ -38,7 +39,8 @@ class Vector(T) {
 	}
 
 	public T get(uint idx) {
-		assert(idx <= this.index, "given index is out of bound");	
+		assert(idx <= this.index, "given index is out of bound. index == " 
+			~ conv!(uint,string)(idx));	
 		return this.data[idx];
 	}
 
@@ -58,6 +60,7 @@ class Vector(T) {
 			lowIdx--;
 		}
 		this.data[idx] = toAdd;
+		assert(this.contains(toAdd), "insert failed");
 		return this;
 	}
 

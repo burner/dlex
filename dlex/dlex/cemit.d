@@ -348,6 +348,9 @@ class CEmit {
 		int index;
 
 		states = m_spec.m_states.keys();
+		foreach(it;states) {
+			writeln(it, " == ", m_spec.m_states[it]);
+		}
 		/*index = 0;*/
 		//while(states.hasMoreElements()) {
 		foreach(it;states) {
@@ -355,13 +358,14 @@ class CEmit {
 			state = conv!(int,string)(m_spec.m_states[it]);
 
 			debug(debugversion) {
+				assert(conv!(string,int)(state) == m_spec.m_states[it]);
 				assert(null !is state);
 			}
 
 			m_outstream.writeLine("\tprivate immutable int " 
 					~ state 
 					~ " = " 
-					~ conv!(int,string)(m_spec.m_states[state])
+					~ conv!(int,string)(m_spec.m_states[it])
 					~ ";");
 			/*++index;*/
 		}

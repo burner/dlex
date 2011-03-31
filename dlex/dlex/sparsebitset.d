@@ -14,9 +14,9 @@ import std.stdio;
 //final class SparseBitSet implements Cloneable {
 final class SparseBitSet {
 	/** Sorted array of bit-block offsets. */
-	int offs[];
+	int[] offs;
 	/** Array of bit-blocks; each holding BITS bits. */
-	long bits[];
+	long[] bits;
 	/** Number of blocks currently in use. */
 	int size;
 	/** log base 2 of BITS, for the identity: x/BITS == x >> LG_BITS */
@@ -266,8 +266,15 @@ final class SparseBitSet {
 			noffs = a.offs;
 			a_zero = a.bits.length - a.size;
 			a_size = a.bits.length;
-			arrayCopy(a.bits, 0, a.bits, a_zero, a.size);
-			arrayCopy(a.offs, 0, a.offs, a_zero, a.size);
+			long[] tmpBits = a.bits.dup;
+			//arrayCopy(a.bits, 0, a.bits, a_zero, a.size);
+			arrayCopy(a.bits, 0, tmpBits, a_zero, a.size);
+			a.bits = tmpBits;
+
+			int[] tmpOffs = a.offs.dup;
+			//arrayCopy(a.offs, 0, a.offs, a_zero, a.size);
+			arrayCopy(a.offs, 0, tmpOffs, a_zero, a.size);
+			a.offs = tmpOffs;
 		}
 		// ok, crunch through and binop those sets!
 		nsize = 0;

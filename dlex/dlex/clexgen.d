@@ -503,8 +503,12 @@ class CLexGen {
 					&& '%' == m_input.m_line[1]) {
 				/* Mess around with line. */
 				m_input.m_line_read -= 2;
-				arrayCopy(m_input.m_line, 2, m_input.m_line, 0,
+				
+				char[] tmp = m_input.m_line.dup;
+				//arrayCopy(m_input.m_line, 2, m_input.m_line, 0,
+				arrayCopy(m_input.m_line, 2, tmp, 0,
 						m_input.m_line_read);
+				m_input.m_line = tmp;
 
 				m_input.m_pushback_line = true;
 				/* Check forand discard empty line. */

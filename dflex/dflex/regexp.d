@@ -18,9 +18,11 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package JFlex;
+module dflex.regexp;
 
-import java.util.Vector;
+import dflex.macros;
+
+import hurt.container.vector;
 
 /**
  * Stores a regular expression of rules section in a JFlex-specification.
@@ -46,30 +48,30 @@ public class RegExp {
    *
    * @see JFlex.sym
    */
-  public RegExp(int type) {
+  public this(int type) {
     this.type = type;    
   }
 
   
 
   /**
-   * Returns a String-representation of this regular expression
+   * Returns a string-representation of this regular expression
    * with the specified indentation.
    *
-   * @param tab   a String that should contain only space characters and
-   *              that is inserted in front of standard String-representation
+   * @param tab   a string that should contain only space characters and
+   *              that is inserted in front of standard string-representation
    *              pf this object.
    */
-  public String print(String tab) {
-    return tab+toString();
+  public string print(string tab) {
+    return tab ~ tostring();
   }
 
 
   /**
-   * Returns a String-representation of this regular expression
+   * Returns a string-representation of this regular expression
    */
-  public String toString() {
-    return "type = "+type;
+  public string tostring() {
+    return "type = "~type;
   }
 
 
@@ -79,7 +81,7 @@ public class RegExp {
    * @param  macros  for macro expansion
    * @return true if the regexp is equivalent to a char class.
    */
-  public boolean isCharClass(Macros macros) {
+  public bool isCharClass(Macros macros) {
     RegExp1 unary;
     RegExp2 binary;
 
@@ -91,12 +93,12 @@ public class RegExp {
       return true;
       
     case sym.BAR: 
-      binary = (RegExp2) this;
+      binary = cast(RegExp2) this;
       return binary.r1.isCharClass(macros) && binary.r2.isCharClass(macros);
  
     case sym.MACROUSE:
-      unary = (RegExp1) this;
-      return macros.getDefinition((String) unary.content).isCharClass(macros);
+      unary = cast(RegExp1) this;
+      return macros.getDefinition(cast(string) unary.content).isCharClass(macros);
      
     default: return false; 
     }     
@@ -115,45 +117,45 @@ public class RegExp {
 
     switch ( type ) {
     case sym.BAR: 
-      binary = (RegExp2) this;
+      binary = cast(RegExp2) this;
       return binary.r1.size(macros) + binary.r2.size(macros) + 2;
 
     case sym.CONCAT:   
-      binary = (RegExp2) this;
+      binary = cast(RegExp2) this;
       return binary.r1.size(macros) + binary.r2.size(macros);
       
     case sym.STAR:
-      unary = (RegExp1) this;
-      content = (RegExp) unary.content;      
+      unary = cast(RegExp1) this;
+      content = cast(RegExp) unary.content;      
       return content.size(macros) + 2;
 
     case sym.PLUS:
-      unary = (RegExp1) this;
-      content = (RegExp) unary.content;      
+      unary = cast(RegExp1) this;
+      content = cast(RegExp) unary.content;      
       return content.size(macros) + 2;
       
     case sym.QUESTION: 
-      unary = (RegExp1) this;
-      content = (RegExp) unary.content;      
+      unary = cast(RegExp1) this;
+      content = cast(RegExp) unary.content;      
       return content.size(macros);
 
     case sym.BANG:
-      unary = (RegExp1) this;
-      content = (RegExp) unary.content;      
+      unary = cast(RegExp1) this;
+      content = cast(RegExp) unary.content;      
       return content.size(macros) * content.size(macros);
       // this is only a very rough estimate (worst case 2^n)
       // exact size too complicated (propably requires construction)
       
     case sym.TILDE:
-      unary = (RegExp1) this;
-      content = (RegExp) unary.content;      
+      unary = cast(RegExp1) this;
+      content = cast(RegExp) unary.content;      
       return content.size(macros) * content.size(macros) * 3;
       // see sym.BANG
       
     case sym.STRING:
     case sym.STRING_I:
-      unary = (RegExp1) this;
-      return ((String) unary.content).length()+1;
+      unary = cast(RegExp1) this;
+      return (cast(string) unary.content).length()+1;
 
     case sym.CHAR:
     case sym.CHAR_I:
@@ -164,8 +166,8 @@ public class RegExp {
       return 2;
 
     case sym.MACROUSE:
-      unary = (RegExp1) this;
-      return macros.getDefinition((String) unary.content).size(macros);
+      unary = cast(RegExp1) this;
+      return macros.getDefinition(cast(string) unary.content).size(macros);
     }
 
     throw new Error("unknown regexp type "+type);
@@ -174,12 +176,12 @@ public class RegExp {
   /**
    * @return the reverse of the specified string.
    */
-  public final static String revString(String s) {
-    StringBuffer b = new StringBuffer(s.length());
+  public final static string revstring(string s) {
+    StringBuffer!(char) b = new StringBuffer!(char)(s.length());
     for (int i=s.length()-1; i >= 0; i--) {
       b.append(s.charAt(i));
     }
-    return b.toString();
+    return b.tostring();
   }
   
   /**
@@ -195,40 +197,40 @@ public class RegExp {
 
     switch ( type ) {
     case sym.BAR: 
-      binary = (RegExp2) this;
+      binary = cast(RegExp2) this;
       return new RegExp2(sym.BAR, binary.r1.resolveTilde(macros), 
                                   binary.r2.resolveTilde(macros));
 
     case sym.CONCAT:   
-      binary = (RegExp2) this;
+      binary = cast(RegExp2) this;
       return new RegExp2(sym.CONCAT, binary.r1.resolveTilde(macros), 
                                      binary.r2.resolveTilde(macros));
       
     case sym.STAR:
-      unary = (RegExp1) this;
-      content = (RegExp) unary.content;      
+      unary = cast(RegExp1) this;
+      content = cast(RegExp) unary.content;      
       return new RegExp1(sym.STAR, content.resolveTilde(macros));
 
     case sym.PLUS:
-      unary = (RegExp1) this;
-      content = (RegExp) unary.content;      
+      unary = cast(RegExp1) this;
+      content = cast(RegExp) unary.content;      
       return new RegExp1(sym.PLUS, content.resolveTilde(macros));
       
     case sym.QUESTION: 
-      unary = (RegExp1) this;
-      content = (RegExp) unary.content;      
+      unary = cast(RegExp1) this;
+      content = cast(RegExp) unary.content;      
       return new RegExp1(sym.QUESTION, content.resolveTilde(macros));
 
     case sym.BANG:
-      unary = (RegExp1) this;
-      content = (RegExp) unary.content;      
+      unary = cast(RegExp1) this;
+      content = cast(RegExp) unary.content;      
       return new RegExp1(sym.BANG, content.resolveTilde(macros));
       
     case sym.TILDE:
       // ~a = !([^]* a [^]*) a
       // uses subexpression sharing
-      unary = (RegExp1) this;
-      content = ((RegExp) unary.content).resolveTilde(macros);
+      unary = cast(RegExp1) this;
+      content = (cast(RegExp) unary.content).resolveTilde(macros);
       
       RegExp any_star = new RegExp1(sym.STAR, anyChar());
       RegExp neg = new RegExp1(sym.BANG, 
@@ -243,12 +245,12 @@ public class RegExp {
     case sym.CHAR_I:
     case sym.CCLASS:
     case sym.CCLASSNOT: 
-      unary = (RegExp1) this;
+      unary = cast(RegExp1) this;
       return new RegExp1(unary.type, unary.content);
 
     case sym.MACROUSE:
-      unary = (RegExp1) this;      
-      return macros.getDefinition((String) unary.content).resolveTilde(macros);
+      unary = cast(RegExp1) this;      
+      return macros.getDefinition(cast(string) unary.content).resolveTilde(macros);
     }
 
     throw new Error("unknown regexp type "+type);
@@ -261,8 +263,8 @@ public class RegExp {
    */
   public RegExp anyChar() {
     // FIXME: there is some code duplication here with the parser
-    Vector list = new Vector();
-    list.addElement(new Interval((char)0,CharClasses.maxChar));    
+    Vector!(Interval) list = new Vector!(Interval)();
+    list.addElement(new Interval(conv!(int,string)(0),CharClasses.maxChar));    
     return new RegExp1(sym.CCLASS,list);
   }
 
@@ -279,31 +281,31 @@ public class RegExp {
 
     switch ( type ) {
     case sym.BAR: 
-      binary = (RegExp2) this;
+      binary = cast(RegExp2) this;
       return new RegExp2(sym.BAR, binary.r1.rev(macros), binary.r2.rev(macros));
 
     case sym.CONCAT:   
-      binary = (RegExp2) this;
+      binary = cast(RegExp2) this;
       return new RegExp2(sym.CONCAT, binary.r2.rev(macros), binary.r1.rev(macros));
       
     case sym.STAR:
-      unary = (RegExp1) this;
-      content = (RegExp) unary.content;      
+      unary = cast(RegExp1) this;
+      content = cast(RegExp) unary.content;      
       return new RegExp1(sym.STAR, content.rev(macros));
 
     case sym.PLUS:
-      unary = (RegExp1) this;
-      content = (RegExp) unary.content;      
+      unary = cast(RegExp1) this;
+      content = cast(RegExp) unary.content;      
       return new RegExp1(sym.PLUS, content.rev(macros));
       
     case sym.QUESTION: 
-      unary = (RegExp1) this;
-      content = (RegExp) unary.content;      
+      unary = cast(RegExp1) this;
+      content = cast(RegExp) unary.content;      
       return new RegExp1(sym.QUESTION, content.rev(macros));
 
     case sym.BANG:
-      unary = (RegExp1) this;
-      content = (RegExp) unary.content;      
+      unary = cast(RegExp1) this;
+      content = cast(RegExp) unary.content;      
       return new RegExp1(sym.BANG, content.rev(macros));
       
     case sym.TILDE:
@@ -312,19 +314,19 @@ public class RegExp {
       
     case sym.STRING:
     case sym.STRING_I:    
-      unary = (RegExp1) this;
-      return new RegExp1(unary.type, revString((String) unary.content));
+      unary = cast(RegExp1) this;
+      return new RegExp1(unary.type, revstring(cast(string) unary.content));
       
     case sym.CHAR:
     case sym.CHAR_I:
     case sym.CCLASS:
     case sym.CCLASSNOT: 
-      unary = (RegExp1) this;
+      unary = cast(RegExp1) this;
       return new RegExp1(unary.type, unary.content);
 
     case sym.MACROUSE:
-      unary = (RegExp1) this;      
-      return macros.getDefinition((String) unary.content).rev(macros);
+      unary = cast(RegExp1) this;      
+      return macros.getDefinition(cast(string) unary.content).rev(macros);
     }
 
     throw new Error("unknown regexp type "+type);

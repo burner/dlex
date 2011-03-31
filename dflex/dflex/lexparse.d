@@ -10,6 +10,7 @@ import dflex.charclasses;
 import dflex.interval;
 import dflex.lexscan;
 import dflex.eofactions;
+import dflex.regexps;
 
 import cup.lrparser;
 import cup.scanner;
@@ -456,7 +457,7 @@ public class LexParse : cup.lrparser.lr_parser {
 		return action_obj.eofActions;
 	}
 
-	public void report_error(string message, Object info) {     
+	public override void report_error(string message, Object info) {     
 		if ( is(info : cup.Symbol) ) {
 			cup.Symbol s = cast(cup.Symbol)info;
 
@@ -469,7 +470,7 @@ public class LexParse : cup.lrparser.lr_parser {
 			Out.error(ErrorMessages.UNKNOWN_SYNTAX);
 	}
 
-	public void report_fatal_error(string message, Object info) {
+	public override void report_fatal_error(string message, Object info) {
 		// report_error(message, info);
 		throw new GeneratorException();
 	}

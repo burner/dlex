@@ -11,6 +11,7 @@ dlex.sparsebitset.o dlex.main.o dlex.vector.o dlex.stack.o
 all:crude
 
 crude:
+	#dmd -I../../libhurt/ -I../cup -m32 -gc `find dlex -name \*.d` *.a -ofDlex -release
 	dmd -I../../libhurt/ -I../cup -m32 -gc `find dlex -name \*.d` *.a -ofDlex -debug=debugversion -debug
 
 dlex: $(OBJS)
